@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
 import { Lock, Unlock, Eye, EyeOff, RefreshCw, CheckCircle2, XCircle, ChevronDown, ChevronUp, Download, ExternalLink, Check, ChevronsUpDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -870,7 +869,7 @@ export function ModelSettingsModal({
                 }
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="!rounded-[3px] border-[var(--pt-border-strong)] focus:ring-[var(--pt-accent)]">
                 <SelectValue placeholder="Select provider" />
               </SelectTrigger>
               <SelectContent className="max-h-64 overflow-y-auto">
@@ -891,7 +890,7 @@ export function ModelSettingsModal({
                     variant="outline"
                     role="combobox"
                     aria-expanded={modelComboboxOpen}
-                    className="flex-1 max-w-[200px] justify-between font-normal"
+                    className="max-w-[200px] flex-1 justify-between !rounded-[3px] border-[var(--pt-border-strong)] font-normal focus:ring-[var(--pt-accent)]"
                   >
                     <span className="truncate">
                       {modelConfig.model || "Select model..."}
@@ -907,7 +906,7 @@ export function ModelSettingsModal({
                        (modelConfig.provider === 'openai' && isLoadingOpenAI) ||
                        (modelConfig.provider === 'claude' && isLoadingClaude) ||
                        (modelConfig.provider === 'groq' && isLoadingGroq) ? (
-                        <div className="py-6 text-center text-sm text-muted-foreground">
+                        <div className="py-6 text-center text-sm text-[var(--pt-text-tertiary)]">
                           <RefreshCw className="mx-auto h-4 w-4 animate-spin mb-2" />
                           Loading models...
                         </div>
@@ -954,9 +953,9 @@ export function ModelSettingsModal({
                 value={customOpenAIEndpoint}
                 onChange={(e) => setCustomOpenAIEndpoint(e.target.value)}
                 placeholder="http://localhost:8000/v1"
-                className="mt-1"
+                className="mt-1 !rounded-[3px]"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-[var(--pt-text-tertiary)]">
                 Base URL of the OpenAI-compatible API
               </p>
             </div>
@@ -968,9 +967,9 @@ export function ModelSettingsModal({
                 value={customOpenAIModel}
                 onChange={(e) => setCustomOpenAIModel(e.target.value)}
                 placeholder="gpt-4, llama-3-70b, etc."
-                className="mt-1"
+                className="mt-1 !rounded-[3px]"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-[var(--pt-text-tertiary)]">
                 Model identifier to use for requests
               </p>
             </div>
@@ -983,7 +982,7 @@ export function ModelSettingsModal({
                 value={customOpenAIApiKey}
                 onChange={(e) => setCustomOpenAIApiKey(e.target.value)}
                 placeholder="Leave empty if not required"
-                className="mt-1"
+                className="mt-1 !rounded-[3px]"
               />
             </div>
 
@@ -995,9 +994,9 @@ export function ModelSettingsModal({
               >
                 <Label className="cursor-pointer">Advanced Options</Label>
                 {isCustomOpenAIAdvancedOpen ? (
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  <ChevronUp className="h-4 w-4 text-[var(--pt-text-tertiary)]" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4 text-[var(--pt-text-tertiary)]" />
                 )}
               </div>
 
@@ -1011,7 +1010,7 @@ export function ModelSettingsModal({
                       value={customMaxTokens}
                       onChange={(e) => setCustomMaxTokens(e.target.value)}
                       placeholder="e.g., 4096"
-                      className="mt-1"
+                      className="mt-1 !rounded-[3px]"
                     />
                   </div>
                   <div>
@@ -1025,7 +1024,7 @@ export function ModelSettingsModal({
                       value={customTemperature}
                       onChange={(e) => setCustomTemperature(e.target.value)}
                       placeholder="e.g., 0.7"
-                      className="mt-1"
+                      className="mt-1 !rounded-[3px]"
                     />
                   </div>
                   <div>
@@ -1039,7 +1038,7 @@ export function ModelSettingsModal({
                       value={customTopP}
                       onChange={(e) => setCustomTopP(e.target.value)}
                       placeholder="e.g., 0.9"
-                      className="mt-1"
+                      className="mt-1 !rounded-[3px]"
                     />
                   </div>
                 </div>
@@ -1053,7 +1052,7 @@ export function ModelSettingsModal({
               size="sm"
               onClick={testCustomOpenAIConnection}
               disabled={isTestingConnection || !customOpenAIEndpoint.trim() || !customOpenAIModel.trim()}
-              className="w-full"
+              className="w-full !rounded-[3px]"
             >
               {isTestingConnection ? (
                 <>
@@ -1080,12 +1079,12 @@ export function ModelSettingsModal({
                 onChange={(e) => setApiKey(e.target.value)}
                 disabled={isApiKeyLocked}
                 placeholder="Enter your API key"
-                className="pr-24"
+                className="pr-24 !rounded-[3px]"
               />
               {isApiKeyLocked && apiKey?.trim() && (
                 <div
                   onClick={handleInputClick}
-                  className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-md cursor-not-allowed"
+                  className="absolute inset-0 flex cursor-not-allowed items-center justify-center bg-[rgba(var(--pt-bg-rgb),.58)] [border-radius:3px]"
                 />
               )}
               <div className="absolute inset-y-0 right-0 pr-1 flex items-center space-x-1">
@@ -1095,7 +1094,7 @@ export function ModelSettingsModal({
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsApiKeyLocked(!isApiKeyLocked)}
-                    className={isLockButtonVibrating ? 'animate-vibrate text-red-500' : ''}
+                    className={`!rounded-[3px] ${isLockButtonVibrating ? 'animate-vibrate text-red-500' : ''}`}
                     title={isApiKeyLocked ? 'Unlock to edit' : 'Lock to prevent editing'}
                   >
                     {isApiKeyLocked ? <Lock /> : <Unlock />}
@@ -1106,6 +1105,7 @@ export function ModelSettingsModal({
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowApiKey(!showApiKey)}
+                  className="!rounded-[3px]"
                 >
                   {showApiKey ? <EyeOff /> : <Eye />}
                 </Button>
@@ -1122,15 +1122,15 @@ export function ModelSettingsModal({
             >
               <Label className="cursor-pointer">Custom Endpoint (optional)</Label>
               {isEndpointSectionCollapsed ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 text-[var(--pt-text-tertiary)]" />
               ) : (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                <ChevronUp className="h-4 w-4 text-[var(--pt-text-tertiary)]" />
               )}
             </div>
 
             {!isEndpointSectionCollapsed && (
               <>
-                <p className="text-sm text-muted-foreground mt-1 mb-2">
+                <p className="mb-2 mt-1 text-sm text-[var(--pt-text-tertiary)]">
                   Leave empty or enter a custom endpoint (e.g., http://x.yy.zz:11434)
                 </p>
                 <div className="flex gap-2 mt-1">
@@ -1148,7 +1148,7 @@ export function ModelSettingsModal({
                       }}
                       placeholder="http://localhost:11434"
                       className={cn(
-                        "pr-10",
+                        "pr-10 !rounded-[3px]",
                         endpointValidationState === 'invalid' && "border-red-500"
                       )}
                     />
@@ -1165,7 +1165,7 @@ export function ModelSettingsModal({
                     onClick={() => fetchOllamaModels()}
                     disabled={isLoadingOllama}
                     variant="outline"
-                    className="whitespace-nowrap"
+                    className="whitespace-nowrap !rounded-[3px]"
                   >
                     {isLoadingOllama ? (
                       <>
@@ -1198,8 +1198,8 @@ export function ModelSettingsModal({
               <h4 className="text-sm font-bold">Available Ollama Models</h4>
               {lastFetchedEndpoint && models.length > 0 && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Using:</span>
-                  <code className="px-2 py-1 bg-muted rounded text-xs">
+                  <span className="text-[var(--pt-text-tertiary)]">Using:</span>
+                  <code className="bg-[var(--pt-surface-alt)] px-2 py-1 text-xs [border-radius:2px]">
                     {lastFetchedEndpoint || 'http://localhost:11434'}
                   </code>
                 </div>
@@ -1211,12 +1211,12 @@ export function ModelSettingsModal({
                   placeholder="Search models..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full"
+                  className="w-full !rounded-[3px]"
                 />
               </div>
             )}
             {isLoadingOllama ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="py-8 text-center text-[var(--pt-text-tertiary)]">
                 <RefreshCw className="mx-auto h-8 w-8 animate-spin mb-2" />
                 Loading models...
               </div>
@@ -1234,12 +1234,12 @@ export function ModelSettingsModal({
                       variant="default"
                       size="sm"
                       onClick={() => invoke('open_external_url', { url: 'https://ollama.com/download' })}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      className="pt-button w-full !rounded-[3px]"
                     >
                       <ExternalLink className="mr-2 h-4 w-4" />
                       Download Ollama
                     </Button>
-                    <div className="text-sm text-muted-foreground text-center">
+                    <div className="text-center text-sm text-[var(--pt-text-tertiary)]">
                       After installing Ollama, restart this application and click "Fetch Models" to continue.
                     </div>
                   </div>
@@ -1260,7 +1260,7 @@ export function ModelSettingsModal({
                           size="sm"
                           onClick={downloadRecommendedModel}
                           disabled={isDownloading('gemma3:1b')}
-                          className="w-full"
+                          className="w-full !rounded-[3px]"
                         >
                           {isDownloading('gemma3:1b') ? (
                             <>
@@ -1277,16 +1277,16 @@ export function ModelSettingsModal({
 
                         {/* Show progress for gemma3:1b download */}
                         {isDownloading('gemma3:1b') && getProgress('gemma3:1b') !== undefined && (
-                          <div className="bg-white rounded-md border p-3">
+                          <div className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-3 [border-radius:3px]">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-blue-600">Downloading gemma3:1b</span>
-                              <span className="text-sm font-semibold text-blue-600">
+                              <span className="text-sm font-medium text-[var(--pt-accent-active)]">Downloading gemma3:1b</span>
+                              <span className="text-sm font-semibold text-[var(--pt-accent-active)]">
                                 {Math.round(getProgress('gemma3:1b')!)}%
                               </span>
                             </div>
-                            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="h-2 w-full overflow-hidden bg-[var(--pt-border)] [border-radius:2px]">
                               <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
+                                className="h-full bg-[var(--pt-accent)] transition-all duration-300 [border-radius:2px]"
                                 style={{ width: `${getProgress('gemma3:1b')}%` }}
                               />
                             </div>
@@ -1315,10 +1315,10 @@ export function ModelSettingsModal({
                         <div
                           key={model.id}
                           className={cn(
-                            'bg-card p-2 m-0 rounded-md border transition-colors',
+                            'm-0 border border-[var(--pt-border)] bg-[var(--pt-surface)] p-2 transition-colors [border-radius:3px]',
                             modelConfig.model === model.name
-                              ? 'ring-1 ring-blue-500 border-blue-500 background-blue-100'
-                              : 'hover:bg-muted/50',
+                              ? 'border-[var(--pt-accent)] bg-[var(--pt-accent-wash)] ring-1 ring-[var(--pt-accent)]'
+                              : 'hover:bg-[var(--pt-surface-alt)]',
                             !modelIsDownloading && 'cursor-pointer'
                           )}
                           onClick={() => {
@@ -1329,20 +1329,20 @@ export function ModelSettingsModal({
                         >
                           <div>
                             <b className="font-bold">{model.name}&nbsp;</b>
-                            <span className="text-muted-foreground">with a size of </span>
+                            <span className="text-[var(--pt-text-tertiary)]">with a size of </span>
                             <span className="font-mono font-bold text-sm">{model.size}</span>
                           </div>
 
                           {/* Progress bar for downloading models */}
                           {modelIsDownloading && progress !== undefined && (
-                            <div className="mt-3 pt-3 border-t border-gray-200">
+                            <div className="mt-3 border-t border-[var(--pt-border)] pt-3">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-blue-600">Downloading...</span>
-                                <span className="text-sm font-semibold text-blue-600">{Math.round(progress)}%</span>
+                                <span className="text-sm font-medium text-[var(--pt-accent-active)]">Downloading...</span>
+                                <span className="text-sm font-semibold text-[var(--pt-accent-active)]">{Math.round(progress)}%</span>
                               </div>
-                              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-2 w-full overflow-hidden bg-[var(--pt-border)] [border-radius:2px]">
                                 <div
-                                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
+                                  className="h-full bg-[var(--pt-accent)] transition-all duration-300 [border-radius:2px]"
                                   style={{ width: `${progress}%` }}
                                 />
                               </div>
@@ -1372,30 +1372,11 @@ export function ModelSettingsModal({
         )}
       </div>
 
-      {/* Auto-generate summaries toggle */}
-      {/* <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <Label htmlFor="auto-generate" className="text-base font-medium">
-              Auto-generate summaries
-            </Label>
-            <p className="text-sm text-muted-foreground mt-1">
-              Automatically generate summary when opening meetings without one
-            </p>
-          </div>
-          <Switch
-            id="auto-generate"
-            checked={autoGenerateEnabled}
-            onCheckedChange={setAutoGenerateEnabled}
-          />
-        </div>
-      </div> */}
-
       <div className="mt-6 flex justify-end">
         <Button
           className={cn(
-            'px-4 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-            isDoneDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+            'px-4 text-sm font-medium !rounded-[3px] focus:outline-none focus:ring-2 focus:ring-[var(--pt-accent)] focus:ring-offset-2',
+            isDoneDisabled ? 'cursor-not-allowed bg-[var(--pt-border)] text-[var(--pt-text-tertiary)]' : 'bg-[var(--pt-accent)] text-[var(--pt-text)] hover:bg-[var(--pt-accent-hover)]'
           )}
           onClick={handleSave}
           disabled={isDoneDisabled}
