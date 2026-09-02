@@ -1,0 +1,29 @@
+{
+  "blocked_by": [
+    "P-2026-09-02-dictation-ux-refinement/T1"
+  ],
+  "commits": [],
+  "created_at": "2026-09-02T15:02:52Z",
+  "execution_context": {
+    "branch": "feature/dictation-ux-refinement",
+    "repository": "dictation-ux-refinement",
+    "worktree": "dictation-ux-refinement"
+  },
+  "files_touched": [
+    "frontend/src/app/dictation-overlay/page.tsx",
+    "frontend/src/components/VoiceHub.tsx"
+  ],
+  "host_refs": {},
+  "id": "P-2026-09-02-dictation-ux-refinement/T5",
+  "kind": "implementation",
+  "local_id": "T5",
+  "owner": null,
+  "plan_id": "P-2026-09-02-dictation-ux-refinement",
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "pending",
+  "subject": "Synchronize shortcut labels across live surfaces",
+  "updated_at": "2026-09-02T15:02:52Z",
+  "verification_receipts": []
+}
