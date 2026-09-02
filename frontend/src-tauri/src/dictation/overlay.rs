@@ -5,7 +5,7 @@ use tauri_plugin_store::StoreExt;
 const PREFERENCE_STORE: &str = "preferences.json";
 const ENABLED_KEY: &str = "dictation_overlay_enabled";
 const COMPACT_SIZE: (u32, u32) = (72, 28);
-const EXPANDED_SIZE: (u32, u32) = (320, 104);
+const EXPANDED_SIZE: (u32, u32) = (320, 124);
 const BOTTOM_MARGIN: i32 = 16;
 
 pub struct DictationOverlayState(RwLock<bool>);
@@ -217,6 +217,7 @@ mod tests {
     #[test]
     fn compact_overlay_is_only_large_enough_for_the_voice_cursor() {
         assert_eq!(COMPACT_SIZE, (72, 28));
+        assert_eq!(EXPANDED_SIZE, (320, 124));
         assert!(EXPANDED_SIZE.0 > COMPACT_SIZE.0);
         assert!(EXPANDED_SIZE.1 > COMPACT_SIZE.1);
     }
