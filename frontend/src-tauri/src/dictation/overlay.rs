@@ -213,17 +213,33 @@ fn start_monitor_follower(app: &AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         let mut interval = tokio::time::interval(MONITOR_POLL_INTERVAL);
+        let mut warning_sent = false;
         interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
         loop {
             interval.tick().await;
-            if !app.state::<DictationOverlayState>().enabled() {
+            let enabled = app.state::<DictationOverlayState>().enabled();
+            if !enabled {
+                record_monitor_follow_result(&mut warning_sent, false, false);
                 continue;
             }
-            if let Err(error) = position_on_cursor_monitor(&app, false) {
-                log::debug!("dictation_overlay_monitor_follow_skipped error={error}");
+            let succeeded = position_on_cursor_monitor(&app, false).is_ok();
+            if record_monitor_follow_result(&mut warning_sent, true, succeeded) {
+                log::warn!("dictation_overlay_monitor_follow_failed code=monitor_unavailable");
             }
         }
     });
+}
+
+fn record_monitor_follow_result(warning_sent: &mut bool, enabled: bool, succeeded: bool) -> bool {
+    if !enabled || succeeded {
+        *warning_sent = false;
+        return false;
+    }
+    if *warning_sent {
+        return false;
+    }
+    *warning_sent = true;
+    true
 }
 
 fn position_on_cursor_monitor(app: &AppHandle, force: bool) -> Result<(), String> {
@@ -385,5 +401,25 @@ mod tests {
             Some(secondary)
         );
         assert_eq!(monitor_transition(Some(primary), None), None);
+    }
+
+    #[test]
+    fn monitor_follow_warning_is_edge_triggered_and_rearms_after_recovery() {
+        let mut warning_sent = false;
+
+        assert!(record_monitor_follow_result(&mut warning_sent, true, false));
+        assert!(!record_monitor_follow_result(
+            &mut warning_sent,
+            true,
+            false
+        ));
+        assert!(!record_monitor_follow_result(&mut warning_sent, true, true));
+        assert!(record_monitor_follow_result(&mut warning_sent, true, false));
+        assert!(!record_monitor_follow_result(
+            &mut warning_sent,
+            false,
+            false
+        ));
+        assert!(record_monitor_follow_result(&mut warning_sent, true, false));
     }
 }
