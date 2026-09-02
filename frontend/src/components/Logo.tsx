@@ -1,35 +1,23 @@
 import React from "react";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { VisuallyHidden } from "./ui/visually-hidden";
-import { About } from "./About";
+import Link from "next/link";
 
 interface LogoProps {
     isCollapsed: boolean;
 }
 
-const Logo = React.forwardRef<HTMLButtonElement, LogoProps>(({ isCollapsed }, ref) => {
+const Logo = React.forwardRef<HTMLAnchorElement, LogoProps>(({ isCollapsed }, ref) => {
   return (
-    <Dialog aria-describedby={undefined}>
+    <Link href="/" ref={ref} aria-label="Go to Home">
       {isCollapsed ? (
-        <DialogTrigger asChild>
-          <button ref={ref} className="pulse-talq-mark pulse-talq-mark--compact" aria-label="About PulseTalq">
-            <span>p</span>
-          </button>
-        </DialogTrigger>
+        <span className="pulse-talq-mark pulse-talq-mark--compact">
+          <span>p</span>
+        </span>
       ) : (
-        <DialogTrigger asChild>
-          <button ref={ref} className="pulse-talq-mark" aria-label="About PulseTalq">
-            <span>pulse </span><strong>talq</strong>
-          </button>
-        </DialogTrigger>
+        <span className="pulse-talq-mark">
+          <span>pulse </span><strong>talq</strong>
+        </span>
       )}
-      <DialogContent>
-        <VisuallyHidden>
-          <DialogTitle>About PulseTalq</DialogTitle>
-        </VisuallyHidden>
-        <About />
-      </DialogContent>
-    </Dialog>
+    </Link>
   );
 });
 
