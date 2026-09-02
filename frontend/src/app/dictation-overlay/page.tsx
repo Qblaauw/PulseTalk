@@ -3,7 +3,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { Mic } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type DictationPhase =
   | 'idle'
@@ -41,15 +41,34 @@ export default function DictationOverlay() {
   const [state, setState] = useState<DictationState>({ phase: 'idle' })
   const [hovered, setHovered] = useState(false)
   const [shortcut, setShortcut] = useState<ShortcutStatus | null>(null)
+  const collapseTimer = useRef<number | null>(null)
+  const resizeQueue = useRef<Promise<void>>(Promise.resolve())
 
   useEffect(() => {
     document.documentElement.style.background = 'transparent'
     document.body.style.background = 'transparent'
     return () => {
+      if (collapseTimer.current !== null) window.clearTimeout(collapseTimer.current)
       document.documentElement.style.background = ''
       document.body.style.background = ''
     }
   }, [])
+
+  const keepExpanded = () => {
+    if (collapseTimer.current !== null) {
+      window.clearTimeout(collapseTimer.current)
+      collapseTimer.current = null
+    }
+    setHovered(true)
+  }
+
+  const scheduleCollapse = () => {
+    if (collapseTimer.current !== null) window.clearTimeout(collapseTimer.current)
+    collapseTimer.current = window.setTimeout(() => {
+      collapseTimer.current = null
+      setHovered(false)
+    }, 180)
+  }
 
   useEffect(() => {
     let disposed = false
@@ -85,9 +104,11 @@ export default function DictationOverlay() {
   const expanded = hovered || active
 
   useEffect(() => {
-    void invoke('dictation_set_overlay_expanded', { expanded }).catch(error =>
-      console.error('dictation_overlay_resize_failed', error),
-    )
+    resizeQueue.current = resizeQueue.current
+      .catch(() => undefined)
+      .then(() => invoke('dictation_set_overlay_expanded', { expanded }))
+      .then(() => undefined)
+      .catch(error => console.error('dictation_overlay_resize_failed', error))
   }, [expanded])
 
   const label = useMemo(() => {
@@ -108,8 +129,8 @@ export default function DictationOverlay() {
       className={`dictation-floater ${expanded ? 'dictation-expanded' : 'dictation-compact'} dictation-${state.phase}`}
       aria-label={label}
       aria-live="polite"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onPointerEnter={keepExpanded}
+      onPointerLeave={scheduleCollapse}
     >
       <div className="dictation-handle" aria-hidden="true" />
       <div className="dictation-bubble">
