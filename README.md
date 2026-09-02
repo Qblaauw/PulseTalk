@@ -256,7 +256,11 @@ Thanks for all the contributions. Our community is what makes this project possi
 
 ## License
 
-MIT License - Feel free to use this project for your own purposes.
+The code in this repository is available under the [MIT License](LICENSE.md).
+That license covers copyright permissions for the code. It does not grant
+permission to use PolyphronAI or PulseTalq trademarks, logos, product identity,
+or other branding. See `LICENSE.md` for the trademark and reserved-rights
+terms. Third-party components may have separate license terms.
 
 ## Acknowledgments
 

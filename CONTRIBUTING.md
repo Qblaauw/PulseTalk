@@ -148,4 +148,8 @@ Types:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's MIT License.
+By contributing, you agree that your contributions will be licensed under the
+project's MIT License. Contributions do not grant permission to use
+PolyphronAI or PulseTalq trademarks, logos, product identity, or other
+branding. See [LICENSE.md](LICENSE.md) for the project's trademark and
+reserved-rights terms.
