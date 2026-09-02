@@ -120,9 +120,10 @@
             "icons/app_icon.icns",
             "icons/app_icon.ico"
         ],
-        "resources": [
-            "templates/*.json"
-        ],
+        "resources": {
+            "templates/*.json": "templates/",
+            "icons/icon.ico": "pulsetalq-shortcut.ico"
+        },
         "externalBin": [
             "binaries/llama-helper",
             "binaries/ffmpeg"
@@ -155,6 +156,7 @@
                 "sidebarImage": "installer/nsis-sidebar.bmp",
                 "installerIcon": "icons/icon.ico",
                 "uninstallerIcon": "icons/icon.ico",
+                "installerHooks": "installer/pulsetalq-shortcuts.nsh",
                 "languages": [
                     "English"
                 ],

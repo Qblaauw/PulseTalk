@@ -80,6 +80,23 @@ The script searches `target/**/bundle/{nsis,msi}` at the repo root (the Cargo wo
 - Opens the `.msi` read-only through `WindowsInstaller.Installer` and reads the Property table: `ProductName`, `Manufacturer`, `ProductCode`, `UpgradeCode`, `ProductVersion`, plus the ARP link properties. `Manufacturer` must be `PolyphronAI` (this comes from `bundle.publisher` in `tauri.conf.json`; without it Tauri derives the lowercase `pulsetalq` from the identifier, which is what the 2026-09-01 build shipped).
 - Records the `UpgradeCode`. Tauri derives it from the bundle identifier, so `com.pulsetalq.app` must yield a GUID different from the Meetily `com.meetily.ai` one. Once an old Meetily MSI is available, paste its UpgradeCode into `$legacyUpgradeCodes` in the script so a regression fails loudly.
 
+The NSIS build maps `icons/icon.ico` to the installed resource
+`$INSTDIR\pulsetalq-shortcut.ico`. Its post-install hook runs after both a fresh
+install and a PulseTalq update. The hook recreates the root Start-menu
+`PulseTalq.lnk` with that explicit icon path. If a `PulseTalq.lnk` already exists
+on the desktop, the hook refreshes it in place. It does not create a desktop
+shortcut when none exists. If the user selects "Create a desktop shortcut" on
+the Finish page, a close callback refreshes the link after Tauri creates it, so
+that path also receives the explicit icon. A fresh install launched with `/NS`
+keeps Tauri's no-shortcut behavior. PulseTalq updates repair the current user's
+canonical shortcut and any current-user desktop shortcut that already exists.
+
+The hook may delete `PulseTalk.lnk` only after inspecting the link target and
+matching `%LOCALAPPDATA%\PulseTalk\meetily.exe`. It performs that check for the
+current user's Start menu and desktop. It never checks, edits, or deletes a
+`Meetily.lnk`, a Meetily install, or Meetily data. The application and tray icon
+configuration stay unchanged by this shortcut repair.
+
 Manual checks (record a screenshot for each in the release PR):
 
 1. Explorer > file Properties > Details on the `.exe` and `.msi`: product name, company, copyright.
@@ -95,9 +112,9 @@ Install the NSIS build, then:
 pwsh scripts/verify-installer-branding.ps1 -Path <setup.exe> -CheckInstalled
 ```
 
-It verifies the Uninstall entry (HKCU for NSIS `currentUser`, HKLM for MSI) has `DisplayName` `PulseTalq`, that `Publisher`, `DisplayIcon`, `InstallLocation` and `UninstallString` carry no legacy string, that the `DisplayIcon` path exists, and that a Start menu shortcut exists at `%APPDATA%\Microsoft\Windows\Start Menu\Programs\PulseTalq.lnk` (or the ProgramData equivalent) and points at an existing executable.
+It verifies the Uninstall entry (HKCU for NSIS `currentUser`, HKLM for MSI) has `DisplayName` `PulseTalq`, that `Publisher`, `DisplayIcon`, `InstallLocation` and `UninstallString` carry no legacy string, and that the `DisplayIcon` path exists. It also requires the current user's Start-menu shortcut to target an existing `pulse-talq.exe` and have a non-empty `IconLocation` naming an existing `pulsetalq-shortcut.ico` beside that executable. An implicit `,0` icon location is a failure. The same target and icon checks run for an existing current-user desktop `PulseTalq.lnk`; having no desktop shortcut is valid. The gate also fails if a current-user Start-menu or desktop `PulseTalk.lnk` still targets the exact transitional `%LOCALAPPDATA%\PulseTalk\meetily.exe` binary. A nonmatching `PulseTalk.lnk` is reported and left alone.
 
-Manual checks: Settings > Apps > Installed apps shows one `PulseTalq` entry with the Deep Focus icon; the Start menu tile, taskbar icon, window title bar, tray tooltip and About dialog all read PulseTalq; pinning to taskbar keeps the new icon after sign-out and sign-in (icon cache).
+Manual checks: Settings > Apps > Installed apps shows one `PulseTalq` entry with the Deep Focus icon. The Start-menu shortcut shows the Pulse icon after a fresh install and after an update. If a desktop shortcut existed before the update, it shows the same icon afterward; if none existed, the installer did not create one. The taskbar icon, window title bar, tray icon, tray tooltip, and About dialog still show PulseTalq. If Windows displays a cached image, sign out and sign in before recording the result.
 
 ## 4. macOS DMG
 

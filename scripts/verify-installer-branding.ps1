@@ -13,8 +13,8 @@
       * MSI Property table (ProductName, Manufacturer, ProductCode,
         UpgradeCode, ProductVersion) via the WindowsInstaller.Installer COM API.
       * Optional: with -CheckInstalled, the HKCU/HKLM Uninstall registry
-        entries (DisplayName, DisplayIcon, Publisher) and the Start menu
-        shortcut for an already-installed PulseTalq.
+        entries (DisplayName, DisplayIcon, Publisher) and current-user Start
+        menu and desktop shortcuts for an already-installed PulseTalq.
 
     This script never runs an installer. Install manually first if you want
     the -CheckInstalled pass.
@@ -24,7 +24,8 @@
     searches <repo>/target/**/bundle/{nsis,msi} and frontend/src-tauri/target/**/bundle/{nsis,msi}.
 
 .PARAMETER CheckInstalled
-    Also verify registry uninstall entries and the Start menu shortcut.
+    Also verify registry uninstall entries, the Start menu shortcut, and any
+    existing desktop shortcuts.
 
 .PARAMETER ExpectedProductName
     Defaults to PulseTalq.
@@ -46,6 +47,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:Rows = New-Object System.Collections.Generic.List[object]
+$script:ExpectedExecutableName = 'pulse-talq.exe'
+$script:ExpectedShortcutIconName = 'pulsetalq-shortcut.ico'
 
 function Add-Result {
     param([string] $Status, [string] $Check, [string] $Detail)
@@ -189,6 +192,95 @@ function Test-MsiProperties {
     }
 }
 
+function Split-ShortcutIconLocation {
+    param([string] $IconLocation)
+    if ([string]::IsNullOrWhiteSpace($IconLocation)) {
+        return [pscustomobject]@{ Path = ''; Index = $null }
+    }
+    $expanded = [Environment]::ExpandEnvironmentVariables($IconLocation.Trim())
+    $iconPath = $expanded
+    $iconIndex = $null
+    $commaIndex = $expanded.LastIndexOf(',')
+    if ($commaIndex -ge 0) {
+        $parsedIndex = 0
+        $indexText = $expanded.Substring($commaIndex + 1).Trim()
+        if ([int]::TryParse($indexText, [ref] $parsedIndex)) {
+            $iconPath = $expanded.Substring(0, $commaIndex)
+            $iconIndex = $parsedIndex
+        }
+    }
+
+    return [pscustomobject]@{
+        Path = $iconPath.Trim().Trim('"')
+        Index = $iconIndex
+    }
+}
+
+function Test-PulseShortcut {
+    param(
+        [string] $ShortcutPath,
+        [string] $Kind
+    )
+    Pass "$Kind shortcut" $ShortcutPath
+    $shell = $null
+    $shortcut = $null
+    try {
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($ShortcutPath)
+
+        $targetPath = [Environment]::ExpandEnvironmentVariables(([string] $shortcut.TargetPath).Trim()).Trim('"')
+        $shortcutText = "$targetPath $($shortcut.Arguments) $($shortcut.Description) $($shortcut.IconLocation)"
+        $forbidden = Test-Forbidden $shortcutText
+        if ($forbidden) {
+            Fail "$Kind shortcut text" "contains '$forbidden'"
+        } else {
+            Pass "$Kind shortcut text" 'contains no legacy product text'
+        }
+
+        if ([string]::IsNullOrWhiteSpace($targetPath)) {
+            Fail "$Kind shortcut target" "empty; expected $($script:ExpectedExecutableName)"
+        } elseif (-not [IO.Path]::IsPathRooted($targetPath)) {
+            Fail "$Kind shortcut target" "not an absolute path: $targetPath"
+        } elseif ([IO.Path]::GetFileName($targetPath) -ine $script:ExpectedExecutableName) {
+            Fail "$Kind shortcut target" "'$targetPath', expected executable $($script:ExpectedExecutableName)"
+        } elseif (-not (Test-Path -LiteralPath $targetPath -PathType Leaf)) {
+            Fail "$Kind shortcut target" "missing: $targetPath"
+        } else {
+            Pass "$Kind shortcut target" $targetPath
+        }
+
+        $icon = Split-ShortcutIconLocation ([string] $shortcut.IconLocation)
+        if ([string]::IsNullOrWhiteSpace($icon.Path)) {
+            Fail "$Kind shortcut icon" "implicit or empty IconLocation; expected an explicit $($script:ExpectedShortcutIconName) path"
+        } elseif (-not [IO.Path]::IsPathRooted($icon.Path)) {
+            Fail "$Kind shortcut icon" "not an absolute path: $($icon.Path)"
+        } elseif ([IO.Path]::GetFileName($icon.Path) -ine $script:ExpectedShortcutIconName) {
+            Fail "$Kind shortcut icon" "'$($icon.Path)', expected $($script:ExpectedShortcutIconName)"
+        } elseif (-not (Test-Path -LiteralPath $icon.Path -PathType Leaf)) {
+            Fail "$Kind shortcut icon" "missing: $($icon.Path)"
+        } elseif ([string]::IsNullOrWhiteSpace($targetPath) -or -not [IO.Path]::IsPathRooted($targetPath)) {
+            Fail "$Kind shortcut icon" 'cannot compare icon location because the shortcut target is not an absolute path'
+        } else {
+            $targetDirectory = [IO.Path]::GetFullPath([IO.Path]::GetDirectoryName($targetPath))
+            $iconDirectory = [IO.Path]::GetFullPath([IO.Path]::GetDirectoryName($icon.Path))
+            if (-not $iconDirectory.Equals($targetDirectory, [StringComparison]::OrdinalIgnoreCase)) {
+                Fail "$Kind shortcut icon" "'$($icon.Path)' is not beside target '$targetPath'"
+            } else {
+                Pass "$Kind shortcut icon" "$($icon.Path),$($icon.Index)"
+            }
+        }
+    } catch {
+        Fail "$Kind shortcut inspection" $_.Exception.Message
+    } finally {
+        if ($null -ne $shortcut -and [Runtime.InteropServices.Marshal]::IsComObject($shortcut)) {
+            [void] [Runtime.InteropServices.Marshal]::ReleaseComObject($shortcut)
+        }
+        if ($null -ne $shell -and [Runtime.InteropServices.Marshal]::IsComObject($shell)) {
+            [void] [Runtime.InteropServices.Marshal]::ReleaseComObject($shell)
+        }
+    }
+}
+
 function Test-Installed {
     $displayFound = $false
     $roots = @(
@@ -229,24 +321,42 @@ function Test-Installed {
     }
     if (-not $displayFound) { Fail 'Uninstall entry' "no DisplayName '$ExpectedProductName' found in HKCU/HKLM" }
 
-    $shortcuts = @(
-        (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\$ExpectedProductName.lnk"),
-        (Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\$ExpectedProductName.lnk"),
-        (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\$ExpectedProductName\$ExpectedProductName.lnk"),
-        (Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\$ExpectedProductName\$ExpectedProductName.lnk")
-    )
-    $hit = $shortcuts | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
-    if ($hit) {
-        Pass 'Start menu shortcut' $hit
+    $startMenuShortcut = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\$ExpectedProductName.lnk"
+    if (Test-Path -LiteralPath $startMenuShortcut -PathType Leaf) {
+        Test-PulseShortcut -ShortcutPath $startMenuShortcut -Kind 'Start menu'
+    } else {
+        Fail 'Start menu shortcut' "missing: $startMenuShortcut"
+    }
+
+    $desktopShortcut = Join-Path ([Environment]::GetFolderPath('Desktop')) "$ExpectedProductName.lnk"
+    if (Test-Path -LiteralPath $desktopShortcut -PathType Leaf) {
+        Test-PulseShortcut -ShortcutPath $desktopShortcut -Kind 'Desktop'
+    } else {
+        Pass 'Desktop shortcut' 'not present; the installer does not create one during shortcut refresh'
+    }
+
+    $expectedTransitionalTarget = Join-Path $env:LOCALAPPDATA 'PulseTalk\meetily.exe'
+    $transitionalShortcuts = [ordered]@{
+        'Start menu' = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\PulseTalk.lnk'
+        'Desktop' = Join-Path ([Environment]::GetFolderPath('Desktop')) 'PulseTalk.lnk'
+    }
+    foreach ($kind in $transitionalShortcuts.Keys) {
+        $shortcutPath = $transitionalShortcuts[$kind]
+        if (-not (Test-Path -LiteralPath $shortcutPath -PathType Leaf)) {
+            Pass "$kind transitional shortcut" 'not present'
+            continue
+        }
         try {
             $shell = New-Object -ComObject WScript.Shell
-            $lnk = $shell.CreateShortcut($hit)
-            if (Test-Path -LiteralPath $lnk.TargetPath) { Pass 'Shortcut target' $lnk.TargetPath } else { Fail 'Shortcut target' "missing: $($lnk.TargetPath)" }
-            $t = Test-Forbidden ($lnk.TargetPath + ' ' + $lnk.Description)
-            if ($t) { Fail 'Shortcut text' "contains '$t'" }
-        } catch { Warn 'Shortcut inspection' $_.Exception.Message }
-    } else {
-        Fail 'Start menu shortcut' "none of: $($shortcuts -join '; ')"
+            $target = [Environment]::ExpandEnvironmentVariables(([string] $shell.CreateShortcut($shortcutPath).TargetPath).Trim()).Trim('"')
+            if ([IO.Path]::GetFullPath($target) -ieq [IO.Path]::GetFullPath($expectedTransitionalTarget)) {
+                Fail "$kind transitional shortcut" "still targets $expectedTransitionalTarget"
+            } else {
+                Warn "$kind transitional shortcut" "left untouched because its target is '$target'"
+            }
+        } catch {
+            Fail "$kind transitional shortcut inspection" $_.Exception.Message
+        }
     }
 }
 
