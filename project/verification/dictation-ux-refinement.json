@@ -1,0 +1,28 @@
+{
+  "schema": "product-ops.verification-report/v1",
+  "status": "passed",
+  "exit_code": 0,
+  "verified_at": "2026-09-02T16:34:43Z",
+  "plan_id": "P-2026-09-02-dictation-ux-refinement",
+  "commit": "0055494",
+  "checks": [
+    "cargo test dictation: 43 passed, 4 intentionally ignored",
+    "cargo check --lib: passed",
+    "dictation shortcut Node test: passed",
+    "Next.js production build: passed",
+    "Tauri NSIS bundle: passed",
+    "installer branding gate: 3 passed, 0 failed",
+    "T3 preview at 1280x800: Home layout and navigation semantics inspected",
+    "final scoped UI review: no findings",
+    "git diff --check: passed"
+  ],
+  "manual_checks_pending": [
+    "Install or update the candidate and confirm Start menu and desktop shortcut icon repair",
+    "Change the shortcut to Ctrl+Alt+D in the packaged app and confirm persistence after restart",
+    "Move the pointer across monitors during dictation and confirm delivery targets the control focused at activation"
+  ],
+  "known_baseline": [
+    "TypeScript noEmit reports the existing missing bun:test declaration in tests/lib/blocknote-markdown.test.ts",
+    "Browser-only preview logs missing Tauri bridge errors and enters onboarding, so native interactions are not browser-verifiable"
+  ]
+}

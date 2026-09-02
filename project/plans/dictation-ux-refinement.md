@@ -52,6 +52,11 @@ delivery_waived: true
 | `frontend/src/components/Logo.tsx` | Home mark | edit | T6 |
 | `frontend/src/components/Sidebar/index.tsx` | Home/history navigation | edit | T6 |
 | `frontend/src/app/settings/page.tsx` | Deep Focus Settings shell | edit | T6 |
+| `frontend/src/components/PreferenceSettings.tsx` | Deep Focus General settings panel | edit | T6 |
+| `frontend/src/components/RecordingSettings.tsx` | Deep Focus Recording settings panel | edit | T6 |
+| `frontend/src/components/TranscriptSettings.tsx` | Deep Focus transcription settings panel | edit | T6 |
+| `frontend/src/components/SummaryModelSettings.tsx` | Deep Focus summary-model settings panel | edit | T6 |
+| `frontend/src/components/BetaSettings.tsx` | Deep Focus beta settings panel | edit | T6 |
 | `docs/windows-dictation-acceptance.md` | end-to-end acceptance record | edit | T7 |
 
 ## Task DAG
@@ -136,11 +141,12 @@ delivery_waived: true
 - blocked_by: [T4]
 - blocks: [T7]
 - dag_level: 3
-- files_touched: [frontend/src/components/Logo.tsx, frontend/src/components/Sidebar/index.tsx, frontend/src/app/settings/page.tsx]
+- files_touched: [frontend/src/components/Logo.tsx, frontend/src/components/Sidebar/index.tsx, frontend/src/app/settings/page.tsx, frontend/src/components/PreferenceSettings.tsx, frontend/src/components/RecordingSettings.tsx, frontend/src/components/TranscriptSettings.tsx, frontend/src/components/SummaryModelSettings.tsx, frontend/src/components/BetaSettings.tsx]
 - acceptance:
   - Compact and expanded Pulse marks navigate to `/` and expose Home semantics and current-page state.
+  - Collapsed Home follows the tooltip pattern used by adjacent navigation controls.
   - Exactly one waveform navigation control remains and it navigates to `/dictation-history` in both Sidebar modes.
-  - Settings uses existing `--pt-*` tokens, 3 px geometry, accent focus states, and information-dense section boundaries without blue/indigo styling.
+  - The Settings shell and every existing tab panel use `--pt-*` tokens, 3 px geometry, accent focus states, and information-dense section boundaries without blue/indigo styling.
 - dispatch_model: sonnet-subagent
 - render_verify_required: false
 - writes_shared_state: false
