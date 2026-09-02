@@ -1,0 +1,25 @@
+version: '3'
+
+tasks:
+  frontend:
+    desc: Build the Next.js frontend
+    cmds:
+      - cmd: pnpm.cmd --dir frontend run build
+        platforms: [windows]
+      - cmd: pnpm --dir frontend run build
+        platforms: [darwin, linux]
+
+  llama-windows:
+    desc: Build the Windows llama helper
+    platforms: [windows]
+    cmd: cargo build --release -p llama-helper
+
+  llama-macos:
+    desc: Build the Apple Silicon llama helper with Metal
+    platforms: [darwin]
+    cmd: cargo build --release -p llama-helper --features metal
+
+  llama-linux:
+    desc: Build the Linux llama helper
+    platforms: [linux]
+    cmd: cargo build --release -p llama-helper

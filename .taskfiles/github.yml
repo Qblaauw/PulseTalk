@@ -1,0 +1,29 @@
+version: '3'
+
+tasks:
+  auth:
+    desc: Confirm local GitHub CLI authentication
+    cmd: gh auth status
+
+  publish:
+    desc: Create or update a draft GitHub Release from staged local artifacts
+    requires:
+      vars: [VERSION, CONFIRM_RELEASE]
+    preconditions:
+      - sh: gh auth status
+        msg: Authenticate the GitHub CLI with `gh auth login` before publishing.
+    cmds:
+      - task: :release:verify-local
+        vars:
+          VERSION: '{{.VERSION}}'
+          PLATFORMS: '{{default "windows" .PLATFORMS}}'
+      - cmd: node scripts/release/release-tool.mjs publish --version "{{.VERSION}}" --confirm "{{.CONFIRM_RELEASE}}"
+
+  verify:
+    desc: Compare a published GitHub Release with the staged local receipt
+    requires:
+      vars: [VERSION]
+    preconditions:
+      - sh: gh auth status
+        msg: Authenticate the GitHub CLI with `gh auth login` before verification.
+    cmd: node scripts/release/release-tool.mjs verify-remote --version "{{.VERSION}}"

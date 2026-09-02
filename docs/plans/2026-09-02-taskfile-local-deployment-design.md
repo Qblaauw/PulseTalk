@@ -4,12 +4,13 @@
 
 PulseTalq will use Task as the single command interface for validation,
 packaging, release staging, and publication. GitHub remains the Git remote and
-release host. GitHub Actions will not build, test, sign, package, or publish the
-application during this phase.
+release host. GitHub Actions will not sign, package, or publish the application
+during this phase and is not release authority. Existing manual CI may remain
+as diagnostic visibility, but local Task validation is mandatory.
 
-Executable workflow YAML will move out of `.github/workflows/`. The preserved
-files remain available as migration references but GitHub will not discover
-them as workflows.
+The executable release workflow will move out of `.github/workflows/`. Its
+preserved file remains available as a migration reference but GitHub will not
+discover it as a workflow.
 
 ## Goals
 
@@ -51,7 +52,7 @@ task doctor
   -> tool and host capability report
 
 task validate:local
-  -> config, frontend, Rust, and Git checks
+  -> config, frontend, and Rust checks
 
 task package:windows MODE=test
   -> unsigned native Windows package for local acceptance
@@ -111,15 +112,16 @@ installer is signed.
 ## Secrets
 
 Local deployment variables load from `.env.deploy.local`, which Git ignores.
-The repository contains only `.env.deploy.example`. Task preconditions check for
-required variable names without printing their values. Signing keys and API
-credentials never enter Task output, release metadata, or committed files.
+The repository contains only `.env.deploy.example`. Signing keys and API
+credentials must never enter Task output, release metadata, or committed files;
+the native signing tools report missing credentials during release packaging.
 
 ## GitHub Actions retirement
 
-The cutover moves every executable `.yml` workflow to
+The cutover moves the executable release workflow to
 `.github/workflows-disabled/` with a `.disabled` suffix. A README in
-`.github/workflows/` points operators to Task. Restoring a workflow requires a
+`.github/workflows/` points operators to Task. Non-deploy CI can remain for
+diagnostics, but cannot publish a release. Restoring deployment requires a
 reviewed change that moves it back and documents why local Task execution no
 longer meets the requirement.
 
@@ -132,15 +134,16 @@ This change is ready for review when:
 - `task validate:config` passes.
 - `task release:preflight` rejects a dirty tree or invalid release branch.
 - `task release:inspect` reports missing artifacts without publishing anything.
-- all former workflow YAML files are outside `.github/workflows/`.
+- the former release workflow YAML is outside `.github/workflows/`;
+- remaining CI workflows cannot publish releases and are not release gates.
 - documentation describes local build, stage, publish, verify, and rollback.
 - no production release command runs during implementation verification.
 
 ## Rollback
 
-Task deployment is reversible. Move the required workflow files back into
-`.github/workflows/`, review their secrets and action versions, and commit the
-restoration. Existing disabled workflow files are preserved specifically for
-that recovery path.
+Task deployment is reversible. Move the release workflow back into
+`.github/workflows/`, review its secrets and action versions, and commit the
+restoration. The disabled workflow is preserved specifically for that recovery
+path.
 
 **Created:** 2026-09-02 . **Last opened:** 2026-09-02 . **Last edited:** 2026-09-02 . **Status:** stable . **Owner:** Q. Blaauw

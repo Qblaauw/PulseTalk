@@ -77,5 +77,8 @@ experiments/
 .cursor/
 target/
 .worktrees/
+.task/
+.env.deploy.local
+dist/releases/
 
 frontend/src-tauri/binaries/
