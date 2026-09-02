@@ -10,6 +10,14 @@ pub fn dictation_get_shortcut_status(
 }
 
 #[tauri::command]
+pub fn dictation_set_shortcut(
+    app: AppHandle,
+    shortcut: String,
+) -> Result<super::DictationShortcutStatus, String> {
+    super::DictationShortcutStatusState::replace(&app, &shortcut)
+}
+
+#[tauri::command]
 pub fn dictation_get_overlay_enabled(
     state: tauri::State<'_, super::DictationOverlayState>,
 ) -> bool {
