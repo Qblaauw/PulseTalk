@@ -3,7 +3,7 @@
 import { invoke } from "@tauri-apps/api/core"
 import { AudioLines, ClipboardCheck, FolderOpen, History, Keyboard, LockKeyhole, Mic2, PictureInPicture2, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { type KeyboardEvent, useEffect, useState } from "react"
+import { type KeyboardEvent, useEffect, useRef, useState } from "react"
 import { Switch } from '@/components/ui/switch'
 
 type ShortcutStatus = {
@@ -23,6 +23,9 @@ export function DictationSettings() {
   const [capturingShortcut, setCapturingShortcut] = useState(false)
   const [savingShortcut, setSavingShortcut] = useState(false)
   const [shortcutError, setShortcutError] = useState<string | null>(null)
+  const [shortcutPreview, setShortcutPreview] = useState<string | null>(null)
+  const heldShortcutKeys = useRef(new Set<string>())
+  const shortcutCandidate = useRef<string | null>(null)
 
   useEffect(() => {
     invoke<ShortcutStatus>('dictation_get_shortcut_status')
@@ -33,38 +36,74 @@ export function DictationSettings() {
       .catch(cause => setError(String(cause)))
   }, [])
 
-  const captureShortcut = async (event: KeyboardEvent<HTMLButtonElement>) => {
+  const resetShortcutCapture = () => {
+    heldShortcutKeys.current.clear()
+    shortcutCandidate.current = null
+    setShortcutPreview(null)
+    setCapturingShortcut(false)
+  }
+
+  const shortcutKey = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Control') return 'Ctrl'
+    if (event.key === 'Alt') return 'Alt'
+    if (event.key === 'Shift') return 'Shift'
+    if (event.key === 'Meta') return 'Cmd'
+    if (event.code.startsWith('Key')) return event.code.slice(3)
+    if (event.code.startsWith('Digit')) return event.code.slice(5)
+    if (event.code === 'Space') return 'Space'
+    return event.code || event.key
+  }
+
+  const formatHeldShortcut = () => {
+    const held = heldShortcutKeys.current
+    const modifiers = ['Ctrl', 'Alt', 'Shift', 'Cmd'].filter(key => held.has(key))
+    const regularKeys = [...held].filter(key => !modifiers.includes(key))
+    return [...modifiers, ...regularKeys].join('+')
+  }
+
+  const captureShortcut = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (!capturingShortcut) return
     event.preventDefault()
-    if (['Control', 'Shift', 'Alt', 'Meta'].includes(event.key)) return
+    event.stopPropagation()
+    if (event.repeat) return
+    if (event.key === 'Escape') {
+      resetShortcutCapture()
+      return
+    }
 
-    const key = event.code.startsWith('Key')
-      ? event.code.slice(3)
-      : event.code.startsWith('Digit')
-        ? event.code.slice(5)
-        : event.code === 'Space'
-          ? 'Space'
-          : event.code
+    const key = shortcutKey(event)
     if (!key) return
+    heldShortcutKeys.current.add(key)
 
-    const modifiers = [
-      event.ctrlKey ? 'Ctrl' : null,
-      event.altKey ? 'Alt' : null,
-      event.shiftKey ? 'Shift' : null,
-      event.metaKey ? 'Cmd' : null,
-    ].filter(Boolean)
-    if (modifiers.length === 0) {
+    const preview = formatHeldShortcut()
+    setShortcutPreview(preview)
+    const parts = preview.split('+')
+    const modifierCount = parts.filter(part => ['Ctrl', 'Alt', 'Shift', 'Cmd'].includes(part)).length
+    const regularKeyCount = parts.length - modifierCount
+    shortcutCandidate.current = modifierCount > 0 && regularKeyCount === 1 ? preview : null
+    setShortcutError(regularKeyCount > 1 ? 'Use one key together with one or more modifier keys.' : null)
+  }
+
+  const releaseShortcut = async (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (!capturingShortcut) return
+    event.preventDefault()
+    event.stopPropagation()
+
+    heldShortcutKeys.current.delete(shortcutKey(event))
+    if (heldShortcutKeys.current.size > 0) return
+
+    const nextShortcut = shortcutCandidate.current
+    if (!nextShortcut) {
       setShortcutError('Hold Ctrl, Alt, Shift, or Cmd while choosing a key.')
       return
     }
 
-    const nextShortcut = [...modifiers, key].join('+')
     setSavingShortcut(true)
     setShortcutError(null)
     try {
       const nextStatus = await invoke<ShortcutStatus>('dictation_set_shortcut', { shortcut: nextShortcut })
       setStatus(nextStatus)
-      setCapturingShortcut(false)
+      resetShortcutCapture()
     } catch (cause) {
       setShortcutError(String(cause))
     } finally {
@@ -118,27 +157,33 @@ export function DictationSettings() {
                   type="button"
                   onClick={() => {
                     setShortcutError(null)
+                    heldShortcutKeys.current.clear()
+                    shortcutCandidate.current = null
+                    setShortcutPreview(null)
                     setCapturingShortcut(true)
                   }}
                   onKeyDown={captureShortcut}
-                  onBlur={() => setCapturingShortcut(false)}
+                  onKeyUp={releaseShortcut}
+                  onBlur={resetShortcutCapture}
                   disabled={savingShortcut}
                   className={`inline-flex min-w-[180px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${capturingShortcut
                     ? 'border-indigo-500 bg-indigo-50 text-indigo-800'
                     : 'border-gray-300 bg-gray-50 text-gray-800 hover:border-indigo-300 hover:bg-indigo-50/50'
                     }`}
-                  aria-label="Edit dictation shortcut"
+                  aria-label={capturingShortcut ? 'Hold shortcut keys, then release to save' : 'Hold to change dictation shortcut'}
                 >
                   <Keyboard className="h-4 w-4" />
-                  {capturingShortcut ? (savingShortcut ? 'Saving shortcut…' : 'Press a shortcut…') : status.shortcut}
+                  {capturingShortcut ? (savingShortcut ? 'Saving shortcut…' : shortcutPreview ?? 'Hold your shortcut…') : status.shortcut}
                 </button>
-                {!capturingShortcut && <span className="text-xs text-gray-500">Click to change</span>}
+                <span className="text-xs font-medium text-gray-500" role="status">
+                  {capturingShortcut ? 'Release to save' : 'Hold to change'}
+                </span>
               </div>
             ) : (
               <p className="mt-3 text-sm text-amber-700">{status?.message ?? 'Checking shortcut availability…'}</p>
             )}
             {(error || shortcutError) && <p className="mt-3 text-sm text-red-600">{error ?? shortcutError}</p>}
-            <p className="mt-3 text-xs text-gray-500">Choose a modifier plus one key. The shortcut is saved for the next launch and takes effect immediately.</p>
+            <p className="mt-3 text-xs text-gray-500">Hold the keys you want to use together. Release all keys to save. Use at least one modifier plus one key.</p>
           </div>
         </div>
       </section>
