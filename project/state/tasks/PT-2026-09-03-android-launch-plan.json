@@ -1,6 +1,8 @@
 {
   "blocked_by": [],
-  "commits": [],
+  "commits": [
+    "1f8b6aaf0bbd7b35b8c69b933709814120cbcac1"
+  ],
   "created_at": "2026-09-03T17:20:00Z",
   "execution_context": {
     "base_ref": "integration/pulsetalq-next",
@@ -25,14 +27,16 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "active",
+  "status": "done",
   "subject": "Align Android launch plan around voice plus keyboard",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-03T17:20:00Z",
+  "updated_at": "2026-09-03T17:28:00Z",
   "verification_contract": [
     "git diff --check",
     "document phase and scope consistency review",
     "prose lint when available"
   ],
-  "verification_receipts": []
+  "verification_receipts": [
+    "git diff --check passed; launch scope, delivery phases, and acceptance gates reviewed for consistency at commit 1f8b6aaf0bbd7b35b8c69b933709814120cbcac1"
+  ]
 }
