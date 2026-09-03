@@ -1,0 +1,42 @@
+{
+  "blocked_by": [],
+  "commits": [
+    "1f8b6aaf0bbd7b35b8c69b933709814120cbcac1"
+  ],
+  "created_at": "2026-09-03T17:20:00Z",
+  "execution_context": {
+    "base_ref": "integration/pulsetalq-next",
+    "base_sha": "680a8ab19a8c2ad98310f5ddd627800b5e4462df",
+    "branch": "docs/android-keyboard-viability",
+    "repository": "PulseTalk",
+    "worktree": "."
+  },
+  "exclusive_resources": [
+    "Android launch sequencing decision"
+  ],
+  "files_touched": [
+    "docs/research/ANDROID_KEYBOARD_VIABILITY.md",
+    "project/state/tasks/PT-2026-09-03-android-launch-plan.json"
+  ],
+  "host_refs": {},
+  "id": "PT-2026-09-03-android-launch-plan",
+  "kind": "docs",
+  "local_id": null,
+  "owner": "codex",
+  "plan_id": null,
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "done",
+  "subject": "Align Android launch plan around voice plus keyboard",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-03T17:28:00Z",
+  "verification_contract": [
+    "git diff --check",
+    "document phase and scope consistency review",
+    "prose lint when available"
+  ],
+  "verification_receipts": [
+    "git diff --check passed; launch scope, delivery phases, and acceptance gates reviewed for consistency at commit 1f8b6aaf0bbd7b35b8c69b933709814120cbcac1"
+  ]
+}

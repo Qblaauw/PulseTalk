@@ -6,6 +6,8 @@ Date: 2026-09-03. Research compiled from four parallel investigations: Android I
 
 Viable, with a clear architecture. Every hard requirement has a proven precedent: shipping open-source keyboards already run local ASR via sherpa-onnx on Android, at least one (Dictus) already ships Parakeet specifically, and our desktop Parakeet code is largely portable Rust. The two real constraints are: Parakeet has no true streaming (chunked pseudo-streaming only), and the ~650 MB INT8 model must live in a separate service process, not the IME process.
 
+The launch decision is Android first. The first public release includes both the PulseTalk keyboard and local voice dictation. A standalone voice-input app may be built as an internal engineering milestone, but it is not the launch product. An iOS companion app remains possible later, with no iOS keyboard target.
+
 ## 1. Android IME landscape
 
 - `InputMethodService` has no special hard memory quota, but IME processes are aggressively reclaimed by the low-memory killer when not foregrounded. Large model loads inside the IME process risk OOM kills on low-RAM devices. Android 17 is adding stricter per-app memory shielding.
@@ -16,7 +18,8 @@ Viable, with a clear architecture. Every hard requirement has a proven precedent
   - **FlorisBoard** (Apache-2.0, slower-moving, NLP engine rewrite in limbo): permissive license but higher maintenance risk.
   - **FUTO Keyboard / Voice Input** (Source First License, NOT open source, restricts commercial use): great reference implementation, not a legal base for us.
   - **OpenBoard**: dead.
-- Building autocorrect/prediction from scratch is a multi-month effort on its own; reuse a base keyboard rather than building typing from zero.
+- Building autocorrect/prediction from scratch is a multi-month effort on its own. Do not write the suggestion engine from zero.
+- **Recommended base: own keyboard shell, borrowed engine.** HeliBoard's GPL-3.0 comes from the OpenBoard fork, but the upstream **AOSP LatinIME is Apache-2.0**, including the native C++ suggestion/autocorrect engine and dictionary format. Plan: write the IME shell in Kotlin/Compose ourselves (voice-first layout, dictation overlay, vocab, sync), integrate the AOSP LatinIME engine and dictionaries for autocorrect, lift permissive Compose components/layouts from FlorisBoard (Apache-2.0), and use HeliBoard/FUTO as read-only behaviour references. Skip swipe typing in v1. A voice-first keyboard only needs typing good enough to keep users until they discover dictation, not Gboard parity. Estimate 6 to 10 weeks for v1 versus 2 to 3 weeks to fork HeliBoard under GPL.
 
 ## 2. Parakeet on-device (Android)
 
@@ -45,20 +48,53 @@ Rejected: PowerSync/ElectricSQL (cloud-Postgres-centric), embedding Syncthing (f
 - `dictation/session.rs` state machine (Idle → Listening → Transcribing → Cleaning → Delivering/Failed): pure logic, portable. The Windows dictation flow (hold hotkey, capture, one batch transcribe, cleanup, paste) maps 1:1 to a keyboard mic-button flow.
 - Not portable as-is: `ParakeetEngine` wrapper (desktop path assumptions), `dictation/coordinator` + `short_audio` (cpal, Windows delivery), `database/` (sqlx + Tauri AppHandle). Android supplies AudioRecord capture and its own storage; persistence would move to the shared core with the Automerge model.
 
-## 5. Recommended phased plan
+## 5. Android launch scope
 
-- **Phase 0, spike (1-2 weeks)**: extract `ParakeetModel` + `TranscriptionProvider` into a `pulsetalk-core` crate, cross-compile for `aarch64-linux-android`, wrap with uniffi, and benchmark INT8 v3 on 2 or 3 real phones (RTF, RAM, chunked latency). This is the single load-bearing unknown (no public phone benchmarks exist), so it gates everything.
-- **Phase 1, voice input app**: standalone Android voice-input app (registers as a voice IME / RecognizerIntent target usable from Gboard and HeliBoard), model in a separate-process foreground service, chunked pseudo-streaming UI. Much smaller scope than a full keyboard, validates the ASR stack with users.
-- **Phase 2, full keyboard**: fork HeliBoard (accepting GPL-3.0 for the keyboard app) or build a minimal keyboard if licensing rules that out, integrating the Phase 1 voice service natively plus PulseTalk theming and vocab.
-- **Phase 3, sync**: Automerge + iroh in `pulsetalk-core`, QR pairing, sync dictation vocab/settings first, then meeting transcripts/summaries.
+The first Play Store release is one Android app with a companion setup surface, a system keyboard, and a separate-process voice service.
 
-## 6. Key risks
+| Area | Required for v1 |
+|---|---|
+| Setup | Keyboard enablement, keyboard selection, microphone permission, model download, storage check, and a short privacy explanation |
+| Keyboard | Standard text entry, shift, symbols, backspace, enter, cursor-safe insertion, and a clear voice control |
+| Prediction | AOSP LatinIME suggestions, autocorrect, next-word prediction, and personal dictionary support |
+| Voice | Hold or tap to record, visible listening state, elapsed time, cancel, chunked partial text, final transcription, and insertion at the current cursor |
+| Recovery | Preserve transcription when insertion fails, then offer retry and copy actions |
+| History | Local dictation history with search, copy, delete, and a switch to disable retention |
+| Personal words | Add and remove words, learn approved corrections, and import a word list |
+| Settings | Model status, model update controls, cleanup toggle, history controls, diagnostics, and privacy information |
+| Privacy | Local transcription by default, no typed-text collection, explicit network use for model download and later opt-in sync |
+| Device support | Parakeet on phones that pass the benchmark gate, with a smaller fallback model for supported lower-memory devices |
+
+Swipe typing, cloud sync, meeting transcript sync, themes beyond the launch theme, and an iOS keyboard are outside v1.
+
+## 6. Delivery plan
+
+- **Phase 0, device spike (1-2 weeks):** extract `ParakeetModel` and `TranscriptionProvider` into a `pulsetalk-core` crate, cross-compile for `aarch64-linux-android`, wrap it with uniffi, and benchmark INT8 v3 on 2 or 3 real phones. Record real-time factor, peak RAM, model load time, battery use, and chunk latency. This gate decides the supported device floor and fallback model.
+- **Phase 1, internal voice milestone:** build the Android companion activity and separate-process voice service. Register it as a voice input target only for internal testing. Validate audio capture, model lifecycle, chunked transcription, cancellation, and text handoff. Do not market or release this as the product.
+- **Phase 2, public Android v1:** build the Kotlin/Compose `InputMethodService`, integrate the Apache-2.0 AOSP LatinIME engine, connect the Phase 1 service through IPC, and implement every item in the launch scope table. Run keyboard trust, accessibility, memory-reclamation, offline, and Play policy checks before release.
+- **Phase 3, post-launch sync:** add Automerge and iroh to `pulsetalk-core`, QR pairing, and opt-in encrypted sync. Start with personal words and settings, then add meeting transcripts and summaries.
+
+The public launch gate is Phase 2. Phase 1 is disposable validation work unless its components are reused by the keyboard app.
+
+## 7. Launch acceptance gates
+
+- Voice dictation works inside at least five common target apps, including a messaging app, browser, notes app, email app, and document editor.
+- The keyboard remains usable when the ASR process is cold, loading, unavailable, or reclaimed by Android.
+- A failed `InputConnection` insertion never loses the completed transcript.
+- Airplane-mode testing confirms that typing, prediction, dictation, history, and personal words work after model installation.
+- Benchmarks define an explicit supported-device list or minimum RAM and chipset class. Unsupported devices receive a clear fallback or incompatibility message before model download.
+- Play Store disclosures match actual microphone, model-download, diagnostics, history, and network behavior.
+- The shipped source and notices satisfy Apache-2.0, CC-BY-4.0, ONNX Runtime, uniffi, and every bundled dictionary dependency. No GPL keyboard code is copied into the application.
+
+## 8. Key risks
 
 | Risk | Mitigation |
 |---|---|
 | No phone-verified Parakeet performance numbers | Phase 0 spike before committing |
 | 650 MB model footprint and RAM on mid-range devices | Separate-process service, Moonshine/whisper-tiny fallback engine behind the existing provider trait |
 | No true streaming (chunked pseudo-streaming) | Matches current desktop UX; set product expectations accordingly |
-| HeliBoard GPL-3.0 copyleft vs. product licensing | Decide early; FlorisBoard (Apache-2.0) or in-house minimal keyboard are the alternatives |
+| Autocorrect quality of an in-house keyboard | Use the Apache-2.0 AOSP LatinIME engine and dictionaries rather than writing prediction from scratch |
 | Keyboard trust/Play review scrutiny | Offline-by-default, prominent disclosure, network confined to model download and opt-in sync |
 | iroh mobile and uniffi pre-1.0 maturity | Pin versions, sync is Phase 3 so it does not block the keyboard |
+
+**Created:** 2026-09-03 . **Last opened:** 2026-09-03 . **Last edited:** 2026-09-03 . **Status:** needs-review . **Owner:** Q. Blaauw
