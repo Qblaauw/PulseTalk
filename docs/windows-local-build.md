@@ -8,10 +8,20 @@ From `frontend`:
 pnpm tauri:build:windows-local
 ```
 
+Before changing any installer input, bump the installer revision from the
+repository root:
+
+```powershell
+node scripts/installer-version.mjs bump
+```
+
+The build refuses to run when installer-sensitive inputs changed without a
+revision bump. Application version `0.4.0` and installer revision `1` produce:
+
 The installer is written to:
 
 ```text
-target\release\bundle\nsis\PulseTalq_0.4.0_x64-setup.exe
+target\release\bundle\nsis\PulseTalq_0.4.0_installer.1_x64-setup.exe
 ```
 
 This local installer is unsigned and Windows may show a SmartScreen warning. Official distribution builds still use `pnpm tauri:build` with the configured code-signing and updater keys.
