@@ -19,6 +19,7 @@ const trackedInputs = [
   "frontend/src-tauri/tauri.conf.json",
   "frontend/src-tauri/tauri.local.conf.json",
   "scripts/brand",
+  "scripts/installer-version.mjs",
   "scripts/verify-installer-assets.py",
   "scripts/verify-installer-branding.ps1"
 ];
@@ -90,7 +91,10 @@ function stamp() {
   const revisionMarker = `_${appVersion}_installer.${manifest.revision}_`;
   const candidates = bundleRoots.flatMap(findBundleFiles).filter((filePath) => {
     const normalized = filePath.replaceAll("\\", "/");
-    return normalized.includes("/bundle/") && path.basename(filePath).includes(versionMarker) && !path.basename(filePath).includes(revisionMarker);
+    const filename = path.basename(filePath);
+    return normalized.includes("/bundle/")
+      && filename.includes(versionMarker)
+      && !/_installer\.\d+_/.test(filename);
   });
   if (candidates.length === 0) throw new Error(`No unstamped ${appVersion} bundle artifacts were found.`);
   for (const source of candidates) {
