@@ -4,7 +4,7 @@ use std::sync::RwLock;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
-pub const DEFAULT_SHORTCUT: &str = "Ctrl+Shift+Space";
+pub const DEFAULT_SHORTCUT: &str = "Ctrl+Super+Space";
 const PREFERENCE_STORE: &str = "preferences.json";
 const SHORTCUT_KEY: &str = "dictation_shortcut";
 

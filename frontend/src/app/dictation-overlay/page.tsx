@@ -1,6 +1,7 @@
 'use client'
 
 import { invoke } from '@tauri-apps/api/core'
+import { displayShortcut } from '@/lib/shortcut'
 import { listen } from '@tauri-apps/api/event'
 import { Mic } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -39,7 +40,7 @@ const phaseCopy: Record<DictationPhase, string> = {
 export default function DictationOverlay() {
   const [state, setState] = useState<DictationState>({ phase: 'idle' })
   const [hovered, setHovered] = useState(false)
-  const [shortcut, setShortcut] = useState('Ctrl+Shift+Space')
+  const [shortcut, setShortcut] = useState('Ctrl+Win+Space')
 
   useEffect(() => {
     document.documentElement.style.background = 'transparent'
@@ -53,7 +54,7 @@ export default function DictationOverlay() {
   useEffect(() => {
     void invoke<ShortcutStatus>('dictation_get_shortcut_status')
       .then(status => {
-        if (status.enabled && status.shortcut) setShortcut(status.shortcut)
+        if (status.enabled && status.shortcut) setShortcut(displayShortcut(status.shortcut) ?? status.shortcut)
       })
       .catch(error => console.error('dictation_overlay_shortcut_load_failed', error))
 

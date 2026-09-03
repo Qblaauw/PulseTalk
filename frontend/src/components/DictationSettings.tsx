@@ -5,6 +5,7 @@ import { AudioLines, ClipboardCheck, FolderOpen, History, Keyboard, LockKeyhole,
 import { useRouter } from "next/navigation"
 import { type KeyboardEvent, useEffect, useRef, useState } from "react"
 import { Switch } from '@/components/ui/switch'
+import { displayShortcut } from '@/lib/shortcut'
 
 type ShortcutStatus = {
   enabled: boolean
@@ -173,7 +174,7 @@ export function DictationSettings() {
                   aria-label={capturingShortcut ? 'Hold shortcut keys, then release to save' : 'Hold to change dictation shortcut'}
                 >
                   <Keyboard className="h-4 w-4" />
-                  {capturingShortcut ? (savingShortcut ? 'Saving shortcut…' : shortcutPreview ?? 'Hold your shortcut…') : status.shortcut}
+                  {capturingShortcut ? (savingShortcut ? 'Saving shortcut…' : displayShortcut(shortcutPreview) ?? 'Hold your shortcut…') : displayShortcut(status.shortcut)}
                 </button>
                 <span className="text-xs font-medium text-gray-500" role="status">
                   {capturingShortcut ? 'Release to save' : 'Hold to change'}
@@ -183,7 +184,7 @@ export function DictationSettings() {
               <p className="mt-3 text-sm text-amber-700">{status?.message ?? 'Checking shortcut availability…'}</p>
             )}
             {(error || shortcutError) && <p className="mt-3 text-sm text-red-600">{error ?? shortcutError}</p>}
-            <p className="mt-3 text-xs text-gray-500">Hold the keys you want to use together. Release all keys to save. Use at least one modifier plus one key.</p>
+            <p className="mt-3 text-xs text-gray-500">Hold the keys you want to use together. Release all keys to save. For the most reliable shortcut, use Ctrl with two additional keys.</p>
           </div>
         </div>
       </section>
