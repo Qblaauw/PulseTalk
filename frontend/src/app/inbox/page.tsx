@@ -1,3 +1,5 @@
+/* Copyright (c) 2026 PolyphronAI. All rights reserved. See NOTICE.md and LICENSE-POLYPHRONAI.md. */
+
 import Link from 'next/link';
 import { ArrowRight, Inbox, Mic } from 'lucide-react';
 

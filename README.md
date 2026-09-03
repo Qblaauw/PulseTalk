@@ -256,11 +256,12 @@ Thanks for all the contributions. Our community is what makes this project possi
 
 ## License
 
-The code in this repository is available under the [MIT License](LICENSE.md).
-That license covers copyright permissions for the code. It does not grant
-permission to use PolyphronAI or PulseTalq trademarks, logos, product identity,
-or other branding. See `LICENSE.md` for the trademark and reserved-rights
-terms. Third-party components may have separate license terms.
+Upstream code remains available under the [MIT License](LICENSE.md). Original
+PolyphronAI additions identified in [NOTICE.md](NOTICE.md) are protected by
+copyright and are available only under [LICENSE-POLYPHRONAI.md](LICENSE-POLYPHRONAI.md).
+That proprietary license does not grant permission to use PolyphronAI or
+PulseTalq trademarks, logos, product identity, or other branding. Third-party
+components may have separate license terms.
 
 ## Acknowledgments
 
