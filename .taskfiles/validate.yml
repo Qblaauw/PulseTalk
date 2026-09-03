@@ -1,0 +1,41 @@
+version: '3'
+
+tasks:
+  config:
+    desc: Validate PulseTalq version, identity, icons, and updater configuration
+    cmd: node scripts/release/release-tool.mjs config
+
+  taskfiles:
+    desc: Confirm that Task can load the complete command graph
+    cmd: task --list
+
+  frontend:
+    desc: Run the frontend TypeScript check
+    preconditions:
+      - sh: >-
+          node -e "process.exit(require('fs').existsSync('frontend/node_modules/typescript/bin/tsc') ? 0 : 1)"
+        msg: Run `pnpm --dir frontend install --frozen-lockfile` before frontend validation.
+    cmds:
+      - cmd: pnpm.cmd --dir frontend exec tsc --noEmit
+        platforms: [windows]
+      - cmd: pnpm --dir frontend exec tsc --noEmit
+        platforms: [darwin, linux]
+
+  rust:
+    desc: Check the Rust workspace
+    cmd: cargo check --workspace
+
+  local:
+    desc: Run configuration, frontend, and Rust checks before packaging
+    cmds:
+      - task: config
+      - task: frontend
+      - task: rust
+
+  release:
+    desc: Enforce clean Git state and release identity before staging
+    requires:
+      vars: [VERSION]
+    cmds:
+      - task: config
+      - cmd: node scripts/release/release-tool.mjs preflight --version "{{.VERSION}}"

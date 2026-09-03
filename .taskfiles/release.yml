@@ -1,0 +1,40 @@
+version: '3'
+
+tasks:
+  preflight:
+    desc: Check clean Git state, branch, version, identity, and release tools
+    requires:
+      vars: [VERSION]
+    cmds:
+      - task: :doctor:release
+      - task: :validate:release
+        vars:
+          VERSION: '{{.VERSION}}'
+
+  stage:
+    desc: Generate checksums, updater metadata, notes, and provenance
+    requires:
+      vars: [VERSION]
+    vars:
+      PLATFORMS: '{{default "windows" .PLATFORMS}}'
+    cmds:
+      - task: preflight
+        vars:
+          VERSION: '{{.VERSION}}'
+      - cmd: node scripts/release/release-tool.mjs stage --version "{{.VERSION}}" --platforms "{{.PLATFORMS}}"
+
+  inspect:
+    desc: Inspect a staged release without changing local or remote state
+    requires:
+      vars: [VERSION]
+    vars:
+      PLATFORMS: '{{default "windows" .PLATFORMS}}'
+    cmd: node scripts/release/release-tool.mjs inspect --version "{{.VERSION}}" --platforms "{{.PLATFORMS}}"
+
+  verify-local:
+    desc: Verify checksums and metadata for a staged release
+    requires:
+      vars: [VERSION]
+    vars:
+      PLATFORMS: '{{default "windows" .PLATFORMS}}'
+    cmd: node scripts/release/release-tool.mjs verify-local --version "{{.VERSION}}" --platforms "{{.PLATFORMS}}"
