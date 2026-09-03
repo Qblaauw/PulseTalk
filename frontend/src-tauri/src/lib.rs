@@ -411,6 +411,8 @@ pub fn run() {
     let activation_bus = dictation::ActivationBus::new();
     #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
     let shortcut_status = dictation::DictationShortcutStatusState::new();
+    #[cfg(target_os = "windows")]
+    let modifier_shortcut = dictation::WindowsModifierShortcutState::new(activation_bus.clone());
 
     #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
     {
@@ -435,6 +437,10 @@ pub fn run() {
         );
         builder = builder.manage(activation_bus);
         builder = builder.manage(shortcut_status);
+        #[cfg(target_os = "windows")]
+        {
+            builder = builder.manage(modifier_shortcut);
+        }
         builder = builder.manage(dictation::DictationOverlayState::new());
     }
 
@@ -486,6 +492,23 @@ pub fn run() {
                 }
                 let mut registered = false;
                 for label in shortcut_candidates.iter() {
+                    #[cfg(target_os = "windows")]
+                    if dictation::is_modifier_only_shortcut(label) {
+                        match _app
+                            .state::<dictation::WindowsModifierShortcutState>()
+                            .configure(Some(label))
+                        {
+                            Ok(()) => {
+                                _app
+                                    .state::<dictation::DictationShortcutStatusState>()
+                                    .registered(label);
+                                log::info!(target: "pulsetalk::dictation", "dictation_modifier_shortcut_monitored shortcut={}", label);
+                                registered = true;
+                                break;
+                            }
+                            Err(error) => log::warn!(target: "pulsetalk::dictation", "dictation_modifier_shortcut_failed shortcut={} error={}", label, error),
+                        }
+                    }
                     let Ok(shortcut) = tauri_plugin_global_shortcut::Shortcut::from_str(label) else {
                         log::warn!(target: "pulsetalk::dictation", "dictation_shortcut_invalid_config shortcut={label}");
                         continue;

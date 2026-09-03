@@ -17,11 +17,17 @@ pub fn dictation_set_shortcut(
     shortcut: String,
 ) -> Result<super::DictationShortcutStatus, String> {
     let shortcut = shortcut.trim().to_owned();
-    let parsed = Shortcut::from_str(&shortcut)
-        .map_err(|error| format!("That shortcut is not supported: {error}"))?;
-    if parsed.mods.is_empty() {
-        return Err("Choose at least one modifier, such as Ctrl, Alt, Shift, or Cmd.".into());
-    }
+    let modifier_only = super::is_modifier_only_shortcut(&shortcut);
+    let parsed = if modifier_only {
+        None
+    } else {
+        let parsed = Shortcut::from_str(&shortcut)
+            .map_err(|error| format!("That shortcut is not supported: {error}"))?;
+        if parsed.mods.is_empty() {
+            return Err("Choose at least one modifier, such as Ctrl, Alt, Shift, or Cmd.".into());
+        }
+        Some(parsed)
+    };
 
     let status_state = app.state::<super::DictationShortcutStatusState>();
     let previous = status_state.get().shortcut;
@@ -29,7 +35,10 @@ pub fn dictation_set_shortcut(
         return Ok(status_state.get());
     }
 
-    if let Some(previous) = previous.as_deref() {
+    if let Some(previous) = previous
+        .as_deref()
+        .filter(|value| !super::is_modifier_only_shortcut(value))
+    {
         let previous_shortcut = Shortcut::from_str(previous)
             .map_err(|error| format!("The active shortcut cannot be removed: {error}"))?;
         app.global_shortcut()
@@ -37,9 +46,32 @@ pub fn dictation_set_shortcut(
             .map_err(|error| format!("Could not release the active shortcut: {error}"))?;
     }
 
-    if let Err(error) = app.global_shortcut().register(parsed) {
+    #[cfg(target_os = "windows")]
+    let modifier_monitor = app.state::<super::WindowsModifierShortcutState>();
+
+    let registration = if modifier_only {
+        #[cfg(target_os = "windows")]
+        {
+            modifier_monitor.configure(Some(&shortcut))
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            Err("Two-modifier shortcuts are currently supported on Windows only.".into())
+        }
+    } else {
+        #[cfg(target_os = "windows")]
+        modifier_monitor.configure(None)?;
+        app.global_shortcut()
+            .register(parsed.expect("parsed standard shortcut"))
+            .map_err(|error| error.to_string())
+    };
+
+    if let Err(error) = registration {
         if let Some(previous) = previous.as_deref() {
-            if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
+            if super::is_modifier_only_shortcut(previous) {
+                #[cfg(target_os = "windows")]
+                let _ = modifier_monitor.configure(Some(previous));
+            } else if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
                 let _ = app.global_shortcut().register(previous_shortcut);
             }
         }
@@ -49,9 +81,17 @@ pub fn dictation_set_shortcut(
     }
 
     if let Err(error) = super::save_shortcut(&app, &shortcut) {
-        let _ = app.global_shortcut().unregister(parsed);
+        if modifier_only {
+            #[cfg(target_os = "windows")]
+            let _ = modifier_monitor.configure(None);
+        } else if let Some(parsed) = parsed {
+            let _ = app.global_shortcut().unregister(parsed);
+        }
         if let Some(previous) = previous.as_deref() {
-            if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
+            if super::is_modifier_only_shortcut(previous) {
+                #[cfg(target_os = "windows")]
+                let _ = modifier_monitor.configure(Some(previous));
+            } else if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
                 let _ = app.global_shortcut().register(previous_shortcut);
             }
         }

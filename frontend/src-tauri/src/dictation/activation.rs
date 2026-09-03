@@ -4,7 +4,7 @@ use std::sync::RwLock;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
-pub const DEFAULT_SHORTCUT: &str = "Ctrl+Super+Space";
+pub const DEFAULT_SHORTCUT: &str = "Ctrl+Super";
 const PREFERENCE_STORE: &str = "preferences.json";
 const SHORTCUT_KEY: &str = "dictation_shortcut";
 
@@ -71,13 +71,105 @@ pub fn configured_shortcut<R: tauri::Runtime>(app: &AppHandle<R>) -> Option<Stri
 
 #[cfg(test)]
 mod shortcut_config_tests {
-    use super::DEFAULT_SHORTCUT;
+    use super::{is_modifier_only_shortcut, DEFAULT_SHORTCUT};
     use std::str::FromStr;
     use tauri_plugin_global_shortcut::Shortcut;
 
     #[test]
-    fn default_shortcut_is_accepted_by_global_shortcut_parser() {
-        assert!(Shortcut::from_str(DEFAULT_SHORTCUT).is_ok());
+    fn default_shortcut_is_accepted_by_modifier_monitor() {
+        assert!(is_modifier_only_shortcut(DEFAULT_SHORTCUT));
+        assert!(Shortcut::from_str(DEFAULT_SHORTCUT).is_err());
+    }
+
+    #[test]
+    fn modifier_monitor_accepts_exactly_two_modifiers() {
+        assert!(is_modifier_only_shortcut("Ctrl+Super"));
+        assert!(is_modifier_only_shortcut("Alt+Shift"));
+        assert!(!is_modifier_only_shortcut("Ctrl"));
+        assert!(!is_modifier_only_shortcut("Ctrl+Space"));
+        assert!(!is_modifier_only_shortcut("Ctrl+Shift+Super"));
+    }
+}
+
+pub fn is_modifier_only_shortcut(shortcut: &str) -> bool {
+    let parts: Vec<_> = shortcut.split('+').map(str::trim).collect();
+    parts.len() == 2
+        && parts.iter().all(|part| {
+            matches!(
+                part.to_ascii_uppercase().as_str(),
+                "CTRL" | "CONTROL" | "ALT" | "OPTION" | "SHIFT" | "CMD" | "COMMAND" | "SUPER"
+            )
+        })
+}
+
+#[cfg(target_os = "windows")]
+#[derive(Clone)]
+pub struct WindowsModifierShortcutState {
+    shortcut: std::sync::Arc<RwLock<Option<String>>>,
+}
+
+#[cfg(target_os = "windows")]
+impl WindowsModifierShortcutState {
+    pub fn new(bus: super::ActivationBus) -> Self {
+        use std::time::Duration;
+
+        let shortcut = std::sync::Arc::new(RwLock::new(None::<String>));
+        let monitored = shortcut.clone();
+        std::thread::spawn(move || {
+            let mut active = false;
+            loop {
+                let configured = monitored.read().ok().and_then(|value| value.clone());
+                let pressed = configured
+                    .as_deref()
+                    .map(modifier_chord_pressed)
+                    .unwrap_or(false);
+                if pressed != active {
+                    active = pressed;
+                    bus.publish(if active {
+                        ActivationEvent::Started
+                    } else {
+                        ActivationEvent::Stopped
+                    });
+                }
+                std::thread::sleep(Duration::from_millis(12));
+            }
+        });
+        Self { shortcut }
+    }
+
+    pub fn configure(&self, shortcut: Option<&str>) -> Result<(), String> {
+        if shortcut.is_some_and(|value| !is_modifier_only_shortcut(value)) {
+            return Err("A two-key shortcut must contain two modifier keys.".into());
+        }
+        *self
+            .shortcut
+            .write()
+            .map_err(|_| "The Windows shortcut monitor is unavailable.".to_string())? =
+            shortcut.map(str::to_owned);
+        Ok(())
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn modifier_chord_pressed(shortcut: &str) -> bool {
+    shortcut
+        .split('+')
+        .all(|part| modifier_pressed(part.trim()))
+}
+
+#[cfg(target_os = "windows")]
+fn modifier_pressed(modifier: &str) -> bool {
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
+        GetAsyncKeyState, VK_CONTROL, VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
+    };
+
+    let down = |key| unsafe { GetAsyncKeyState(key) < 0 };
+    match modifier.to_ascii_uppercase().as_str() {
+        "CTRL" | "CONTROL" => down(VK_CONTROL as i32),
+        "ALT" | "OPTION" => down(VK_MENU as i32),
+        "SHIFT" => down(VK_SHIFT as i32),
+        "CMD" | "COMMAND" | "SUPER" => down(VK_LWIN as i32) || down(VK_RWIN as i32),
+        _ => false,
     }
 }
 

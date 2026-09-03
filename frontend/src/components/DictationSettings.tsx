@@ -81,7 +81,9 @@ export function DictationSettings() {
     const parts = preview.split('+')
     const modifierCount = parts.filter(part => ['Ctrl', 'Alt', 'Shift', 'Cmd'].includes(part)).length
     const regularKeyCount = parts.length - modifierCount
-    shortcutCandidate.current = modifierCount > 0 && regularKeyCount === 1 ? preview : null
+    const validTwoKeyChord = modifierCount === 2 && regularKeyCount === 0
+    const validStandardChord = modifierCount > 0 && regularKeyCount === 1
+    shortcutCandidate.current = validTwoKeyChord || validStandardChord ? preview : null
     setShortcutError(regularKeyCount > 1 ? 'Use one key together with one or more modifier keys.' : null)
   }
 
@@ -95,7 +97,7 @@ export function DictationSettings() {
 
     const nextShortcut = shortcutCandidate.current
     if (!nextShortcut) {
-      setShortcutError('Hold Ctrl, Alt, Shift, or Cmd while choosing a key.')
+      setShortcutError('Use at least two keys together. Two modifiers work, or pair a modifier with another key.')
       return
     }
 
@@ -177,14 +179,16 @@ export function DictationSettings() {
                   {capturingShortcut ? (savingShortcut ? 'Saving shortcut…' : displayShortcut(shortcutPreview) ?? 'Hold your shortcut…') : displayShortcut(status.shortcut)}
                 </button>
                 <span className="text-xs font-medium text-gray-500" role="status">
-                  {capturingShortcut ? 'Release to save' : 'Hold to change'}
+                  {capturingShortcut
+                    ? shortcutCandidate.current ? 'Release to save' : 'Add one more key'
+                    : 'Hold to change'}
                 </span>
               </div>
             ) : (
               <p className="mt-3 text-sm text-amber-700">{status?.message ?? 'Checking shortcut availability…'}</p>
             )}
             {(error || shortcutError) && <p className="mt-3 text-sm text-red-600">{error ?? shortcutError}</p>}
-            <p className="mt-3 text-xs text-gray-500">Hold the keys you want to use together. Release all keys to save. For the most reliable shortcut, use Ctrl with two additional keys.</p>
+            <p className="mt-3 text-xs leading-5 text-gray-500">Hold your chosen keys together, then release to save. Two-key shortcuts work, though some combinations may conflict with Windows or other apps. Three keys offer the best compatibility.</p>
           </div>
         </div>
       </section>
