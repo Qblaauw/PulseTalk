@@ -472,7 +472,7 @@ pub fn run() {
                 use tauri_plugin_global_shortcut::GlobalShortcutExt;
 
                 let mut shortcut_candidates = Vec::new();
-                if let Some(shortcut) = dictation::configured_shortcut(_app) {
+                if let Some(shortcut) = dictation::configured_shortcut(_app.handle()) {
                     shortcut_candidates.push(shortcut);
                 }
                 for fallback in [

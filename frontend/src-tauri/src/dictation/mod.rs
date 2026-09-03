@@ -18,8 +18,8 @@ mod short_audio;
 mod windows_delivery;
 
 pub use activation::{
-    ActivationEvent, DictationShortcutStatus, DictationShortcutStatusState, HoldShortcut, KeyCode,
-    ShortcutTracker,
+    configured_shortcut, save_shortcut, ActivationEvent, DictationShortcutStatus,
+    DictationShortcutStatusState, HoldShortcut, KeyCode, ShortcutTracker, DEFAULT_SHORTCUT,
 };
 pub use activation_bus::ActivationBus;
 pub use cleanup::{cleanup_transcript, CleanupFallbackReason, CleanupResult};

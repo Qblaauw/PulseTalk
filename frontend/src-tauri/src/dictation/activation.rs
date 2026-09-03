@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::sync::RwLock;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
 pub const DEFAULT_SHORTCUT: &str = "Ctrl+Shift+Space";
