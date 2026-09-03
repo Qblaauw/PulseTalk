@@ -17,12 +17,13 @@ Related files:
 
 The installer new-look migration is done when all of the following hold on a clean build from the release branch:
 
-1. `python scripts/verify-installer-assets.py` exits 0 (warnings about unused Next.js scaffold SVGs are acceptable until those files are deleted).
-2. `pwsh scripts/verify-installer-branding.ps1` exits 0 against the NSIS `.exe` and the `.msi` produced by `pnpm run tauri:build` on Windows.
-3. After installing the NSIS build on a Windows test machine, `pwsh scripts/verify-installer-branding.ps1 -Path <setup.exe> -CheckInstalled` exits 0.
-4. A human has looked at the screenshots in `docs/installer-preview*` (or at the live installer) and confirmed: no purple, the wordmark reads "pulsetalq" with "talq" in Hot Signal, the header and sidebar bitmaps are not stretched, and no "Meetily" or "Zackriya" text appears in any dialog, license page, shortcut, tray tooltip, About dialog, or uninstall entry.
-5. macOS DMG and Linux packages have been through the manual checks in sections 4 and 5, with results recorded in the release PR.
-6. The behaviour for machines with an existing Meetily install (section 6) is documented in the release notes, and nothing in the installer uninstalls or deletes Meetily.
+1. `node scripts/installer-version.mjs verify` confirms that installer inputs match the recorded installer revision.
+2. `python scripts/verify-installer-assets.py` exits 0 (warnings about unused Next.js scaffold SVGs are acceptable until those files are deleted).
+3. `pwsh scripts/verify-installer-branding.ps1` exits 0 against the NSIS `.exe` and the `.msi` produced by `pnpm run tauri:build` on Windows.
+4. After installing the NSIS build on a Windows test machine, `pwsh scripts/verify-installer-branding.ps1 -Path <setup.exe> -CheckInstalled` exits 0.
+5. A human has looked at the screenshots in `docs/installer-preview*` (or at the live installer) and confirmed: no purple, the wordmark reads "pulsetalq" with "talq" in Hot Signal, the header and sidebar bitmaps are not stretched, and no "Meetily" or "Zackriya" text appears in any dialog, license page, shortcut, tray tooltip, About dialog, or uninstall entry.
+6. macOS DMG and Linux packages have been through the manual checks in sections 4 and 5, with results recorded in the release PR.
+7. The behaviour for machines with an existing Meetily install (section 6) is documented in the release notes, and nothing in the installer uninstalls or deletes Meetily.
 
 If any of these fail, the release is not brand-complete. Do not paper over a failing gate by editing the expected values in the scripts.
 

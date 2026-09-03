@@ -4735,7 +4735,7 @@ dependencies = [
 
 [[package]]
 name = "pulse-talq"
-version = "0.4.0"
+version = "0.4.2"
 dependencies = [
  "anyhow",
  "async-trait",

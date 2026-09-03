@@ -1,12 +1,105 @@
 use super::history::{self, DictationHistoryItem};
 use crate::state::AppState;
+use std::str::FromStr;
 use tauri::{AppHandle, Manager};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 
 #[tauri::command]
 pub fn dictation_get_shortcut_status(
     status: tauri::State<'_, super::DictationShortcutStatusState>,
 ) -> super::DictationShortcutStatus {
     status.get()
+}
+
+#[tauri::command]
+pub fn dictation_set_shortcut(
+    app: AppHandle,
+    shortcut: String,
+) -> Result<super::DictationShortcutStatus, String> {
+    let shortcut = shortcut.trim().to_owned();
+    let modifier_only = super::is_modifier_only_shortcut(&shortcut);
+    let parsed = if modifier_only {
+        None
+    } else {
+        let parsed = Shortcut::from_str(&shortcut)
+            .map_err(|error| format!("That shortcut is not supported: {error}"))?;
+        if parsed.mods.is_empty() {
+            return Err("Choose at least one modifier, such as Ctrl, Alt, Shift, or Cmd.".into());
+        }
+        Some(parsed)
+    };
+
+    let status_state = app.state::<super::DictationShortcutStatusState>();
+    let previous = status_state.get().shortcut;
+    if previous.as_deref() == Some(shortcut.as_str()) {
+        return Ok(status_state.get());
+    }
+
+    if let Some(previous) = previous
+        .as_deref()
+        .filter(|value| !super::is_modifier_only_shortcut(value))
+    {
+        let previous_shortcut = Shortcut::from_str(previous)
+            .map_err(|error| format!("The active shortcut cannot be removed: {error}"))?;
+        app.global_shortcut()
+            .unregister(previous_shortcut)
+            .map_err(|error| format!("Could not release the active shortcut: {error}"))?;
+    }
+
+    #[cfg(target_os = "windows")]
+    let modifier_monitor = app.state::<super::WindowsModifierShortcutState>();
+
+    let registration = if modifier_only {
+        #[cfg(target_os = "windows")]
+        {
+            modifier_monitor.configure(Some(&shortcut))
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            Err("Two-modifier shortcuts are currently supported on Windows only.".into())
+        }
+    } else {
+        #[cfg(target_os = "windows")]
+        modifier_monitor.configure(None)?;
+        app.global_shortcut()
+            .register(parsed.expect("parsed standard shortcut"))
+            .map_err(|error| error.to_string())
+    };
+
+    if let Err(error) = registration {
+        if let Some(previous) = previous.as_deref() {
+            if super::is_modifier_only_shortcut(previous) {
+                #[cfg(target_os = "windows")]
+                let _ = modifier_monitor.configure(Some(previous));
+            } else if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
+                let _ = app.global_shortcut().register(previous_shortcut);
+            }
+        }
+        return Err(format!(
+            "That shortcut is already in use or unavailable: {error}"
+        ));
+    }
+
+    if let Err(error) = super::save_shortcut(&app, &shortcut) {
+        if modifier_only {
+            #[cfg(target_os = "windows")]
+            let _ = modifier_monitor.configure(None);
+        } else if let Some(parsed) = parsed {
+            let _ = app.global_shortcut().unregister(parsed);
+        }
+        if let Some(previous) = previous.as_deref() {
+            if super::is_modifier_only_shortcut(previous) {
+                #[cfg(target_os = "windows")]
+                let _ = modifier_monitor.configure(Some(previous));
+            } else if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
+                let _ = app.global_shortcut().register(previous_shortcut);
+            }
+        }
+        return Err(error);
+    }
+
+    status_state.registered(&shortcut);
+    Ok(status_state.get())
 }
 
 #[tauri::command]

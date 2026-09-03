@@ -1,6 +1,7 @@
 'use client'
 
 import { invoke } from '@tauri-apps/api/core'
+import { displayShortcut } from '@/lib/shortcut'
 import { Check, Clipboard, Mic2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -88,7 +89,7 @@ export default function DictationHistoryPage() {
           <h1 className="text-3xl font-semibold tracking-[-0.035em]">Dictation history</h1>
           <p className="mt-1.5 text-sm text-[#697386]">Every transcript is saved before PulseTalq tries to paste it.</p>
           <p className={`mt-2 text-xs font-medium ${shortcutStatus?.enabled ? 'text-emerald-700' : 'text-amber-700'}`}>
-            {shortcutStatus?.enabled ? `Hold ${shortcutStatus.shortcut} to dictate anywhere.` : shortcutStatus?.message}
+            {shortcutStatus?.enabled ? `Hold ${displayShortcut(shortcutStatus.shortcut)} to dictate anywhere.` : shortcutStatus?.message}
           </p>
         </div>
       </header>
@@ -101,7 +102,7 @@ export default function DictationHistoryPage() {
           <div className="rounded-2xl border border-dashed border-[#ccd1dc] bg-white px-6 py-14 text-center">
             <AudioEmpty />
             <p className="mt-4 font-medium">No dictations yet</p>
-            <p className="mt-1 text-sm text-[#697386]">{shortcutStatus?.enabled ? `Hold ${shortcutStatus.shortcut} anywhere, speak, then release.` : 'Resolve the shortcut warning above, then try again.'}</p>
+            <p className="mt-1 text-sm text-[#697386]">{shortcutStatus?.enabled ? `Hold ${displayShortcut(shortcutStatus.shortcut)} anywhere, speak, then release.` : 'Resolve the shortcut warning above, then try again.'}</p>
           </div>
         )}
         {items.map(item => (

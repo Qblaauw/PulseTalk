@@ -411,6 +411,8 @@ pub fn run() {
     let activation_bus = dictation::ActivationBus::new();
     #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
     let shortcut_status = dictation::DictationShortcutStatusState::new();
+    #[cfg(target_os = "windows")]
+    let modifier_shortcut = dictation::WindowsModifierShortcutState::new(activation_bus.clone());
 
     #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
     {
@@ -435,6 +437,10 @@ pub fn run() {
         );
         builder = builder.manage(activation_bus);
         builder = builder.manage(shortcut_status);
+        #[cfg(target_os = "windows")]
+        {
+            builder = builder.manage(modifier_shortcut);
+        }
         builder = builder.manage(dictation::DictationOverlayState::new());
     }
 
@@ -468,30 +474,45 @@ pub fn run() {
 
             #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
             {
-                use tauri_plugin_global_shortcut::{
-                    Code, GlobalShortcutExt, Modifiers, Shortcut,
-                };
+                use std::str::FromStr;
+                use tauri_plugin_global_shortcut::GlobalShortcutExt;
 
-                let shortcut_candidates = [
-                    (
-                        "Ctrl+Shift+Space",
-                        Modifiers::CONTROL | Modifiers::SHIFT,
-                        Code::Space,
-                    ),
-                    (
-                        "Ctrl+Alt+D",
-                        Modifiers::CONTROL | Modifiers::ALT,
-                        Code::KeyD,
-                    ),
-                    (
-                        "Ctrl+Shift+F10",
-                        Modifiers::CONTROL | Modifiers::SHIFT,
-                        Code::F10,
-                    ),
-                ];
+                let mut shortcut_candidates = Vec::new();
+                if let Some(shortcut) = dictation::configured_shortcut(_app.handle()) {
+                    shortcut_candidates.push(shortcut);
+                }
+                for fallback in [
+                    dictation::DEFAULT_SHORTCUT,
+                    "Ctrl+Alt+D",
+                    "Ctrl+Shift+F10",
+                ] {
+                    if !shortcut_candidates.iter().any(|candidate| candidate == fallback) {
+                        shortcut_candidates.push(fallback.to_owned());
+                    }
+                }
                 let mut registered = false;
-                for (label, modifiers, code) in shortcut_candidates {
-                    let shortcut = Shortcut::new(Some(modifiers), code);
+                for label in shortcut_candidates.iter() {
+                    #[cfg(target_os = "windows")]
+                    if dictation::is_modifier_only_shortcut(label) {
+                        match _app
+                            .state::<dictation::WindowsModifierShortcutState>()
+                            .configure(Some(label))
+                        {
+                            Ok(()) => {
+                                _app
+                                    .state::<dictation::DictationShortcutStatusState>()
+                                    .registered(label);
+                                log::info!(target: "pulsetalk::dictation", "dictation_modifier_shortcut_monitored shortcut={}", label);
+                                registered = true;
+                                break;
+                            }
+                            Err(error) => log::warn!(target: "pulsetalk::dictation", "dictation_modifier_shortcut_failed shortcut={} error={}", label, error),
+                        }
+                    }
+                    let Ok(shortcut) = tauri_plugin_global_shortcut::Shortcut::from_str(label) else {
+                        log::warn!(target: "pulsetalk::dictation", "dictation_shortcut_invalid_config shortcut={label}");
+                        continue;
+                    };
                     match _app.global_shortcut().register(shortcut) {
                         Ok(()) => {
                             _app
@@ -641,6 +662,7 @@ pub fn run() {
             dictation::commands::dictation_list_history,
             dictation::commands::dictation_copy_history,
             dictation::commands::dictation_get_shortcut_status,
+            dictation::commands::dictation_set_shortcut,
             dictation::commands::dictation_get_overlay_enabled,
             dictation::commands::dictation_set_overlay_enabled,
             dictation::commands::dictation_set_overlay_expanded,

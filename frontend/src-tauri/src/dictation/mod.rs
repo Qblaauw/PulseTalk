@@ -17,9 +17,12 @@ mod short_audio;
 #[cfg(target_os = "windows")]
 mod windows_delivery;
 
+#[cfg(target_os = "windows")]
+pub use activation::WindowsModifierShortcutState;
 pub use activation::{
-    ActivationEvent, DictationShortcutStatus, DictationShortcutStatusState, HoldShortcut, KeyCode,
-    ShortcutTracker,
+    configured_shortcut, is_modifier_only_shortcut, save_shortcut, ActivationEvent,
+    DictationShortcutStatus, DictationShortcutStatusState, HoldShortcut, KeyCode, ShortcutTracker,
+    DEFAULT_SHORTCUT,
 };
 pub use activation_bus::ActivationBus;
 pub use cleanup::{cleanup_transcript, CleanupFallbackReason, CleanupResult};
