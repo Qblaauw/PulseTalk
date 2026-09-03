@@ -1,0 +1,44 @@
+{
+  "blocked_by": [],
+  "commits": [],
+  "created_at": "2026-09-03T18:00:00Z",
+  "execution_context": {
+    "base_ref": "integration/pulsetalq-next",
+    "base_sha": "680a8ab19a8c2ad98310f5ddd627800b5e4462df",
+    "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
+    "repository": "PulseTalk",
+    "worktree": ".worktrees/feature-PT-2026-09-03-android-sideload-keyboard"
+  },
+  "exclusive_resources": [
+    "Android application ID",
+    "Android Gradle module",
+    "mobile ASR native library boundary",
+    "debug APK output"
+  ],
+  "files_touched": [
+    "project/scope-briefs/android-sideload-keyboard.md",
+    "project/state/tasks/PT-2026-09-03-android-sideload-keyboard.json"
+  ],
+  "host_refs": {},
+  "id": "PT-2026-09-03-android-sideload-keyboard",
+  "kind": "feature",
+  "local_id": null,
+  "owner": "codex",
+  "plan_id": null,
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "scoped",
+  "subject": "Build the first sideloadable Android voice keyboard",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-03T18:00:00Z",
+  "verification_contract": [
+    "scope brief approved",
+    "dispatchable implementation plan validated",
+    "Android debug APK built and checksummed",
+    "Android 16 hardware smoke test completed"
+  ],
+  "verification_receipts": [
+    "Baseline cargo build attempted before scope edit and failed in inherited desktop dependency llama-cpp-sys-2 because libclang.dll was not configured."
+  ]
+}
