@@ -16,50 +16,7 @@ pub fn dictation_set_shortcut(
     app: AppHandle,
     shortcut: String,
 ) -> Result<super::DictationShortcutStatus, String> {
-    let shortcut = shortcut.trim().to_owned();
-    let parsed = Shortcut::from_str(&shortcut)
-        .map_err(|error| format!("That shortcut is not supported: {error}"))?;
-    if parsed.mods.is_empty() {
-        return Err("Choose at least one modifier, such as Ctrl, Alt, Shift, or Cmd.".into());
-    }
-
-    let status_state = app.state::<super::DictationShortcutStatusState>();
-    let previous = status_state.get().shortcut;
-    if previous.as_deref() == Some(shortcut.as_str()) {
-        return Ok(status_state.get());
-    }
-
-    if let Some(previous) = previous.as_deref() {
-        let previous_shortcut = Shortcut::from_str(previous)
-            .map_err(|error| format!("The active shortcut cannot be removed: {error}"))?;
-        app.global_shortcut()
-            .unregister(previous_shortcut)
-            .map_err(|error| format!("Could not release the active shortcut: {error}"))?;
-    }
-
-    if let Err(error) = app.global_shortcut().register(parsed) {
-        if let Some(previous) = previous.as_deref() {
-            if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
-                let _ = app.global_shortcut().register(previous_shortcut);
-            }
-        }
-        return Err(format!(
-            "That shortcut is already in use or unavailable: {error}"
-        ));
-    }
-
-    if let Err(error) = super::save_shortcut(&app, &shortcut) {
-        let _ = app.global_shortcut().unregister(parsed);
-        if let Some(previous) = previous.as_deref() {
-            if let Ok(previous_shortcut) = Shortcut::from_str(previous) {
-                let _ = app.global_shortcut().register(previous_shortcut);
-            }
-        }
-        return Err(error);
-    }
-
-    status_state.registered(&shortcut);
-    Ok(status_state.get())
+    super::DictationShortcutStatusState::replace(&app, &shortcut)
 }
 
 #[tauri::command]

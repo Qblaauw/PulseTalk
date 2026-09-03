@@ -157,22 +157,22 @@ export default function AnalyticsConsentSwitch() {
     <>
       <div className="space-y-4">
         <div>
-          <h3 className="text-base font-semibold text-gray-800 mb-2">Usage Analytics</h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <h3 className="mb-2 text-base font-medium text-[var(--pt-text)]">Usage analytics</h3>
+          <p className="mb-4 text-sm text-[var(--pt-text-secondary)]">
             Usage analytics is off by default. You can turn it on to share anonymous product and performance data; no personal content is collected.
           </p>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="flex items-center justify-between border border-[var(--pt-border)] bg-[var(--pt-surface-alt)] p-3 [border-radius:3px]">
           <div>
-            <h4 className="font-semibold text-gray-800">Enable Analytics</h4>
-            <p className="text-sm text-gray-600">
+            <h4 className="font-medium text-[var(--pt-text)]">Enable analytics</h4>
+            <p className="text-sm text-[var(--pt-text-secondary)]">
               {isProcessing ? 'Updating...' : 'Off unless you choose to enable it'}
             </p>
           </div>
           <div className="flex items-center gap-2 ml-4">
             {isProcessing && (
-              <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+              <Loader2 className="h-4 w-4 animate-spin text-[var(--pt-text-tertiary)]" />
             )}
             <Switch
               checked={isAnalyticsOptedIn}
@@ -184,28 +184,28 @@ export default function AnalyticsConsentSwitch() {
 
         {/* User ID Display */}
         {isAnalyticsOptedIn && userId && (
-          <div className="p-4 border rounded-lg bg-gray-50">
+          <div className="border border-[var(--pt-border)] bg-[var(--pt-surface-alt)] p-4 [border-radius:3px]">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-800 mb-1">Your User ID</div>
-                <p className="text-xs text-gray-600 mb-2">
+                <div className="mb-1 font-medium text-[var(--pt-text)]">Your user ID</div>
+                <p className="mb-2 text-xs text-[var(--pt-text-secondary)]">
                   Share this ID when reporting issues to help us investigate your issue logs
                 </p>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs text-gray-700 bg-white px-2 py-1 rounded border border-gray-300 font-mono flex-1 truncate">
+                  <code className="flex-1 truncate border border-[var(--pt-border-strong)] bg-[var(--pt-surface)] px-2 py-1 font-mono text-xs text-[var(--pt-text-secondary)] [border-radius:2px]">
                     {userId}
                   </code>
                   <Button
                     onClick={handleCopyUserId}
                     variant="outline"
                     size="sm"
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 !rounded-[3px]"
                     title="Copy User ID"
                   >
                     {isCopied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-green-600" />
-                        <span className="text-green-600">Copied!</span>
+                        <Check className="h-3.5 w-3.5 text-[var(--pt-success)]" />
+                        <span className="text-[var(--pt-success)]">Copied</span>
                       </>
                     ) : (
                       <>
@@ -220,17 +220,17 @@ export default function AnalyticsConsentSwitch() {
           </div>
         )}
 
-        <div className="flex items-start gap-2 p-2 bg-blue-50 rounded border border-blue-200">
-          <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-xs text-blue-700">
+        <div className="flex items-start gap-2 border-l-2 border-[var(--pt-accent)] bg-[var(--pt-accent-wash)] p-3 [border-radius:3px]">
+          <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--pt-accent)]" />
+          <div className="text-xs text-[var(--pt-text-secondary)]">
             <p className="mb-1">
               Your meetings, transcripts, and recordings remain completely private and local.
             </p>
             <button
               onClick={handlePrivacyPolicyClick}
-              className="text-blue-600 hover:text-blue-800 underline hover:no-underline"
+              className="pt-focus-ring font-medium text-[var(--pt-text)] underline decoration-[var(--pt-accent)] underline-offset-2 hover:text-[var(--pt-accent-active)]"
             >
-              View Privacy Policy
+              View privacy policy
             </button>
           </div>
         </div>

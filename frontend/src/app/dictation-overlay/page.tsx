@@ -3,7 +3,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { Mic } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type DictationPhase =
   | 'idle'
@@ -23,6 +23,7 @@ type DictationState = {
 type ShortcutStatus = {
   enabled: boolean
   shortcut?: string | null
+  message?: string | null
 }
 
 const phaseCopy: Record<DictationPhase, string> = {
@@ -39,29 +40,56 @@ const phaseCopy: Record<DictationPhase, string> = {
 export default function DictationOverlay() {
   const [state, setState] = useState<DictationState>({ phase: 'idle' })
   const [hovered, setHovered] = useState(false)
-  const [shortcut, setShortcut] = useState('Ctrl+Shift+Space')
+  const [shortcut, setShortcut] = useState<ShortcutStatus | null>(null)
+  const collapseTimer = useRef<number | null>(null)
+  const resizeQueue = useRef<Promise<void>>(Promise.resolve())
 
   useEffect(() => {
     document.documentElement.style.background = 'transparent'
     document.body.style.background = 'transparent'
     return () => {
+      if (collapseTimer.current !== null) window.clearTimeout(collapseTimer.current)
       document.documentElement.style.background = ''
       document.body.style.background = ''
     }
   }, [])
 
+  const keepExpanded = () => {
+    if (collapseTimer.current !== null) {
+      window.clearTimeout(collapseTimer.current)
+      collapseTimer.current = null
+    }
+    setHovered(true)
+  }
+
+  const scheduleCollapse = () => {
+    if (collapseTimer.current !== null) window.clearTimeout(collapseTimer.current)
+    collapseTimer.current = window.setTimeout(() => {
+      collapseTimer.current = null
+      setHovered(false)
+    }, 180)
+  }
+
   useEffect(() => {
-    void invoke<ShortcutStatus>('dictation_get_shortcut_status')
+    let disposed = false
+    let shortcutChanged = false
+    const unlisten = listen<DictationState>('dictation-state', event => {
+      if (!disposed) setState(event.payload)
+    })
+    const unlistenShortcut = listen<ShortcutStatus>('dictation-shortcut-changed', event => {
+      shortcutChanged = true
+      if (!disposed) setShortcut(event.payload)
+    })
+    void unlistenShortcut
+      .then(() => invoke<ShortcutStatus>('dictation_get_shortcut_status'))
       .then(status => {
-        if (status.enabled && status.shortcut) setShortcut(status.shortcut)
+        if (!disposed && !shortcutChanged) setShortcut(status)
       })
       .catch(error => console.error('dictation_overlay_shortcut_load_failed', error))
-
-    const unlisten = listen<DictationState>('dictation-state', event => {
-      setState(event.payload)
-    })
     return () => {
+      disposed = true
       void unlisten.then(dispose => dispose())
+      void unlistenShortcut.then(dispose => dispose())
     }
   }, [])
 
@@ -76,14 +104,21 @@ export default function DictationOverlay() {
   const expanded = hovered || active
 
   useEffect(() => {
-    void invoke('dictation_set_overlay_expanded', { expanded }).catch(error =>
-      console.error('dictation_overlay_resize_failed', error),
-    )
+    resizeQueue.current = resizeQueue.current
+      .catch(() => undefined)
+      .then(() => invoke('dictation_set_overlay_expanded', { expanded }))
+      .then(() => undefined)
+      .catch(error => console.error('dictation_overlay_resize_failed', error))
   }, [expanded])
 
   const label = useMemo(() => {
+    const shortcutLabel = shortcut === null
+      ? 'Loading shortcut…'
+      : shortcut.enabled && shortcut.shortcut
+        ? shortcut.shortcut
+        : shortcut.message ?? 'Shortcut unavailable'
     if (state.phase === 'idle' || state.phase === 'cancelled') {
-      return `${phaseCopy[state.phase]} ${shortcut}`
+      return `${phaseCopy[state.phase]} ${shortcutLabel}`
     }
     if (state.phase === 'failed' && state.message) return phaseCopy.failed
     return phaseCopy[state.phase]
@@ -94,8 +129,8 @@ export default function DictationOverlay() {
       className={`dictation-floater ${expanded ? 'dictation-expanded' : 'dictation-compact'} dictation-${state.phase}`}
       aria-label={label}
       aria-live="polite"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onPointerEnter={keepExpanded}
+      onPointerLeave={scheduleCollapse}
     >
       <div className="dictation-handle" aria-hidden="true" />
       <div className="dictation-bubble">

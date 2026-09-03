@@ -16,12 +16,12 @@ export function SummaryLanguageSettings() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm relative">
+    <section className="relative border border-[var(--pt-border)] bg-[var(--pt-surface)] p-6 [border-radius:3px]">
       <div className="flex items-center gap-2 mb-2">
-        <Globe size={18} className="text-gray-500" />
-        <h3 className="text-lg font-semibold text-gray-900">Summary Language</h3>
+        <Globe size={18} className="text-[var(--pt-accent)]" />
+        <h3 className="text-lg font-medium text-[var(--pt-text)]">Summary language</h3>
       </div>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="mb-4 text-sm text-[var(--pt-text-secondary)]">
         Pin one language as the default for new meetings. Unpinned languages remain as
         quick-switch options in the summary generator. Auto uses the dominant transcript language.
       </p>
@@ -32,10 +32,10 @@ export function SummaryLanguageSettings() {
           return (
             <span
               key={code}
-              className={`inline-flex items-center rounded-full border text-sm overflow-hidden ${
+              className={`inline-flex items-center overflow-hidden border text-sm [border-radius:3px] ${
                 isPinned
-                  ? 'bg-blue-50 border-blue-200 text-blue-800'
-                  : 'bg-gray-100 border-gray-200 text-gray-800'
+                  ? 'border-[var(--pt-accent)] bg-[var(--pt-accent-wash)] text-[var(--pt-text)]'
+                  : 'border-[var(--pt-border)] bg-[var(--pt-surface-alt)] text-[var(--pt-text)]'
               }`}
             >
               <button
@@ -45,12 +45,12 @@ export function SummaryLanguageSettings() {
                 title={isPinned ? 'Click to unset as default' : 'Click to set as default'}
                 onClick={() => togglePin(code)}
                 className={`flex items-center gap-1.5 pl-3 pr-2 py-1 hover:brightness-95 active:brightness-90 ${
-                  isPinned ? 'text-blue-800' : 'text-gray-800'
+                  isPinned ? 'text-[var(--pt-text)]' : 'text-[var(--pt-text-secondary)]'
                 }`}
               >
                 <Pin
                   size={14}
-                  className={isPinned ? 'text-blue-600' : 'text-gray-400'}
+                  className={isPinned ? 'text-[var(--pt-accent)]' : 'text-[var(--pt-text-tertiary)]'}
                   fill={isPinned ? 'currentColor' : 'none'}
                 />
                 {labelForCode(code)}
@@ -59,7 +59,7 @@ export function SummaryLanguageSettings() {
                 type="button"
                 aria-label={`Remove ${labelForCode(code)}`}
                 onClick={() => removeRecent(code)}
-                className={`pr-2.5 pl-0.5 py-1 leading-none ${isPinned ? 'text-blue-400 hover:text-blue-700' : 'text-gray-400 hover:text-gray-700'}`}
+                className={`py-1 pl-0.5 pr-2.5 leading-none ${isPinned ? 'text-[var(--pt-accent-active)] hover:text-[var(--pt-error)]' : 'text-[var(--pt-text-tertiary)] hover:text-[var(--pt-text)]'}`}
               >
                 ×
               </button>
@@ -72,7 +72,7 @@ export function SummaryLanguageSettings() {
             <button
               type="button"
               disabled={recents.length >= 5}
-              className="inline-flex items-center gap-1 rounded-full border border-dashed border-gray-300 px-3 py-1 text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="pt-focus-ring inline-flex items-center gap-1 border border-dashed border-[var(--pt-border-strong)] px-3 py-1 text-sm text-[var(--pt-text-secondary)] [border-radius:3px] hover:border-[var(--pt-border-hover)] hover:text-[var(--pt-text)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               ＋ Add language
             </button>
@@ -91,11 +91,11 @@ export function SummaryLanguageSettings() {
         </Popover>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3">
+      <p className="mt-3 text-xs text-[var(--pt-text-tertiary)]">
         {pinned
           ? `Default: ${labelForCode(pinned)} - click it again to unset. Max 5 quick-switch options.`
           : 'Click any language to set it as your default. Max 5 quick-switch options.'}
       </p>
-    </div>
+    </section>
   );
 }

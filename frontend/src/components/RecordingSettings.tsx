@@ -145,27 +145,27 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
 
   if (loading) {
     return (
-      <div className="animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-        <div className="h-8 bg-gray-200 rounded mb-4"></div>
+      <div className="animate-pulse border border-[var(--pt-border)] bg-[var(--pt-surface)] p-6 [border-radius:3px]">
+        <div className="mb-4 h-4 w-1/4 bg-[var(--pt-surface-alt)] [border-radius:3px]"></div>
+        <div className="h-8 bg-[var(--pt-surface-alt)] [border-radius:3px]"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Recording Settings</h3>
-        <p className="text-sm text-gray-600 mb-6">
+    <div className="space-y-4 pt-6 text-[var(--pt-text)]">
+      <div className="border-b border-[var(--pt-border)] pb-5">
+        <h3 className="mb-2 text-lg font-medium">Recording settings</h3>
+        <p className="text-sm text-[var(--pt-text-secondary)]">
           Configure how your audio recordings are saved during meetings.
         </p>
       </div>
 
       {/* Auto Save Toggle */}
-      <div className="flex items-center justify-between p-4 border rounded-lg">
+      <section className="flex items-center justify-between gap-6 border border-[var(--pt-border)] bg-[var(--pt-surface)] p-5 [border-radius:3px]">
         <div className="flex-1">
           <div className="font-medium">Save Audio Recordings</div>
-          <div className="text-sm text-gray-600">
+          <div className="mt-1 text-sm text-[var(--pt-text-secondary)]">
             Automatically save audio files when recording stops
           </div>
         </div>
@@ -174,31 +174,31 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
           onCheckedChange={handleAutoSaveToggle}
           disabled={saving}
         />
-      </div>
+      </section>
 
       {/* Folder Location - Only shown when auto_save is enabled */}
       {preferences.auto_save && (
         <div className="space-y-4">
-          <div className="p-4 border rounded-lg bg-gray-50">
+          <div className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-4 [border-radius:3px]">
             <div className="font-medium mb-2">Save Location</div>
-            <div className="text-sm text-gray-600 mb-3 break-all">
+            <div className="mb-3 break-all text-sm text-[var(--pt-text-secondary)]">
               {preferences.save_folder || 'Default folder'}
             </div>
             <button
               onClick={handleOpenFolder}
-              className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="pt-button min-h-10 !border-[var(--pt-border-strong)] !bg-[var(--pt-surface)] px-3 text-sm !text-[var(--pt-text)] hover:!bg-[var(--pt-surface-hover)]"
             >
-              <FolderOpen className="w-4 h-4" />
-              Open Folder
+              <FolderOpen className="h-4 w-4" aria-hidden="true" />
+              Open folder
             </button>
           </div>
 
-          <div className="p-4 border rounded-lg bg-blue-50">
-            <div className="text-sm text-blue-800">
-              <strong>File Format:</strong> {preferences.file_format.toUpperCase()} files
+          <div className="border-l-2 border-[var(--pt-accent)] bg-[var(--pt-accent-wash)] p-4 [border-radius:3px]">
+            <div className="text-sm text-[var(--pt-text)]">
+              <strong>File format:</strong> {preferences.file_format.toUpperCase()} files
             </div>
-            <div className="text-xs text-blue-600 mt-1">
-              Recordings are saved with timestamp: recording_YYYYMMDD_HHMMSS.{preferences.file_format}
+            <div className="mt-1 text-xs text-[var(--pt-text-secondary)]">
+              Files use the name recording_YYYYMMDD_HHMMSS.{preferences.file_format}
             </div>
           </div>
         </div>
@@ -206,18 +206,18 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
 
       {/* Info when auto_save is disabled */}
       {!preferences.auto_save && (
-        <div className="p-4 border rounded-lg bg-yellow-50">
-          <div className="text-sm text-yellow-800">
+        <div className="border border-[var(--pt-border)] bg-[var(--pt-warning-wash)] p-4 text-sm text-[var(--pt-warning)] [border-radius:3px]">
+          <div>
             Audio recording is disabled. Enable "Save Audio Recordings" to automatically save your meeting audio.
           </div>
         </div>
       )}
 
       {/* Recording Notification Toggle */}
-      <div className="flex items-center justify-between p-4 border rounded-lg">
+      <section className="flex items-center justify-between gap-6 border border-[var(--pt-border)] bg-[var(--pt-surface)] p-5 [border-radius:3px]">
         <div className="flex-1">
           <div className="font-medium">Recording Start Notification</div>
-          <div className="text-sm text-gray-600">
+          <div className="mt-1 text-sm text-[var(--pt-text-secondary)]">
             Show reminder to inform participants when recording starts
           </div>
         </div>
@@ -225,17 +225,17 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
           checked={showRecordingNotification}
           onCheckedChange={handleNotificationToggle}
         />
-      </div>
+      </section>
 
       {/* Device Preferences */}
       <div className="space-y-4">
-        <div className="border-t pt-6">
-          <h4 className="text-base font-medium text-gray-900 mb-4">Default Audio Devices</h4>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="border-t border-[var(--pt-border)] pt-6">
+          <h4 className="mb-2 text-base font-medium">Default audio devices</h4>
+          <p className="mb-4 text-sm text-[var(--pt-text-secondary)]">
             Set your preferred microphone and system audio devices for recording. These will be automatically selected when starting new recordings.
           </p>
 
-          <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="border border-[var(--pt-border)] bg-[var(--pt-surface-alt)] p-4 [border-radius:3px]">
             <DeviceSelection
               selectedDevices={{
                 micDevice: preferences.preferred_mic_device,

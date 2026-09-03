@@ -468,59 +468,7 @@ pub fn run() {
 
             #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
             {
-                use std::str::FromStr;
-                use tauri_plugin_global_shortcut::GlobalShortcutExt;
-
-                let mut shortcut_candidates = Vec::new();
-                if let Some(shortcut) = dictation::configured_shortcut(_app) {
-                    shortcut_candidates.push(shortcut);
-                }
-                for fallback in [
-                    dictation::DEFAULT_SHORTCUT,
-                    "Ctrl+Alt+D",
-                    "Ctrl+Shift+F10",
-                ] {
-                    if !shortcut_candidates.iter().any(|candidate| candidate == fallback) {
-                        shortcut_candidates.push(fallback.to_owned());
-                    }
-                }
-                let mut registered = false;
-                for label in shortcut_candidates.iter() {
-                    let Ok(shortcut) = tauri_plugin_global_shortcut::Shortcut::from_str(label) else {
-                        log::warn!(target: "pulsetalk::dictation", "dictation_shortcut_invalid_config shortcut={label}");
-                        continue;
-                    };
-                    match _app.global_shortcut().register(shortcut) {
-                        Ok(()) => {
-                            _app
-                                .state::<dictation::DictationShortcutStatusState>()
-                                .registered(label);
-                            log::info!(
-                                target: "pulsetalk::dictation",
-                                "dictation_shortcut_registered shortcut={}",
-                                label
-                            );
-                            registered = true;
-                            break;
-                        }
-                        Err(error) => log::warn!(
-                            target: "pulsetalk::dictation",
-                            "dictation_shortcut_registration_failed code=shortcut_unavailable shortcut={} error={}",
-                            label,
-                            error
-                        ),
-                    }
-                }
-                if !registered {
-                    _app
-                        .state::<dictation::DictationShortcutStatusState>()
-                        .unavailable();
-                    log::error!(
-                        target: "pulsetalk::dictation",
-                        "dictation_activation_disabled code=shortcut_unavailable candidate_count={}",
-                        shortcut_candidates.len()
-                    );
-                }
+                dictation::DictationShortcutStatusState::initialize(_app.handle());
             }
 
             // Initialize system tray

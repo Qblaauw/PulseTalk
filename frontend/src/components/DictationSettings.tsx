@@ -1,10 +1,12 @@
 "use client"
 
 import { invoke } from "@tauri-apps/api/core"
-import { AudioLines, ClipboardCheck, FolderOpen, History, Keyboard, LockKeyhole, Mic2, PictureInPicture2, Sparkles } from "lucide-react"
+import { listen } from "@tauri-apps/api/event"
+import { AudioLines, ClipboardCheck, FolderOpen, History, LockKeyhole, Mic2, PictureInPicture2, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { type KeyboardEvent, useEffect, useState } from "react"
+import { KeyboardEvent, useEffect, useState } from "react"
 import { Switch } from '@/components/ui/switch'
+import { captureDictationShortcut, shortcutParts } from '@/lib/dictationShortcut'
 
 type ShortcutStatus = {
   enabled: boolean
@@ -20,53 +22,78 @@ export function DictationSettings() {
   const [openingDiagnostics, setOpeningDiagnostics] = useState(false)
   const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [capturingShortcut, setCapturingShortcut] = useState(false)
+  const [capturing, setCapturing] = useState(false)
+  const [candidate, setCandidate] = useState<string | null>(null)
+  const [shortcutMessage, setShortcutMessage] = useState<string | null>(null)
   const [savingShortcut, setSavingShortcut] = useState(false)
-  const [shortcutError, setShortcutError] = useState<string | null>(null)
 
   useEffect(() => {
-    invoke<ShortcutStatus>('dictation_get_shortcut_status')
-      .then(setStatus)
-      .catch(cause => setError(String(cause)))
+    let disposed = false
+    let shortcutRevision = 0
+    let stopListening: (() => void) | undefined
+
+    const synchronizeShortcut = async () => {
+      stopListening = await listen<ShortcutStatus>('dictation-shortcut-changed', event => {
+        shortcutRevision += 1
+        if (!disposed) setStatus(event.payload)
+      })
+      if (disposed) {
+        stopListening()
+        return
+      }
+
+      const queryRevision = shortcutRevision
+      try {
+        const initialStatus = await invoke<ShortcutStatus>('dictation_get_shortcut_status')
+        if (!disposed && shortcutRevision === queryRevision) setStatus(initialStatus)
+      } catch (cause) {
+        if (!disposed && shortcutRevision === queryRevision) setError(String(cause))
+      }
+    }
+
+    synchronizeShortcut().catch(cause => {
+      if (!disposed) setError(String(cause))
+    })
     invoke<boolean>('dictation_get_overlay_enabled')
       .then(setOverlayEnabled)
       .catch(cause => setError(String(cause)))
+
+    return () => {
+      disposed = true
+      stopListening?.()
+    }
   }, [])
 
-  const captureShortcut = async (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (!capturingShortcut) return
+  const captureShortcut = (event: KeyboardEvent<HTMLButtonElement>) => {
     event.preventDefault()
-    if (['Control', 'Shift', 'Alt', 'Meta'].includes(event.key)) return
-
-    const key = event.code.startsWith('Key')
-      ? event.code.slice(3)
-      : event.code.startsWith('Digit')
-        ? event.code.slice(5)
-        : event.code === 'Space'
-          ? 'Space'
-          : event.code
-    if (!key) return
-
-    const modifiers = [
-      event.ctrlKey ? 'Ctrl' : null,
-      event.altKey ? 'Alt' : null,
-      event.shiftKey ? 'Shift' : null,
-      event.metaKey ? 'Cmd' : null,
-    ].filter(Boolean)
-    if (modifiers.length === 0) {
-      setShortcutError('Hold Ctrl, Alt, Shift, or Cmd while choosing a key.')
+    event.stopPropagation()
+    const result = captureDictationShortcut(event)
+    if (!result.ok && result.cancelled) {
+      setCapturing(false)
+      setCandidate(null)
+      setShortcutMessage(null)
       return
     }
+    if (!result.ok) {
+      setShortcutMessage(result.reason)
+      return
+    }
+    setCandidate(result.shortcut)
+    setCapturing(false)
+    setShortcutMessage(null)
+  }
 
-    const nextShortcut = [...modifiers, key].join('+')
+  const saveShortcut = async () => {
+    if (!candidate) return
     setSavingShortcut(true)
-    setShortcutError(null)
+    setShortcutMessage(null)
     try {
-      const nextStatus = await invoke<ShortcutStatus>('dictation_set_shortcut', { shortcut: nextShortcut })
-      setStatus(nextStatus)
-      setCapturingShortcut(false)
+      const next = await invoke<ShortcutStatus>('dictation_set_shortcut', { shortcut: candidate })
+      setStatus(next)
+      setCandidate(null)
+      setShortcutMessage(`Shortcut changed to ${next.shortcut ?? candidate}.`)
     } catch (cause) {
-      setShortcutError(String(cause))
+      setShortcutMessage(`Could not change the shortcut. ${String(cause)}`)
     } finally {
       setSavingShortcut(false)
     }
@@ -100,57 +127,68 @@ export function DictationSettings() {
   }
 
   return (
-    <div className="space-y-6 pt-6">
-      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="space-y-4 pt-6 text-[var(--pt-text)]">
+      <section className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-6 shadow-[0_1px_2px_rgba(var(--pt-text-rgb),.025)] [border-radius:3px]">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
-            <AudioLines className="h-5 w-5" />
+          <div className="grid h-11 w-11 shrink-0 place-items-center border border-[var(--pt-border)] bg-[var(--pt-surface-alt)] text-[var(--pt-accent)] [border-radius:3px]">
+            <AudioLines className="h-[18px] w-[18px]" />
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-gray-900">Hold-to-talk activation</h2>
-              <span className={`h-2 w-2 rounded-full ${status?.enabled ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-            </div>
-            <p className="mt-1 text-sm text-gray-600">Hold while speaking and release when finished. PulseTalq records only while the shortcut is held.</p>
-            {status?.enabled ? (
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShortcutError(null)
-                    setCapturingShortcut(true)
-                  }}
-                  onKeyDown={captureShortcut}
-                  onBlur={() => setCapturingShortcut(false)}
-                  disabled={savingShortcut}
-                  className={`inline-flex min-w-[180px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${capturingShortcut
-                    ? 'border-indigo-500 bg-indigo-50 text-indigo-800'
-                    : 'border-gray-300 bg-gray-50 text-gray-800 hover:border-indigo-300 hover:bg-indigo-50/50'
-                    }`}
-                  aria-label="Edit dictation shortcut"
-                >
-                  <Keyboard className="h-4 w-4" />
-                  {capturingShortcut ? (savingShortcut ? 'Saving shortcut…' : 'Press a shortcut…') : status.shortcut}
-                </button>
-                {!capturingShortcut && <span className="text-xs text-gray-500">Click to change</span>}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-medium">Hold-to-talk activation</h2>
+                <span className={`h-2 w-2 rounded-full ${status?.enabled ? 'bg-[var(--pt-success)]' : 'bg-[var(--pt-warning)]'}`} aria-label={status?.enabled ? 'Shortcut active' : 'Shortcut unavailable'} />
               </div>
-            ) : (
-              <p className="mt-3 text-sm text-amber-700">{status?.message ?? 'Checking shortcut availability…'}</p>
+              {!capturing && (
+                <button type="button" onClick={() => { setCapturing(true); setCandidate(null); setShortcutMessage(null) }} className="pt-button min-h-10 !border-[var(--pt-border-strong)] !bg-[var(--pt-surface)] px-3 text-sm !text-[var(--pt-text)] hover:!bg-[var(--pt-surface-hover)]">
+                  Change shortcut
+                </button>
+              )}
+            </div>
+            <p className="mt-1 max-w-2xl text-sm text-[var(--pt-text-secondary)]">Hold while speaking and release when finished. PulseTalq records only while the shortcut is held.</p>
+
+            <div className="mt-5 border-l-2 border-[var(--pt-accent)] bg-[var(--pt-surface-dark)] p-4 text-[var(--pt-text-inverse)] [border-radius:3px]">
+              <p className="text-xs font-semibold tracking-[0.08em] text-[var(--pt-text-inverse-muted)]">ACTIVE COMMAND</p>
+              <ShortcutChips shortcut={status?.shortcut} inverse />
+              {capturing && (
+                <button type="button" autoFocus onKeyDown={captureShortcut} onBlur={() => setCapturing(false)} className="mt-3 min-h-11 w-full border border-[var(--pt-accent)] bg-transparent px-3 text-left text-sm font-medium outline-none [border-radius:3px] focus:shadow-[0_0_0_3px_rgba(var(--pt-accent-rgb),.22)]">
+                  Press your new combination. Escape cancels.
+                </button>
+              )}
+            </div>
+
+            {candidate && (
+              <div className="mt-3 border border-[var(--pt-border)] bg-[var(--pt-surface-alt)] p-3 [border-radius:3px]">
+                <p className="text-xs font-semibold tracking-[0.08em] text-[var(--pt-text-tertiary)]">PROPOSED COMMAND</p>
+                <ShortcutChips shortcut={candidate} />
+              </div>
             )}
-            {(error || shortcutError) && <p className="mt-3 text-sm text-red-600">{error ?? shortcutError}</p>}
-            <p className="mt-3 text-xs text-gray-500">Choose a modifier plus one key. The shortcut is saved for the next launch and takes effect immediately.</p>
+
+            {candidate && !capturing && (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={saveShortcut} disabled={savingShortcut} aria-busy={savingShortcut} className="pt-button min-h-10 px-4 text-sm disabled:cursor-wait disabled:opacity-60">
+                  {savingShortcut ? 'Saving…' : 'Save shortcut'}
+                </button>
+                <button type="button" onClick={() => { setCandidate(null); setShortcutMessage(null) }} disabled={savingShortcut} className="pt-button min-h-10 !bg-transparent px-3 text-sm !text-[var(--pt-text-secondary)] hover:!bg-[var(--pt-surface-alt)] hover:!shadow-none">Cancel</button>
+              </div>
+            )}
+            {!status?.enabled && !candidate && <p className="mt-3 text-sm text-[var(--pt-warning)]">{status?.message ?? 'Checking shortcut availability…'}</p>}
+            {status?.enabled && status.message && <p className="mt-3 text-sm text-[var(--pt-warning)]" role="status">{status.message}</p>}
+            {shortcutMessage && <p className={`mt-3 text-sm ${shortcutMessage.startsWith('Shortcut changed') ? 'text-[var(--pt-success)]' : shortcutMessage.startsWith('Could not') ? 'text-[var(--pt-error)]' : 'text-[var(--pt-warning)]'}`} role="status">{shortcutMessage}</p>}
+            {error && <p className="mt-3 text-sm text-[var(--pt-error)]" role="alert">{error}</p>}
+            <p className="mt-3 text-xs text-[var(--pt-text-tertiary)]">Use at least one modifier with a letter, number, function key, or Space. PulseTalq keeps the current shortcut if the new combination is unavailable.</p>
           </div>
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-6 shadow-[0_1px_2px_rgba(var(--pt-text-rgb),.025)] [border-radius:3px]">
         <div className="flex items-start gap-4">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
-            <PictureInPicture2 className="h-5 w-5" />
+          <div className="grid h-11 w-11 shrink-0 place-items-center border border-[var(--pt-border)] bg-[var(--pt-surface-alt)] text-[var(--pt-accent)] [border-radius:3px]">
+            <PictureInPicture2 className="h-[18px] w-[18px]" />
           </div>
           <div className="min-w-0 flex-1">
-            <label htmlFor="dictation-overlay-toggle" className="font-semibold text-gray-900">Floating dictation overlay</label>
-            <p className="mt-1 text-sm leading-6 text-gray-600">Keep a small microphone above other windows. Hover over it to reveal the active shortcut; it expands automatically while PulseTalq listens and pastes.</p>
+            <label htmlFor="dictation-overlay-toggle" className="font-medium">Floating dictation overlay</label>
+            <p className="mt-1 text-sm leading-6 text-[var(--pt-text-secondary)]">Keep a small microphone above other windows. It follows the pointer between screens and expands while PulseTalq listens and pastes into the active text field.</p>
           </div>
           <Switch
             id="dictation-overlay-toggle"
@@ -183,30 +221,30 @@ export function DictationSettings() {
           title="Target protection"
           description="PulseTalq refuses to paste if focus moved, the original window closed, or the target runs at a higher Windows integrity level."
         />
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <History className="h-5 w-5 text-indigo-600" />
-          <h3 className="mt-3 font-semibold text-gray-900">Recovery history</h3>
-          <p className="mt-1 text-sm leading-6 text-gray-600">Every transcript is saved before paste, including failed deliveries.</p>
+        <section className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-5 [border-radius:3px]">
+          <History className="h-[18px] w-[18px] text-[var(--pt-accent)]" />
+          <h3 className="mt-3 font-medium">Recovery history</h3>
+          <p className="mt-1 text-sm leading-6 text-[var(--pt-text-secondary)]">Every transcript is saved before paste, including failed deliveries.</p>
           <button
             onClick={() => router.push('/dictation-history')}
-            className="mt-4 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-50"
+            className="pt-button mt-4 min-h-10 !border-[var(--pt-border-strong)] !bg-[var(--pt-surface)] px-3 text-sm !text-[var(--pt-text)] hover:!bg-[var(--pt-surface-hover)]"
           >
             Open dictation history
           </button>
         </section>
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <FolderOpen className="h-5 w-5 text-indigo-600" />
-          <h3 className="mt-3 font-semibold text-gray-900">Diagnostics</h3>
-          <p className="mt-1 text-sm leading-6 text-gray-600">Open the privacy-filtered support logs. PulseTalq keeps one active 1 MB file and four rotated archives.</p>
+        <section className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-5 [border-radius:3px]">
+          <FolderOpen className="h-[18px] w-[18px] text-[var(--pt-accent)]" />
+          <h3 className="mt-3 font-medium">Diagnostics</h3>
+          <p className="mt-1 text-sm leading-6 text-[var(--pt-text-secondary)]">Open the privacy-filtered support logs. PulseTalq keeps one active 1 MB file and four rotated archives.</p>
           <button
             onClick={openDiagnostics}
             disabled={openingDiagnostics}
             aria-busy={openingDiagnostics}
-            className="mt-4 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
+            className="pt-button mt-4 min-h-10 !border-[var(--pt-border-strong)] !bg-[var(--pt-surface)] px-3 text-sm !text-[var(--pt-text)] hover:!bg-[var(--pt-surface-hover)] disabled:cursor-wait disabled:opacity-60"
           >
             {openingDiagnostics ? 'Opening…' : 'Open diagnostics folder'}
           </button>
-          {diagnosticsError && <p className="mt-3 text-sm text-red-600" role="alert">{diagnosticsError}</p>}
+          {diagnosticsError && <p className="mt-3 text-sm text-[var(--pt-error)]" role="alert">{diagnosticsError}</p>}
         </section>
       </div>
     </div>
@@ -215,10 +253,24 @@ export function DictationSettings() {
 
 function SettingCard({ icon: Icon, title, description }: { icon: typeof Mic2; title: string; description: string }) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <Icon className="h-5 w-5 text-indigo-600" />
-      <h3 className="mt-3 font-semibold text-gray-900">{title}</h3>
-      <p className="mt-1 text-sm leading-6 text-gray-600">{description}</p>
+    <section className="border border-[var(--pt-border)] bg-[var(--pt-surface)] p-5 [border-radius:3px]">
+      <Icon className="h-[18px] w-[18px] text-[var(--pt-accent)]" />
+      <h3 className="mt-3 font-medium">{title}</h3>
+      <p className="mt-1 text-sm leading-6 text-[var(--pt-text-secondary)]">{description}</p>
     </section>
+  )
+}
+
+function ShortcutChips({ shortcut, inverse = false }: { shortcut?: string | null; inverse?: boolean }) {
+  const parts = shortcutParts(shortcut)
+  if (parts.length === 0) return <p className="mt-2 text-sm text-[var(--pt-text-inverse-muted)]">Waiting for shortcut status…</p>
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-label={`Shortcut ${parts.join(' plus ')}`}>
+      {parts.map((part, index) => (
+        <span key={`${part}-${index}`} className={`inline-flex min-h-8 items-center border px-2.5 text-xs font-semibold [border-radius:2px] ${inverse ? 'border-white/25 bg-white/10 text-white' : 'border-[var(--pt-border-strong)] bg-[var(--pt-surface-alt)]'}`}>
+          {part}
+        </span>
+      ))}
+    </div>
   )
 }
