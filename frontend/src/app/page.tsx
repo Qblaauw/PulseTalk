@@ -199,6 +199,7 @@ export default function Home() {
 
   // Computed values using global status
   const isProcessingStop = status === RecordingStatus.PROCESSING_TRANSCRIPTS || isProcessing;
+  const showVoiceHub = !recordingState.isRecording && transcripts.length === 0 && !isProcessingStop;
 
   return (
     <motion.div
@@ -224,7 +225,7 @@ export default function Home() {
         onLoadPreview={loadMeetingTranscripts}
       />
       <div className="flex flex-1 overflow-hidden">
-        {!recordingState.isRecording && transcripts.length === 0 && !isProcessingStop ? (
+        {showVoiceHub ? (
           <VoiceHub meetings={meetings} />
         ) : (
           <TranscriptPanel
@@ -237,7 +238,7 @@ export default function Home() {
         )}
 
         {/* Recording controls - only show when permissions are granted or already recording and not showing status messages */}
-        {captureMode === 'record-meeting' && (hasMicrophone || isRecording) &&
+        {!showVoiceHub && captureMode === 'record-meeting' && (hasMicrophone || isRecording) &&
           status !== RecordingStatus.PROCESSING_TRANSCRIPTS &&
           status !== RecordingStatus.SAVING && (
             <div className="pointer-events-none fixed bottom-7 left-0 right-0 z-10">
