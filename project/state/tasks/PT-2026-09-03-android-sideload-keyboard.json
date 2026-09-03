@@ -1,6 +1,8 @@
 {
   "blocked_by": [],
-  "commits": [],
+  "commits": [
+    "42c3847baa03c112459621afcd2eba631385f08d"
+  ],
   "created_at": "2026-09-03T18:00:00Z",
   "execution_context": {
     "base_ref": "integration/pulsetalq-next",
@@ -39,6 +41,7 @@
     "Android 16 hardware smoke test completed"
   ],
   "verification_receipts": [
-    "Baseline cargo build attempted before scope edit and failed in inherited desktop dependency llama-cpp-sys-2 because libclang.dll was not configured."
+    "Baseline cargo build attempted before scope edit and failed in inherited desktop dependency llama-cpp-sys-2 because libclang.dll was not configured.",
+    "Scope checkpoint 42c3847baa03c112459621afcd2eba631385f08d passed task JSON parsing, git diff --check, and ProductOps prose lint."
   ]
 }
