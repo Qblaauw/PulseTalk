@@ -35,6 +35,7 @@ Remote branches inherited from the upstream Meetily repository were not classifi
 - Format: NSIS setup executable
 - Build command: `pnpm --dir frontend tauri:build:windows-local`
 - Signing state: unsigned local test build. `DIGICERT_KEYPAIR_ALIAS` was not set.
-- Expected path: `target/release/bundle/nsis/PulseTalq_0.4.0_x64-setup.exe`
-
-The final commit SHA, byte size, and installer SHA-256 are recorded in the build handoff after the final package run.
+- Packaged commit: `796f70d98ac4a0fd464ed7ab98394bbfb07c88ed`
+- Artifact path: `dist/releases/v0.4.0/windows/PulseTalq_0.4.0_x64-setup.exe`
+- Byte size: `42897619`
+- SHA-256: `b8d766ad7457efa6f9fe4a51bb8f709e89e40ed865a415e2b8c75abe642f98f9`
