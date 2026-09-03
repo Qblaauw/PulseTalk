@@ -1,0 +1,39 @@
+{
+  "blocked_by": [
+    "P-2026-09-02-dictation-ux-refinement/T4"
+  ],
+  "commits": [
+    "da6cb09"
+  ],
+  "created_at": "2026-09-02T15:02:52Z",
+  "execution_context": {
+    "branch": "feature/dictation-ux-refinement",
+    "repository": "dictation-ux-refinement",
+    "worktree": "F:\\Dev Ops\\PulseTalk\\.worktrees\\dictation-ux-refinement"
+  },
+  "files_touched": [
+    "frontend/src/app/settings/page.tsx",
+    "frontend/src/components/BetaSettings.tsx",
+    "frontend/src/components/Logo.tsx",
+    "frontend/src/components/PreferenceSettings.tsx",
+    "frontend/src/components/RecordingSettings.tsx",
+    "frontend/src/components/Sidebar/index.tsx",
+    "frontend/src/components/SummaryModelSettings.tsx",
+    "frontend/src/components/TranscriptSettings.tsx"
+  ],
+  "host_refs": {},
+  "id": "P-2026-09-02-dictation-ux-refinement/T6",
+  "kind": "implementation",
+  "local_id": "T6",
+  "owner": "agent-navigation-shell",
+  "plan_id": "P-2026-09-02-dictation-ux-refinement",
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "done",
+  "subject": "Align Home, history, and Settings with Deep Focus",
+  "updated_at": "2026-09-02T16:34:43Z",
+  "verification_receipts": [
+    "Final scoped review: no findings; production frontend build passed"
+  ]
+}

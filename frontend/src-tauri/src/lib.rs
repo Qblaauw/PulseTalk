@@ -468,61 +468,7 @@ pub fn run() {
 
             #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
             {
-                use tauri_plugin_global_shortcut::{
-                    Code, GlobalShortcutExt, Modifiers, Shortcut,
-                };
-
-                let shortcut_candidates = [
-                    (
-                        "Ctrl+Shift+Space",
-                        Modifiers::CONTROL | Modifiers::SHIFT,
-                        Code::Space,
-                    ),
-                    (
-                        "Ctrl+Alt+D",
-                        Modifiers::CONTROL | Modifiers::ALT,
-                        Code::KeyD,
-                    ),
-                    (
-                        "Ctrl+Shift+F10",
-                        Modifiers::CONTROL | Modifiers::SHIFT,
-                        Code::F10,
-                    ),
-                ];
-                let mut registered = false;
-                for (label, modifiers, code) in shortcut_candidates {
-                    let shortcut = Shortcut::new(Some(modifiers), code);
-                    match _app.global_shortcut().register(shortcut) {
-                        Ok(()) => {
-                            _app
-                                .state::<dictation::DictationShortcutStatusState>()
-                                .registered(label);
-                            log::info!(
-                                target: "pulsetalk::dictation",
-                                "dictation_shortcut_registered shortcut={}",
-                                label
-                            );
-                            registered = true;
-                            break;
-                        }
-                        Err(error) => log::warn!(
-                            target: "pulsetalk::dictation",
-                            "dictation_shortcut_registration_failed code=shortcut_unavailable shortcut={} error={}",
-                            label,
-                            error
-                        ),
-                    }
-                }
-                if !registered {
-                    _app
-                        .state::<dictation::DictationShortcutStatusState>()
-                        .unavailable();
-                    log::error!(
-                        target: "pulsetalk::dictation",
-                        "dictation_activation_disabled code=shortcut_unavailable candidate_count={}",
-                        shortcut_candidates.len()
-                    );
-                }
+                dictation::DictationShortcutStatusState::initialize(_app.handle());
             }
 
             // Initialize system tray
@@ -641,6 +587,7 @@ pub fn run() {
             dictation::commands::dictation_list_history,
             dictation::commands::dictation_copy_history,
             dictation::commands::dictation_get_shortcut_status,
+            dictation::commands::dictation_set_shortcut,
             dictation::commands::dictation_get_overlay_enabled,
             dictation::commands::dictation_set_overlay_enabled,
             dictation::commands::dictation_set_overlay_expanded,

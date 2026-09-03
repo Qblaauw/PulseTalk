@@ -78,5 +78,8 @@ experiments/
 target/
 .worktrees/
 .tooling/
+.task/
+.env.deploy.local
+dist/releases/
 
 frontend/src-tauri/binaries/

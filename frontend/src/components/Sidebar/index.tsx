@@ -449,7 +449,6 @@ const Sidebar: React.FC = () => {
   const renderCollapsedIcons = () => {
     if (!isCollapsed) return null;
 
-    const isLiveCapturePage = pathname === '/';
     const isInboxPage = pathname === '/inbox';
     const isProjectsPage = pathname === '/projects';
     const isMeetingPage = pathname?.includes('/meeting-details');
@@ -459,36 +458,28 @@ const Sidebar: React.FC = () => {
     return (
       <TooltipProvider>
         <div className="flex flex-col items-center space-y-4 mt-4">
-          <Logo isCollapsed={isCollapsed} />
-
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                onClick={() => router.push('/dictation-history')}
-                className={`p-2 rounded-lg transition-colors duration-150 ${isDictationPage ? 'bg-indigo-50' : 'hover:bg-gray-100'}`}
-              >
-                <AudioLines className="w-5 h-5 text-gray-600" />
-              </button>
+              <Logo isCollapsed={isCollapsed} />
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Dictation history</p>
+              <p>Home</p>
             </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => router.push('/')}
-                aria-current={isLiveCapturePage ? 'page' : undefined}
-                aria-label="Live capture"
-                className={`w-10 h-10 flex items-center justify-center rounded-[3px] transition-colors duration-150 pt-focus-ring ${isLiveCapturePage ? 'bg-white/10 border-l-2 border-[var(--pt-accent)]' : 'hover:bg-white/[0.07]'
-                  }`}
+                onClick={() => router.push('/dictation-history')}
+                aria-current={isDictationPage ? 'page' : undefined}
+                aria-label="Dictation history"
+                className={`w-10 h-10 flex items-center justify-center rounded-[3px] transition-colors duration-150 pt-focus-ring ${isDictationPage ? 'bg-white/10 border-l-2 border-[var(--pt-accent)]' : 'hover:bg-white/[0.07]'}`}
               >
-                <AudioLines className="w-5 h-5 text-[var(--pt-text-inverse-muted)]" />
+                <AudioLines className="w-5 h-5 text-[var(--pt-text-inverse-muted)]" aria-hidden="true" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Live capture</p>
+              <p>Dictation history</p>
             </TooltipContent>
           </Tooltip>
 
@@ -634,7 +625,7 @@ const Sidebar: React.FC = () => {
                 )}
               </div>
               {searchQuery && item.id === 'meetings' && isSearching && (
-                <span className="ml-2 text-xs text-blue-500 animate-pulse">Searching...</span>
+                <span className="ml-2 animate-pulse text-xs text-[var(--pt-accent-soft)]">Searching...</span>
               )}
             </>
           ) : (
@@ -757,7 +748,7 @@ const Sidebar: React.FC = () => {
             {!isCollapsed && (
               <div className="space-y-1">
                 {[
-                  { href: '/', label: 'Live capture', icon: AudioLines, active: pathname === '/', preview: false },
+                  { href: '/dictation-history', label: 'Dictation history', icon: AudioLines, active: pathname === '/dictation-history', preview: false },
                   { href: '/inbox', label: 'Inbox', icon: Inbox, active: pathname === '/inbox', preview: true },
                   { href: '/projects', label: 'Projects', icon: FolderKanban, active: pathname === '/projects', preview: true },
                 ].map(({ href, label, icon: Icon, active, preview }) => (
@@ -792,7 +783,7 @@ const Sidebar: React.FC = () => {
                       <NotebookPen className="w-4 h-4 mr-2 text-[var(--pt-text-inverse-muted)]" />
                       <span className="text-[var(--pt-text-inverse)]">{item.title}</span>
                       {searchQuery && item.id === 'meetings' && isSearching && (
-                        <span className="ml-2 text-xs text-blue-500 animate-pulse">Searching...</span>
+                        <span className="ml-2 animate-pulse text-xs text-[var(--pt-accent-soft)]">Searching...</span>
                       )}
                     </div>
                   </div>
@@ -839,14 +830,6 @@ const Sidebar: React.FC = () => {
             )}
 
             <button
-              onClick={() => router.push('/dictation-history')}
-              className="w-full flex items-center justify-center px-3 py-1.5 mt-1 text-sm font-medium text-gray-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
-            >
-              <AudioLines className="w-4 h-4 mr-2" />
-              <span>Dictation history</span>
-            </button>
-
-            <button
               onClick={() => router.push('/settings')}
               className="w-full min-h-10 flex items-center justify-center px-3 py-1.5 mt-2 mb-1 text-sm font-medium text-[var(--pt-text-inverse-muted)] hover:text-[var(--pt-text-inverse)] bg-transparent hover:bg-white/[0.07] rounded-[3px] transition-colors pt-focus-ring"
             >
@@ -854,7 +837,7 @@ const Sidebar: React.FC = () => {
               <span>Settings</span>
             </button>
             <Info isCollapsed={isCollapsed} />
-            <div className="w-full flex items-center justify-center px-3 py-1 text-xs text-gray-400">
+            <div className="flex w-full items-center justify-center px-3 py-1 text-xs text-[var(--pt-text-inverse-muted)]">
               v0.4.0
             </div>
           </div>
@@ -881,7 +864,7 @@ const Sidebar: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">Edit Meeting Title</h3>
             <div className="space-y-4">
               <div>
-                <label htmlFor="meeting-title" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="meeting-title" className="mb-2 block text-sm font-medium text-[var(--pt-text)]">
                   Meeting Title
                 </label>
                 <input
@@ -896,7 +879,7 @@ const Sidebar: React.FC = () => {
                       handleEditCancel();
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-[var(--pt-border-strong)] bg-[var(--pt-surface)] px-3 py-2 text-[var(--pt-text)] outline-none [border-radius:3px] focus:border-[var(--pt-accent)] focus:ring-2 focus:ring-[rgba(var(--pt-accent-rgb),.2)]"
                   placeholder="Enter meeting title"
                   autoFocus
                 />
@@ -906,13 +889,13 @@ const Sidebar: React.FC = () => {
           <DialogFooter>
             <button
               onClick={handleEditCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="pt-button px-4 py-2 text-sm font-medium !border-[var(--pt-border-strong)] !bg-[var(--pt-surface)] !text-[var(--pt-text-secondary)] hover:!bg-[var(--pt-surface-alt)]"
             >
               Cancel
             </button>
             <button
               onClick={handleEditConfirm}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+              className="pt-button px-4 py-2 text-sm font-medium"
             >
               Save
             </button>

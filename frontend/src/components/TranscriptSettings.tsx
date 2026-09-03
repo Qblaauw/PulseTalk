@@ -96,15 +96,12 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
     };
 
     return (
-        <div>
+        <div className="pt-6 text-[var(--pt-text)]">
             <div>
-                {/* <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Transcript Settings</h3>
-                </div> */}
-                <div className="space-y-4 pb-6">
+                <div className="space-y-4 border border-[var(--pt-border)] bg-[var(--pt-surface)] p-6 [border-radius:3px]">
                     <div>
-                        <Label className="block text-sm font-medium text-gray-700 mb-1">
-                            Transcript Model
+                        <Label className="mb-2 block text-sm font-medium text-[var(--pt-text)]">
+                            Transcript model
                         </Label>
                         <div className="flex space-x-2 mx-1">
                             <Select
@@ -117,12 +114,12 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                     }
                                 }}
                             >
-                                <SelectTrigger className='focus:ring-1 focus:ring-blue-500 focus:border-blue-500'>
+                                <SelectTrigger className="!rounded-[3px] border-[var(--pt-border-strong)] bg-[var(--pt-surface)] focus:border-[var(--pt-accent)] focus:ring-2 focus:ring-[rgba(var(--pt-accent-rgb),.2)]">
                                     <SelectValue placeholder="Select provider" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="parakeet">⚡ Parakeet (Recommended - Real-time / Accurate)</SelectItem>
-                                    <SelectItem value="localWhisper">🏠 Local Whisper (High Accuracy)</SelectItem>
+                                    <SelectItem value="parakeet">Parakeet, recommended for real-time accuracy</SelectItem>
+                                    <SelectItem value="localWhisper">Local Whisper, high accuracy</SelectItem>
                                     {/* <SelectItem value="deepgram">☁️ Deepgram (Backup)</SelectItem>
                                     <SelectItem value="elevenLabs">☁️ ElevenLabs</SelectItem>
                                     <SelectItem value="groq">☁️ Groq</SelectItem>
@@ -138,7 +135,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                         setTranscriptModelConfig({ ...transcriptModelConfig, provider: uiProvider, model });
                                     }}
                                 >
-                                    <SelectTrigger className='focus:ring-1 focus:ring-blue-500 focus:border-blue-500'>
+                                    <SelectTrigger className="!rounded-[3px] border-[var(--pt-border-strong)] bg-[var(--pt-surface)] focus:border-[var(--pt-accent)] focus:ring-2 focus:ring-[rgba(var(--pt-accent-rgb),.2)]">
                                         <SelectValue placeholder="Select model" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -175,13 +172,13 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
 
                     {requiresApiKey && (
                         <div>
-                            <Label className="block text-sm font-medium text-gray-700 mb-1">
-                                API Key
+                            <Label className="mb-2 block text-sm font-medium text-[var(--pt-text)]">
+                                API key
                             </Label>
                             <div className="relative mx-1">
                                 <Input
                                     type={showApiKey ? "text" : "password"}
-                                    className={`pr-24 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${isApiKeyLocked ? 'bg-gray-100 cursor-not-allowed' : ''
+                                    className={`!rounded-[3px] border-[var(--pt-border-strong)] bg-[var(--pt-surface)] pr-24 focus:border-[var(--pt-accent)] focus:ring-2 focus:ring-[rgba(var(--pt-accent-rgb),.2)] ${isApiKeyLocked ? 'cursor-not-allowed !bg-[var(--pt-surface-alt)]' : ''
                                         }`}
                                     value={apiKey || ''}
                                     onChange={(e) => setApiKey(e.target.value)}
@@ -192,7 +189,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                 {isApiKeyLocked && (
                                     <div
                                         onClick={handleInputClick}
-                                        className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 rounded-md cursor-not-allowed"
+                                        className="absolute inset-0 flex cursor-not-allowed items-center justify-center bg-[rgba(var(--pt-bg-rgb),.58)] [border-radius:3px]"
                                     />
                                 )}
                                 <div className="absolute inset-y-0 right-0 pr-1 flex items-center">
@@ -201,7 +198,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => setIsApiKeyLocked(!isApiKeyLocked)}
-                                        className={`transition-colors duration-200 ${isLockButtonVibrating ? 'animate-vibrate text-red-500' : ''
+                                        className={`!rounded-[3px] transition-colors duration-200 ${isLockButtonVibrating ? 'animate-vibrate text-[var(--pt-error)]' : ''
                                             }`}
                                         title={isApiKeyLocked ? "Unlock to edit" : "Lock to prevent editing"}
                                     >
@@ -212,6 +209,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => setShowApiKey(!showApiKey)}
+                                        className="!rounded-[3px]"
                                     >
                                         {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>

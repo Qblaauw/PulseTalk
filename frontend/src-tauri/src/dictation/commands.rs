@@ -1,12 +1,22 @@
 use super::history::{self, DictationHistoryItem};
 use crate::state::AppState;
+use std::str::FromStr;
 use tauri::{AppHandle, Manager};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 
 #[tauri::command]
 pub fn dictation_get_shortcut_status(
     status: tauri::State<'_, super::DictationShortcutStatusState>,
 ) -> super::DictationShortcutStatus {
     status.get()
+}
+
+#[tauri::command]
+pub fn dictation_set_shortcut(
+    app: AppHandle,
+    shortcut: String,
+) -> Result<super::DictationShortcutStatus, String> {
+    super::DictationShortcutStatusState::replace(&app, &shortcut)
 }
 
 #[tauri::command]

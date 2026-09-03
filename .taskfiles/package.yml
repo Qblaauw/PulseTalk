@@ -1,0 +1,73 @@
+version: '3'
+
+tasks:
+  windows:
+    desc: Build and collect a native Windows package
+    platforms: [windows]
+    requires:
+      vars:
+        - name: MODE
+          enum: [test, release]
+    cmds:
+      - task: :validate:config
+      - cmd: node scripts/release/release-tool.mjs preflight --version "{{.VERSION}}"
+        if: '{{eq .MODE "release"}}'
+      - task: :build:llama-windows
+      - cmd: pnpm.cmd --dir frontend exec tauri build --target x86_64-pc-windows-msvc -- --features vulkan
+      - cmd: node scripts/release/release-tool.mjs collect --platform windows --version "{{.VERSION}}"
+    vars:
+      VERSION:
+        sh: node scripts/release/release-tool.mjs version
+
+  macos:
+    desc: Build and collect a native Apple Silicon macOS package
+    platforms: [darwin]
+    requires:
+      vars:
+        - name: MODE
+          enum: [test, release]
+    cmds:
+      - task: :validate:config
+      - cmd: node scripts/release/release-tool.mjs preflight --version "{{.VERSION}}"
+        if: '{{eq .MODE "release"}}'
+      - task: :build:llama-macos
+      - cmd: pnpm --dir frontend exec tauri build --target aarch64-apple-darwin -- --features metal
+      - cmd: node scripts/release/release-tool.mjs collect --platform macos --version "{{.VERSION}}"
+    vars:
+      VERSION:
+        sh: node scripts/release/release-tool.mjs version
+
+  linux:
+    desc: Build and collect native Linux packages
+    platforms: [linux]
+    requires:
+      vars:
+        - name: MODE
+          enum: [test, release]
+    cmds:
+      - task: :validate:config
+      - cmd: node scripts/release/release-tool.mjs preflight --version "{{.VERSION}}"
+        if: '{{eq .MODE "release"}}'
+      - task: :build:llama-linux
+      - cmd: pnpm --dir frontend exec tauri build --target x86_64-unknown-linux-gnu --bundles deb,appimage,rpm -- --features openblas
+      - cmd: node scripts/release/release-tool.mjs collect --platform linux --version "{{.VERSION}}"
+    vars:
+      VERSION:
+        sh: node scripts/release/release-tool.mjs version
+
+  current:
+    desc: Build the package for the current operating system
+    requires:
+      vars:
+        - name: MODE
+          enum: [test, release]
+    cmds:
+      - task: windows
+        vars: { MODE: '{{.MODE}}' }
+        platforms: [windows]
+      - task: macos
+        vars: { MODE: '{{.MODE}}' }
+        platforms: [darwin]
+      - task: linux
+        vars: { MODE: '{{.MODE}}' }
+        platforms: [linux]

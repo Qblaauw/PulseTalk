@@ -1,0 +1,35 @@
+version: '3'
+
+output: group
+
+dotenv:
+  - .env.deploy.local
+
+includes:
+  doctor: .taskfiles/doctor.yml
+  validate: .taskfiles/validate.yml
+  build: .taskfiles/build.yml
+  package: .taskfiles/package.yml
+  release: .taskfiles/release.yml
+  github: .taskfiles/github.yml
+
+tasks:
+  default:
+    desc: List PulseTalq development and deployment tasks
+    cmds:
+      - task --list
+
+  test:
+    desc: Run the local validation suite
+    cmds:
+      - task: validate:local
+
+  deploy:
+    desc: Publish a staged release to GitHub Releases
+    requires:
+      vars: [VERSION, CONFIRM_RELEASE]
+    cmds:
+      - task: github:publish
+        vars:
+          VERSION: '{{.VERSION}}'
+          CONFIRM_RELEASE: '{{.CONFIRM_RELEASE}}'

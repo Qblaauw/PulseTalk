@@ -153,4 +153,9 @@ Types:
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's MIT License.
+By contributing, you agree to the [PolyphronAI Contributor License
+Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md). Contributions that modify or
+include upstream material remain subject to the applicable upstream license.
+The agreement does not grant permission to use PolyphronAI or PulseTalq
+trademarks, logos, product identity, or other branding. See [LICENSE.md](LICENSE.md)
+and [NOTICE.md](NOTICE.md) for the project's licensing and provenance terms.

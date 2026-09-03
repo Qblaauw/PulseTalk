@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Report local build and deployment capabilities
+    cmd: node scripts/release/release-tool.mjs doctor
+
+  release:
+    desc: Require every tool needed to publish a GitHub release
+    cmd: node scripts/release/release-tool.mjs doctor --strict-release

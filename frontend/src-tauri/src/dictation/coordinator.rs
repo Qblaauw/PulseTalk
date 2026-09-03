@@ -36,14 +36,9 @@ pub fn start_coordinator(app: AppHandle) {
                     if let Ok(target) = target.as_ref() {
                         session.record_target_process(target.process_label());
                     }
-                    #[cfg(target_os = "windows")]
-                    let overlay_anchor = target
-                        .as_ref()
-                        .ok()
-                        .and_then(super::WindowsTarget::focused_control_anchor);
-                    #[cfg(not(target_os = "windows"))]
-                    let overlay_anchor = None;
-                    super::prepare_overlay_for_activation(&app, overlay_anchor);
+                    // Capture owns delivery identity. Overlay placement is a separate
+                    // cursor-monitor concern and must never replace that target.
+                    super::prepare_overlay_for_activation(&app);
                     let (stop, stop_receiver) = mpsc::channel();
                     let worker = std::thread::spawn(move || {
                         let capture = ShortAudioCapture::start()?;

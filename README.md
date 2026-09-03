@@ -256,7 +256,12 @@ Thanks for all the contributions. Our community is what makes this project possi
 
 ## License
 
-MIT License - Feel free to use this project for your own purposes.
+Upstream code remains available under the [MIT License](LICENSE.md). Original
+PolyphronAI additions identified in [NOTICE.md](NOTICE.md) are protected by
+copyright and are available only under [LICENSE-POLYPHRONAI.md](LICENSE-POLYPHRONAI.md).
+That proprietary license does not grant permission to use PolyphronAI or
+PulseTalq trademarks, logos, product identity, or other branding. Third-party
+components may have separate license terms.
 
 ## Acknowledgments
 

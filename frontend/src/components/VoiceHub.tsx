@@ -46,42 +46,49 @@ export function VoiceHub({ meetings }: { meetings: CurrentMeeting[] }) {
   const [shortcut, setShortcut] = useState<ShortcutStatus | null>(null)
   const [dictation, setDictation] = useState<DictationState>({ phase: 'idle' })
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const mounted = useRef(true)
   const phaseResetTimer = useRef<number | null>(null)
 
   useEffect(() => {
-    mounted.current = true
-    Promise.all([
-      invoke<DictationHistoryItem[]>('dictation_list_history', { limit: 20 }),
-      invoke<ShortcutStatus>('dictation_get_shortcut_status'),
-    ])
-      .then(([items, status]) => {
-        if (!mounted.current) return
+    let disposed = false
+    let shortcutChanged = false
+    invoke<DictationHistoryItem[]>('dictation_list_history', { limit: 20 })
+      .then(items => {
+        if (disposed) return
         setHistory(items)
-        setShortcut(status)
       })
       .catch(error => console.error('Failed to load voice hub data:', error))
 
     const unlisten = listen<DictationState>('dictation-state', event => {
-      if (!mounted.current) return
+      if (disposed) return
       setDictation(event.payload)
       if (event.payload.phase === 'completed' || event.payload.phase === 'failed') {
         if (phaseResetTimer.current !== null) window.clearTimeout(phaseResetTimer.current)
         phaseResetTimer.current = window.setTimeout(() => {
-          if (mounted.current) setDictation({ phase: 'idle' })
+          if (!disposed) setDictation({ phase: 'idle' })
         }, event.payload.phase === 'completed' ? 1400 : 3400)
         window.setTimeout(() => {
           invoke<DictationHistoryItem[]>('dictation_list_history', { limit: 20 })
-            .then(items => mounted.current && setHistory(items))
+            .then(items => !disposed && setHistory(items))
             .catch(error => console.error('Failed to refresh voice hub history:', error))
         }, 250)
       }
     })
+    const unlistenShortcut = listen<ShortcutStatus>('dictation-shortcut-changed', event => {
+      shortcutChanged = true
+      if (!disposed) setShortcut(event.payload)
+    })
+    void unlistenShortcut
+      .then(() => invoke<ShortcutStatus>('dictation_get_shortcut_status'))
+      .then(status => {
+        if (!disposed && !shortcutChanged) setShortcut(status)
+      })
+      .catch(error => console.error('Failed to load dictation shortcut:', error))
 
     return () => {
-      mounted.current = false
+      disposed = true
       if (phaseResetTimer.current !== null) window.clearTimeout(phaseResetTimer.current)
       unlisten.then(dispose => dispose())
+      unlistenShortcut.then(dispose => dispose())
     }
   }, [])
 
@@ -106,6 +113,11 @@ export function VoiceHub({ meetings }: { meetings: CurrentMeeting[] }) {
 
   const active = dictation.phase !== 'idle' && dictation.phase !== 'cancelled'
   const visibleHistory = history.filter(item => item.finalText || item.failureMessage).slice(0, 4)
+  const shortcutLabel = shortcut === null
+    ? 'Loading shortcut…'
+    : shortcut.enabled && shortcut.shortcut
+      ? shortcut.shortcut
+      : shortcut.message ?? 'Shortcut unavailable'
 
   return (
     <div className="h-full overflow-y-auto bg-[#f3f5f6] px-6 pb-32 pt-7 text-[#19212a] lg:px-9">
@@ -137,7 +149,7 @@ export function VoiceHub({ meetings }: { meetings: CurrentMeeting[] }) {
               <div className="flex items-center justify-between gap-4">
                 <span className="inline-flex items-center gap-2 rounded-lg border border-[#4a5a62] bg-[#213139] px-3 py-1.5 font-mono text-xs text-[#d9e0e3]">
                   <Radio className={`h-3.5 w-3.5 ${active ? 'text-[#42d4bb]' : 'text-[#93a1a8]'}`} />
-                  {shortcut?.enabled ? shortcut.shortcut : 'Shortcut unavailable'}
+                  {shortcutLabel}
                 </span>
                 <PulseTalkMark className="h-11 w-11 text-[#ff3b1f] transition-transform group-hover:scale-105" />
               </div>
@@ -145,7 +157,7 @@ export function VoiceHub({ meetings }: { meetings: CurrentMeeting[] }) {
                 <h2 className="text-2xl font-semibold tracking-[-0.025em]">{phaseCopy[dictation.phase]}</h2>
                 <p className="mt-1 max-w-lg text-sm text-[#adbac0]">
                   {dictation.phase === 'listening'
-                    ? `Release ${shortcut?.shortcut ?? 'the shortcut'} to paste at the original cursor.`
+                    ? `Release ${shortcutLabel} to paste at the original cursor.`
                     : dictation.message ?? 'Hold the shortcut while speaking. PulseTalq transcribes locally, then pastes where you were typing.'}
                 </p>
                 <div className="mt-5 flex h-11 items-center gap-1.5" aria-hidden="true">
