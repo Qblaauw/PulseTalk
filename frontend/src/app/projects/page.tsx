@@ -1,3 +1,5 @@
+/* Copyright (c) 2026 PolyphronAI. All rights reserved. See NOTICE.md and LICENSE-POLYPHRONAI.md. */
+
 import { ProjectWorkspacePreview } from '@/components/ProjectWorkspacePreview';
 
 export default function ProjectsPage() {

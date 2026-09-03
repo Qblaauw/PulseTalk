@@ -1,6 +1,10 @@
 MIT License
 
-Copyright (c) 2026 PolyphronAI (polyphronai.com), for the PulseTalq fork
+This MIT License applies to the original Meetily material and to other
+material expressly identified as MIT-licensed in `NOTICE.md`. It does not
+apply to PolyphronAI-owned material listed in `NOTICE.md`, which is governed by
+`LICENSE-POLYPHRONAI.md`.
+
 Copyright (c) 2024 Zackriya Solutions, for the original Meetily work
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +27,8 @@ SOFTWARE.
 
 Trademark and other rights reservation
 
-This license grants rights to the copyright in the Software only. It does not
+This license grants rights to the copyright in the MIT-licensed Software only.
+It does not
 grant permission to use the names, logos, icons, product names, domain names,
 trade dress, or other trademarks and service marks of PolyphronAI, including
 "PolyphronAI" and "PulseTalq" (the "PolyphronAI Marks"). All rights in the

@@ -1,3 +1,8 @@
+"""Copyright (c) 2026 PolyphronAI. All rights reserved.
+
+See NOTICE.md and LICENSE-POLYPHRONAI.md.
+"""
+
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
