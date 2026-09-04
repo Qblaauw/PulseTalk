@@ -1,10 +1,16 @@
 package com.pulsetalq.android.setup
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pulsetalq.android.model.ModelInstallState
+import com.pulsetalq.android.model.ModelRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class SetupUiState(
     val microphoneGranted: Boolean = false,
@@ -19,8 +25,11 @@ data class SetupUiState(
         get() = microphoneGranted && modelReady && keyboardEnabled && keyboardSelected
 }
 
-class SetupViewModel : ViewModel() {
+class SetupViewModel(
+    private val modelRepository: ModelRepository? = null,
+) : ViewModel() {
     private val mutableUiState = MutableStateFlow(SetupUiState())
+    private var installJob: Job? = null
     val uiState: StateFlow<SetupUiState> = mutableUiState.asStateFlow()
 
     fun onPlatformReadiness(
@@ -63,6 +72,21 @@ class SetupViewModel : ViewModel() {
                 modelMessage = "Model setup needs attention",
                 errorMessage = state.message,
             )
+        }
+    }
+
+    fun refreshModel() {
+        val repository = modelRepository ?: return
+        viewModelScope.launch {
+            onModelState(withContext(Dispatchers.IO) { repository.inspect() })
+        }
+    }
+
+    fun installModel() {
+        val repository = modelRepository ?: return
+        if (installJob?.isActive == true) return
+        installJob = viewModelScope.launch {
+            onModelState(repository.install(::onModelState))
         }
     }
 

@@ -165,7 +165,7 @@ fun SetupScreen(
 
             Spacer(Modifier.height(18.dp))
             Text(
-                "English • Parakeet TDT INT8 • about 661 MB • Galaxy S20-class or better",
+                "English • Parakeet TDT INT8 • 661 MB download • Galaxy S20-class or better",
                 color = Muted,
                 fontSize = 12.sp,
             )
