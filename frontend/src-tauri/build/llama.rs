@@ -151,15 +151,7 @@ fn sidecar_target_dir(workspace_root: &Path) -> PathBuf {
     workspace_root.hash(&mut hasher);
     let workspace_hash = format!("{:016x}", hasher.finish());
 
-    // llama.cpp creates deeply nested CMake and MSBuild paths. Keep the nested
-    // Cargo target close to the drive root on Windows to stay below MAX_PATH.
-    if cfg!(windows) {
-        if let Some(system_drive) = std::env::var_os("SystemDrive") {
-            return PathBuf::from(format!(r"{}\", system_drive.to_string_lossy()))
-                .join("ptl")
-                .join(workspace_hash);
-        }
-    }
-
+    // llama.cpp creates deeply nested CMake and MSBuild paths. The short cache
+    // name stays below MAX_PATH on Windows and remains writable by the user.
     std::env::temp_dir().join("ptl").join(workspace_hash)
 }

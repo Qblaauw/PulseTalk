@@ -29,9 +29,8 @@ version metadata.
 
 Use a short `CARGO_TARGET_DIR` on Windows so whisper.cpp's CMake paths stay below
 the legacy 260-character path limit. The build script compiles llama.cpp in a
-separate cache under `C:\ptl` by default. Set
-`PULSETALQ_SIDECAR_TARGET_DIR` to another short absolute path if the system drive
-root is not writable.
+separate short cache under `%TEMP%\ptl` by default. Set
+`PULSETALQ_SIDECAR_TARGET_DIR` to another short absolute path if needed.
 
 Tauri packages two external binaries. `llama-helper` is built from workspace
 source. `frontend/src-tauri/build.rs` builds it before Tauri validates
