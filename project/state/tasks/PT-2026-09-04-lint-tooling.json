@@ -1,6 +1,11 @@
 {
   "blocked_by": [],
-  "commits": [],
+  "commits": [
+    "dc6f5657772248f344c203ec413d40d1b93c7da0",
+    "2d188babdc9a709354927382c1335e2b67f8a6a1",
+    "a4df6be087f8ff7212c827cb884b0a45fce122ab",
+    "8ba3609c2b47593b61af723b9ead27790171bf21"
+  ],
   "created_at": "2026-09-04T07:51:40Z",
   "exclusive_resources": [
     "frontend/package.json",
@@ -17,6 +22,76 @@
     "worktree": "F:/Dev Ops/PulseTalk/.worktrees/chore-PT-2026-09-04-lint-tooling"
   },
   "files_touched": [
+    "frontend/.eslintrc.json",
+    "frontend/eslint.config.mjs",
+    "frontend/package.json",
+    "frontend/pnpm-lock.yaml",
+    "frontend/src/app/layout.tsx",
+    "frontend/src/app/meeting-details/page-content.tsx",
+    "frontend/src/app/meeting-details/page.tsx",
+    "frontend/src/app/page.tsx",
+    "frontend/src/app/settings/page.tsx",
+    "frontend/src/components/AISummary/BlockNoteSummaryView.tsx",
+    "frontend/src/components/AISummary/Section.tsx",
+    "frontend/src/components/AISummary/index.tsx",
+    "frontend/src/components/AnalyticsDataModal.tsx",
+    "frontend/src/components/AudioLevelMeter.tsx",
+    "frontend/src/components/BluetoothPlaybackWarning.tsx",
+    "frontend/src/components/BuiltInModelManager.tsx",
+    "frontend/src/components/ChunkProgressDisplay.tsx",
+    "frontend/src/components/ComplianceNotification.tsx",
+    "frontend/src/components/DeviceSelection.tsx",
+    "frontend/src/components/EditableTitle.tsx",
+    "frontend/src/components/ImportAudio/ImportAudioDialog.tsx",
+    "frontend/src/components/LanguageSelection.tsx",
+    "frontend/src/components/MeetingDetails/RetranscribeDialog.tsx",
+    "frontend/src/components/MeetingDetails/SummaryGeneratorButtonGroup.tsx",
+    "frontend/src/components/MeetingDetails/SummaryPanel.tsx",
+    "frontend/src/components/MeetingDetails/TranscriptPanel.tsx",
+    "frontend/src/components/MessageToast.tsx",
+    "frontend/src/components/ModelDownloadProgress.tsx",
+    "frontend/src/components/ModelSettingsModal.tsx",
+    "frontend/src/components/ParakeetModelManager.tsx",
+    "frontend/src/components/RecordingControls.tsx",
+    "frontend/src/components/RecordingSettings.tsx",
+    "frontend/src/components/RecordingStatusBar.tsx",
+    "frontend/src/components/Sidebar/SidebarProvider.tsx",
+    "frontend/src/components/SummaryModelSettings.tsx",
+    "frontend/src/components/TranscriptRecovery/TranscriptRecovery.tsx",
+    "frontend/src/components/TranscriptView.tsx",
+    "frontend/src/components/UpdateDialog.tsx",
+    "frontend/src/components/VirtualizedTranscriptView.tsx",
+    "frontend/src/components/WhisperModelManager.tsx",
+    "frontend/src/components/molecules/form-components/form-input-item.tsx",
+    "frontend/src/components/molecules/form-components/form-input-switch.tsx",
+    "frontend/src/components/molecules/form-components/form-select-item.tsx",
+    "frontend/src/components/onboarding/OnboardingFlow.tsx",
+    "frontend/src/components/onboarding/steps/DownloadProgressStep.tsx",
+    "frontend/src/components/onboarding/steps/PermissionsStep.tsx",
+    "frontend/src/components/onboarding/steps/SetupOverviewStep.tsx",
+    "frontend/src/components/shared/DownloadProgressToast.tsx",
+    "frontend/src/contexts/OnboardingContext.tsx",
+    "frontend/src/contexts/TranscriptContext.tsx",
+    "frontend/src/hooks/meeting-details/useCopyOperations.ts",
+    "frontend/src/hooks/meeting-details/useMeetingData.ts",
+    "frontend/src/hooks/meeting-details/useMeetingOperations.ts",
+    "frontend/src/hooks/meeting-details/useModelConfiguration.ts",
+    "frontend/src/hooks/meeting-details/useSummaryGeneration.ts",
+    "frontend/src/hooks/useAudioPlayer.ts",
+    "frontend/src/hooks/useAutoScroll.ts",
+    "frontend/src/hooks/useImportAudio.ts",
+    "frontend/src/hooks/usePaginatedTranscripts.ts",
+    "frontend/src/hooks/useProcessingProgress.ts",
+    "frontend/src/hooks/useRecordingStart.ts",
+    "frontend/src/hooks/useRecordingStateSync.ts",
+    "frontend/src/hooks/useRecordingStop.ts",
+    "frontend/src/hooks/useTranscriptRecovery.ts",
+    "frontend/src/lib/analytics.ts",
+    "frontend/src/lib/error-message.ts",
+    "frontend/src/lib/recordingNotification.tsx",
+    "frontend/src/services/indexedDBService.ts",
+    "frontend/src/services/storageService.ts",
+    "frontend/src/types/index.ts",
     "project/state/tasks/PT-2026-09-04-lint-tooling.json"
   ],
   "host_refs": {
@@ -30,10 +105,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "in_progress",
+  "status": "ready_for_review",
   "subject": "Make the Next 14 frontend lint check non-interactive and fix its findings",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T07:51:40Z",
+  "updated_at": "2026-09-04T08:39:20Z",
   "verification_contract": [
     "pnpm run lint in frontend exits successfully without prompting",
     "pnpm exec tsc --noEmit in frontend introduces no errors beyond the known missing bun:test types",
@@ -50,6 +125,40 @@
       "check": "baseline pnpm exec tsc --noEmit in frontend",
       "note": "Only tests/lib/blocknote-markdown.test.ts failed because bun:test types are not installed",
       "result": "known_failure"
+    },
+    {
+      "check": "corepack pnpm@9.15.9 install --frozen-lockfile in frontend at 8ba3609c2b47593b61af723b9ead27790171bf21",
+      "note": "Lockfile installed without changes and retained the declared ProseMirror overrides",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run lint in frontend at 8ba3609c2b47593b61af723b9ead27790171bf21",
+      "note": "Exited successfully without prompting: 0 errors and 36 pre-existing react-hooks/exhaustive-deps warnings across 19 files; no warning-producing hook dependency arrays changed and no lint rules were weakened",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm exec tsc --noEmit in frontend at 8ba3609c2b47593b61af723b9ead27790171bf21",
+      "note": "Only the accepted pre-existing tests/lib/blocknote-markdown.test.ts missing bun:test declaration remains",
+      "result": "known_failure"
+    },
+    {
+      "check": "pnpm run build in frontend at 8ba3609c2b47593b61af723b9ead27790171bf21",
+      "note": "Next 14.2.35 production build passed and generated all 11 static pages",
+      "result": "pass"
+    },
+    {
+      "check": "git diff --check 7ca2a1572e85a471c2dd328223bbe63d32c62625..8ba3609c2b47593b61af723b9ead27790171bf21",
+      "result": "pass"
+    },
+    {
+      "check": "independent code review at 8ba3609c2b47593b61af723b9ead27790171bf21",
+      "note": "No remaining findings after the error-message behavior-preservation fix; Tauri payloads, storage fields, state transitions, and async ordering were unchanged",
+      "result": "pass"
+    },
+    {
+      "check": "target integration freshness before handoff",
+      "note": "origin/integration/pulsetalq-next remained at 7ca2a1572e85a471c2dd328223bbe63d32c62625; implementation head was 0 commits behind and 4 commits ahead before the handoff metadata commit",
+      "result": "pass"
     }
   ]
 }
