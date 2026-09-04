@@ -2,7 +2,9 @@
   "blocked_by": [],
   "commits": [
     "42c3847baa03c112459621afcd2eba631385f08d",
-    "08f60c246277b1096bb194face7412bdf7e47ca7"
+    "08f60c246277b1096bb194face7412bdf7e47ca7",
+    "2a95d3209a993ba0dfc9ed87b1921cdd4ae5a81d",
+    "e0b56edb44db84a3ef8b4cf18fd680526838a845"
   ],
   "created_at": "2026-09-03T18:00:00Z",
   "execution_context": {
@@ -22,7 +24,13 @@
     "project/scope-briefs/android-sideload-keyboard.md",
     "project/plans/android-sideload-keyboard.md",
     "project/state/goals/P-2026-09-04-android-sideload-keyboard.json",
-    "project/state/tasks/PT-2026-09-03-android-sideload-keyboard.json"
+    "project/state/tasks/PT-2026-09-03-android-sideload-keyboard.json",
+    "android/",
+    "scripts/android/",
+    "docs/android-sideload-test.md",
+    "docs/verification/android-build-report.md",
+    "docs/verification/android-build-report.json",
+    "docs/verification/android-device-smoke.md"
   ],
   "host_refs": {},
   "id": "PT-2026-09-03-android-sideload-keyboard",
@@ -33,10 +41,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "planned",
+  "status": "active",
   "subject": "Build the first sideloadable Android voice keyboard",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T05:30:20Z",
+  "updated_at": "2026-09-04T06:32:20Z",
   "verification_contract": [
     "scope brief approved",
     "dispatchable implementation plan validated",
@@ -46,6 +54,8 @@
   "verification_receipts": [
     "Baseline cargo build attempted before scope edit and failed in inherited desktop dependency llama-cpp-sys-2 because libclang.dll was not configured.",
     "Scope checkpoint 42c3847baa03c112459621afcd2eba631385f08d passed task JSON parsing, git diff --check, and ProductOps prose lint.",
-    "Plan P-2026-09-04-android-sideload-keyboard passed validate-plan with no findings, passed ProductOps prose lint, and sealed goal contract revision 1 at digest 264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe."
+    "Plan P-2026-09-04-android-sideload-keyboard passed validate-plan with no findings, passed ProductOps prose lint, and sealed goal contract revision 1 at digest 264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe.",
+    "report:docs/verification/android-build-report.json#package-gate",
+    "Android 16 emulator verification passed setup instrumentation, IME registration and selection, and cross-app tap typing. Physical Samsung microphone, offline, recovery, and performance acceptance remains pending."
   ]
 }

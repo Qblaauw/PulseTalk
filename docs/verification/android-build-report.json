@@ -1,0 +1,42 @@
+{
+  "schema": "product-ops.verification-report/v1",
+  "status": "passed",
+  "exit_code": 0,
+  "recorded_at": "2026-09-04T06:32:20Z",
+  "source_commit": "2a95d3209a993ba0dfc9ed87b1921cdd4ae5a81d",
+  "artifact": {
+    "path": "android/app/build/outputs/apk/debug/app-debug.apk",
+    "bytes": 59083306,
+    "sha256": "a600b8099bbcfc58c3809fd6803594221497abe5a5a4852bdffa5e31cde5d8f7",
+    "application_id": "com.pulsetalq.android.debug",
+    "abis": [
+      "arm64-v8a"
+    ],
+    "min_sdk": 29,
+    "target_sdk": 36,
+    "signature_schemes": [
+      "v2"
+    ]
+  },
+  "checks": {
+    "clean_build": "passed",
+    "unit_tests": {
+      "passed": 18,
+      "failed": 0,
+      "errors": 0
+    },
+    "lint_debug": "passed",
+    "assemble_debug": "passed",
+    "assemble_debug_android_test": "passed",
+    "model_files_excluded": true,
+    "gpl_derived_source_scan": "passed",
+    "third_party_notices": "present",
+    "api_36_emulator_instrumentation": "passed",
+    "api_36_emulator_ime_registration": "passed",
+    "api_36_emulator_tap_typing": "passed"
+  },
+  "hardware_acceptance": {
+    "status": "pending",
+    "reason": "No Android 16 Samsung handset was connected when the report was recorded."
+  }
+}

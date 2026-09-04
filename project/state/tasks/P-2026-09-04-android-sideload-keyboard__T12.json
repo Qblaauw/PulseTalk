@@ -3,7 +3,15 @@
     "P-2026-09-04-android-sideload-keyboard/T10",
     "P-2026-09-04-android-sideload-keyboard/T11"
   ],
-  "commits": [],
+  "commits": [
+    "0a1db865524ac45eeeae8801544ee01d09f70d7d",
+    "1b8d4e9c1fb4933106aed99e12aae7681d9b428a",
+    "2a95d3209a993ba0dfc9ed87b1921cdd4ae5a81d",
+    "41bea4dbcf1ad0b6a806c899fba70c57fc7c219f",
+    "4f75f0ca3e040768275b490be8546dbadf8ed5a5",
+    "c3408a21cfbc4c02df7e3d8b37949bc95677cd7d",
+    "d5745a05b457dffb07c2f50a91ee47e465591439"
+  ],
   "created_at": "2026-09-04T05:30:12Z",
   "execution_context": {
     "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
@@ -27,8 +35,10 @@
   ],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "pending",
+  "status": "done",
   "subject": "Build and document the sideload package",
-  "updated_at": "2026-09-04T05:30:12Z",
-  "verification_receipts": []
+  "updated_at": "2026-09-04T06:32:20Z",
+  "verification_receipts": [
+    "report:docs/verification/android-build-report.json#package-gate"
+  ]
 }

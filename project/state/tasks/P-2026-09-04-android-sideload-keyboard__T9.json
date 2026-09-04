@@ -4,7 +4,10 @@
     "P-2026-09-04-android-sideload-keyboard/T4",
     "P-2026-09-04-android-sideload-keyboard/T6"
   ],
-  "commits": [],
+  "commits": [
+    "2a95d3209a993ba0dfc9ed87b1921cdd4ae5a81d",
+    "4d4e06a24c6a34f0983af8c18e5539b8cb64951c"
+  ],
   "created_at": "2026-09-04T05:30:11Z",
   "execution_context": {
     "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
@@ -29,8 +32,10 @@
   ],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "pending",
+  "status": "done",
   "subject": "Implement the isolated microphone and ASR service",
-  "updated_at": "2026-09-04T05:30:11Z",
-  "verification_receipts": []
+  "updated_at": "2026-09-04T06:32:20Z",
+  "verification_receipts": [
+    "report:docs/verification/android-build-report.json#android-build"
+  ]
 }

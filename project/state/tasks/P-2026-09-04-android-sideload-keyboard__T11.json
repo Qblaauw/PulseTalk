@@ -3,7 +3,9 @@
     "P-2026-09-04-android-sideload-keyboard/T7",
     "P-2026-09-04-android-sideload-keyboard/T9"
   ],
-  "commits": [],
+  "commits": [
+    "e6f1850254d24186631936cd3ceaf3d7f592fa17"
+  ],
   "created_at": "2026-09-04T05:30:12Z",
   "execution_context": {
     "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
@@ -27,8 +29,10 @@
   ],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "pending",
+  "status": "done",
   "subject": "Connect setup actions and add setup instrumentation",
-  "updated_at": "2026-09-04T05:30:12Z",
-  "verification_receipts": []
+  "updated_at": "2026-09-04T06:32:20Z",
+  "verification_receipts": [
+    "report:docs/verification/android-build-report.json#instrumentation-build"
+  ]
 }

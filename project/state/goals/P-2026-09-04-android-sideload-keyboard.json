@@ -233,8 +233,40 @@
   "created_at": "2026-09-04T05:30:20Z",
   "criteria": [
     {
+      "attestation": {
+        "applied_at": "2026-09-04T06:35:15Z",
+        "contract_digest": "264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe",
+        "criterion_definition_digest": "3b1cada2ac1b405842c0aca6ff3b553e3954bbedf8242188f7868deb8fbcac41",
+        "evidence_digest": "9d87f66344d4cdfdb9fc2c3fe651b2de16a6f9e9c2d31fec65c981098f4a886b",
+        "judge": "Codex",
+        "resolution_digest": "65c038cd77edb1394dab37fa7367c96cd0e36e590874d5c7a64a489a924b1663",
+        "semantic_adequacy": "judged"
+      },
       "criterion": "`assembleDebug` produces one installable APK and the handoff records its SHA-256.",
       "definition_digest": "3b1cada2ac1b405842c0aca6ff3b553e3954bbedf8242188f7868deb8fbcac41",
+      "evidence": [
+        {
+          "kind": "task",
+          "task_id": "T1"
+        },
+        {
+          "kind": "task",
+          "task_id": "T12"
+        },
+        {
+          "kind": "task",
+          "task_id": "T2"
+        },
+        {
+          "kind": "task",
+          "task_id": "T3"
+        },
+        {
+          "kind": "report",
+          "path": "docs/verification/android-build-report.json",
+          "sha256": "df9f221ef01b88efa46bfd8f93e1a672e990c78288fdd0bc3774120d9c67ba40"
+        }
+      ],
       "id": "G1",
       "receipts": [],
       "satisfied_by": [
@@ -243,8 +275,8 @@
         "T2",
         "T3"
       ],
-      "status": "pending",
-      "updated_at": "2026-09-04T05:30:20Z"
+      "status": "satisfied",
+      "updated_at": "2026-09-04T06:35:15Z"
     },
     {
       "criterion": "The APK installs on the Android 16 test handset without root access.",
@@ -346,8 +378,36 @@
       "updated_at": "2026-09-04T05:30:20Z"
     },
     {
+      "attestation": {
+        "applied_at": "2026-09-04T06:35:35Z",
+        "contract_digest": "264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe",
+        "criterion_definition_digest": "e78f31defe3db3b171c61b65c2cafa882f478769748f757ced37d1c2e4b5a620",
+        "evidence_digest": "530316cef955e783a1f3af45a44990a8f2f19f2f2b4ffee8ad6e74fd0c0a17da",
+        "judge": "Codex",
+        "resolution_digest": "83d2cadef39ffab179712771c5323517144cfbb86f3f96e0daabd1a70713e0e3",
+        "semantic_adequacy": "judged"
+      },
       "criterion": "No GPL-derived source is present, and bundled notices cover the ASR model and native dependencies.",
       "definition_digest": "e78f31defe3db3b171c61b65c2cafa882f478769748f757ced37d1c2e4b5a620",
+      "evidence": [
+        {
+          "kind": "task",
+          "task_id": "T12"
+        },
+        {
+          "kind": "task",
+          "task_id": "T5"
+        },
+        {
+          "kind": "task",
+          "task_id": "T6"
+        },
+        {
+          "kind": "report",
+          "path": "docs/verification/android-build-report.json",
+          "sha256": "df9f221ef01b88efa46bfd8f93e1a672e990c78288fdd0bc3774120d9c67ba40"
+        }
+      ],
       "id": "G10",
       "receipts": [],
       "satisfied_by": [
@@ -355,8 +415,8 @@
         "T5",
         "T6"
       ],
-      "status": "pending",
-      "updated_at": "2026-09-04T05:30:20Z"
+      "status": "satisfied",
+      "updated_at": "2026-09-04T06:35:35Z"
     }
   ],
   "plan_id": "P-2026-09-04-android-sideload-keyboard",
@@ -605,5 +665,5 @@
     "section6_sha256": "cb2d49cdcd1bb9a1536ef31c46ae35a69e09088575bcc1daed27441a5a2d4ae1"
   },
   "tombstones": [],
-  "updated_at": "2026-09-04T05:30:20Z"
+  "updated_at": "2026-09-04T06:35:35Z"
 }
