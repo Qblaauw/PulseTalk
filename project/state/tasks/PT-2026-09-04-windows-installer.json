@@ -13,7 +13,8 @@
     "target": "x86_64-pc-windows-msvc NSIS CPU profile"
   },
   "commits": [
-    "9a9190af967bc2d60f6a654c12e74785adba69da"
+    "9a9190af967bc2d60f6a654c12e74785adba69da",
+    "146f0dd409c783f753587be81cddcb9df50c5842"
   ],
   "created_at": "2026-09-04T15:14:18Z",
   "exclusive_resources": [
@@ -43,10 +44,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "ready_for_review",
+  "status": "done",
   "subject": "Build and verify a new unsigned Windows NSIS installer from the current PulseTalq integration candidate",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T15:29:35Z",
+  "updated_at": "2026-09-04T15:30:36Z",
   "verification_contract": [
     "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
     "python scripts/verify-installer-assets.py passes before packaging",
