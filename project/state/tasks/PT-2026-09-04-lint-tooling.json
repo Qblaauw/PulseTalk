@@ -1,0 +1,55 @@
+{
+  "blocked_by": [],
+  "commits": [],
+  "created_at": "2026-09-04T07:51:40Z",
+  "exclusive_resources": [
+    "frontend/package.json",
+    "frontend/pnpm-lock.yaml",
+    "frontend/eslint.config.mjs",
+    "frontend/.eslintrc.json",
+    "frontend TypeScript files changed only to resolve lint findings"
+  ],
+  "execution_context": {
+    "base_ref": "origin/integration/pulsetalq-next",
+    "base_sha": "7ca2a1572e85a471c2dd328223bbe63d32c62625",
+    "branch": "chore/PT-2026-09-04-lint-tooling",
+    "repository": "PulseTalk",
+    "worktree": "F:/Dev Ops/PulseTalk/.worktrees/chore-PT-2026-09-04-lint-tooling"
+  },
+  "files_touched": [
+    "project/state/tasks/PT-2026-09-04-lint-tooling.json"
+  ],
+  "host_refs": {
+    "runtime": "codex-root/t3-code"
+  },
+  "id": "PT-2026-09-04-lint-tooling",
+  "kind": "chore",
+  "local_id": null,
+  "owner": "codex-root",
+  "plan_id": "docs/plans/2026-09-04-pulsetalq-ui-redesign-implementation.md#4-follow-up-plan",
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "in_progress",
+  "subject": "Make the Next 14 frontend lint check non-interactive and fix its findings",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-04T07:51:40Z",
+  "verification_contract": [
+    "pnpm run lint in frontend exits successfully without prompting",
+    "pnpm exec tsc --noEmit in frontend introduces no errors beyond the known missing bun:test types",
+    "pnpm run build in frontend passes",
+    "git diff --check passes"
+  ],
+  "verification_receipts": [
+    {
+      "check": "baseline pnpm run lint in frontend",
+      "note": "Next 14 prompted to configure ESLint and exited with code 1",
+      "result": "blocked"
+    },
+    {
+      "check": "baseline pnpm exec tsc --noEmit in frontend",
+      "note": "Only tests/lib/blocknote-markdown.test.ts failed because bun:test types are not installed",
+      "result": "known_failure"
+    }
+  ]
+}
