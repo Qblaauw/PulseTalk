@@ -59,6 +59,7 @@ which = "6.0.1"
 zip = "2.2"           # ZIP extraction (Windows, macOS)
 tar = "0.4"           # TAR extraction (Linux)
 xz2 = "0.1"           # XZ decompression (Linux)
+sha2 = "0.10"         # Sidecar integrity verification
 
 
 [dependencies]
@@ -175,7 +176,9 @@ futures-channel = "0.3.31"
 
 # PERFORMANCE: Enable Metal GPU + CoreML acceleration automatically on macOS
 # CoreML provides additional acceleration for Apple Silicon chips
-whisper-rs = { version = "0.13.2", features = ["raw-api", "metal", "coreml"] }
+# Keep this exact release aligned with the workspace lockfile. whisper-rs 0.13.2
+# resolves whisper-rs-sys 0.11.1, which vendors whisper.cpp 1.7.1.
+whisper-rs = { version = "=0.13.2", features = ["raw-api", "metal", "coreml"] }
 
 # Windows-specific dependencies
 # Default: CPU-only build (no BLAS)
@@ -184,7 +187,7 @@ whisper-rs = { version = "0.13.2", features = ["raw-api", "metal", "coreml"] }
 #   --features vulkan   (AMD/Intel GPUs)
 #   --features openblas (OpenBLAS optimization, requires BLAS_INCLUDE_DIRS)
 [target.'cfg(target_os = "windows")'.dependencies]
-whisper-rs = { version = "0.13.2", features = ["raw-api"] }
+whisper-rs = { version = "=0.13.2", features = ["raw-api"] }
 futures-channel = "0.3.31"
 windows-sys = { version = "0.61.2", features = [
     "Win32_Foundation",
@@ -211,7 +214,7 @@ windows = { version = "0.61.3", features = [
 #   --features hipblas  (AMD ROCm)
 #   --features openblas (OpenBLAS optimization, requires BLAS_INCLUDE_DIRS)
 [target.'cfg(target_os = "linux")'.dependencies]
-whisper-rs = { version = "0.13.2", features = ["raw-api"] }
+whisper-rs = { version = "=0.13.2", features = ["raw-api"] }
 futures-channel = "0.3.31"
 
 [dev-dependencies]
