@@ -4,7 +4,8 @@ param(
     [string]$Action = "install",
     [string]$Apk = "",
     [string]$ExpectedSha256 = "a600b8099bbcfc58c3809fd6803594221497abe5a5a4852bdffa5e31cde5d8f7",
-    [string]$AndroidSdk = ""
+    [string]$AndroidSdk = "",
+    [switch]$PermitEmulatorPreflight
 )
 
 $ErrorActionPreference = "Stop"
@@ -32,9 +33,12 @@ if ($devices.Count -ne 1) {
 }
 $serial = (($devices[0] -split '\s+')[0]).Trim()
 function Invoke-Adb {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
+    param(
+        [switch]$AllowFailure,
+        [Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments
+    )
     $result = & $adb -s $serial @Arguments
-    if ($LASTEXITCODE -ne 0) {
+    if ($LASTEXITCODE -ne 0 -and -not $AllowFailure) {
         throw "ADB failed: adb -s $serial $($Arguments -join ' ')"
     }
     return $result
@@ -44,11 +48,12 @@ $sdk = (Invoke-Adb shell getprop ro.build.version.sdk).Trim()
 $manufacturer = (Invoke-Adb shell getprop ro.product.manufacturer).Trim()
 $model = (Invoke-Adb shell getprop ro.product.model).Trim()
 $build = (Invoke-Adb shell getprop ro.build.fingerprint).Trim()
+$isEmulator = (Invoke-Adb shell getprop ro.kernel.qemu).Trim() -eq "1"
 $memoryKb = ((Invoke-Adb shell cat /proc/meminfo | Select-String '^MemTotal:').ToString() -replace '\D', '')
 if ($sdk -ne "36") {
     throw "The connected device runs API $sdk. This smoke test requires Android 16 / API 36."
 }
-if ($manufacturer -notmatch '(?i)samsung') {
+if ($manufacturer -notmatch '(?i)samsung' -and -not ($PermitEmulatorPreflight -and $isEmulator)) {
     throw "The connected device reports manufacturer '$manufacturer'. Use the required Samsung handset."
 }
 $actualSha = (Get-FileHash -LiteralPath $Apk -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -67,7 +72,7 @@ switch ($Action) {
     "status" {
         $registered = @((Invoke-Adb shell ime list -s) | Where-Object { $_ -eq $imeComponent }).Count -eq 1
         $selected = (Invoke-Adb shell settings get secure default_input_method).Trim() -eq $imeComponent
-        $voicePid = (Invoke-Adb shell pidof "$packageName`:voice" 2>$null).Trim()
+        $voicePid = [string]::Join("`n", @(Invoke-Adb -AllowFailure shell pidof "$packageName`:voice")).Trim()
         [ordered]@{
             serial = $serial
             manufacturer = $manufacturer
@@ -76,6 +81,7 @@ switch ($Action) {
             build = $build
             memoryKb = $memoryKb
             apkSha256 = $actualSha
+            acceptanceEligible = $manufacturer -match '(?i)samsung' -and -not $isEmulator
             imeRegistered = $registered
             imeSelected = $selected
             voiceProcessPid = $voicePid

@@ -24,6 +24,18 @@ Reviewed APK SHA-256: `a600b8099bbcfc58c3809fd6803594221497abe5a5a4852bdffa5e31c
 6. During an active voice request, run `scripts/android/device-smoke.ps1 -Action kill-voice` and verify recovery.
 7. Run `scripts/android/device-smoke.ps1 -Action metrics` and record the structured timing line.
 
+The script rejects non-Samsung devices by default. Maintainers can run
+`scripts/android/device-smoke.ps1 -Action status -PermitEmulatorPreflight` on an
+API 36 emulator to check the script itself. Emulator output always sets
+`acceptanceEligible` to `false` and cannot satisfy this report.
+
+## Harness check
+
+The API 36 emulator preflight returned valid status JSON while the optional
+`:voice` process was idle. Running the same command without
+`-PermitEmulatorPreflight` rejected the Google emulator, so the Samsung hardware
+gate remains active.
+
 ## Result matrix
 
 | Check | Result | Evidence |
