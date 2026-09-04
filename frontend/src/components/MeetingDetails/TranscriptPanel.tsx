@@ -68,7 +68,7 @@ export function TranscriptPanel({
 
   return (
     <section className="flex min-w-0 flex-1 flex-col bg-[var(--pt-bg)]" aria-label={mode === 'context' ? 'Meeting context' : 'Meeting transcript'}>
-      <div className="mx-auto flex min-h-0 w-full max-w-[1180px] flex-1 flex-col px-5 py-5 md:px-8 md:py-6">
+      <div className={`mx-auto flex min-h-0 w-full flex-1 flex-col px-5 py-5 md:px-8 md:py-6 ${mode === 'transcript' ? 'max-w-[820px]' : 'max-w-[1180px]'}`}>
       {/* Title area */}
       <div className="mb-4 flex flex-col gap-1 border-b border-[var(--pt-border)] pb-4">
         <p className="pt-label text-[var(--pt-text-tertiary)]">{mode === 'context' ? 'Summary guidance' : 'Source record'}</p>

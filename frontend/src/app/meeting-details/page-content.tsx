@@ -17,11 +17,11 @@ import { useTemplates } from '@/hooks/meeting-details/useTemplates';
 import { useCopyOperations } from '@/hooks/meeting-details/useCopyOperations';
 import { useMeetingOperations } from '@/hooks/meeting-details/useMeetingOperations';
 import { useConfig } from '@/contexts/ConfigContext';
-import { Button } from '@/components/ui/button';
-import { Check, FileText, ListChecks, Save, SlidersHorizontal } from 'lucide-react';
+import { Check, FileText, ListChecks, Save } from 'lucide-react';
 import { EditableTitle } from '@/components/EditableTitle';
+import { PrivacyChip } from '@/components/AppShell/StateChips';
 
-type WorkspaceView = 'outcomes' | 'transcript' | 'context';
+type WorkspaceView = 'summary' | 'transcript';
 
 export default function PageContent({
   meeting,
@@ -62,7 +62,7 @@ export default function PageContent({
   const [customPrompt, setCustomPrompt] = useState<string>('');
   const [isRecording] = useState(false);
   const [summaryResponse] = useState<SummaryResponse | null>(null);
-  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>('outcomes');
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>('summary');
 
   // Ref to store the modal open function from SummaryGeneratorButtonGroup
   const openModelSettingsRef = useRef<(() => void) | null>(null);
@@ -178,11 +178,10 @@ export default function PageContent({
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="flex flex-col h-screen bg-[var(--pt-bg)] text-[var(--pt-text)]"
     >
-      <header className="shrink-0 border-b border-[var(--pt-border)] bg-[var(--pt-surface)] px-5 py-4 md:px-8">
+      <header className="sticky top-0 z-10 shrink-0 border-b border-[var(--pt-border)] bg-[var(--pt-glass)] backdrop-blur-xl px-5 py-4 md:px-8">
         <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="pt-label mb-1 text-[var(--pt-text-tertiary)]">Meeting review</p>
               <EditableTitle
                 title={meetingData.meetingTitle}
                 isEditing={meetingData.isEditingTitle}
@@ -190,9 +189,12 @@ export default function PageContent({
                 onFinishEditing={() => meetingData.setIsEditingTitle(false)}
                 onChange={meetingData.handleTitleChange}
               />
-              <p className="mt-1 text-xs text-[var(--pt-text-tertiary)]">
-                {new Date(meeting.created_at).toLocaleString()} · {meetingData.transcripts.length} transcript segments
-              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <p className="text-xs text-[var(--pt-text-tertiary)]">
+                  {new Date(meeting.created_at).toLocaleString()} · {meetingData.transcripts.length} transcript segments
+                </p>
+                <PrivacyChip state="stored-on-device" />
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <span className={`pt-badge ${meetingData.isSaving || hasUnsavedChanges ? 'pt-badge--warning' : 'pt-badge--success'}`}>
@@ -202,39 +204,36 @@ export default function PageContent({
                     ? 'Unsaved changes'
                     : <><Check className="mr-1 h-3 w-3" /> Saved locally</>}
               </span>
-              <Button
+              <button
+                type="button"
                 onClick={meetingData.saveAllChanges}
                 disabled={meetingData.isSaving || !hasUnsavedChanges}
-                className="rounded-[3px] bg-[var(--pt-text)] text-[var(--pt-text-inverse)] hover:bg-[var(--pt-surface-dark)]"
+                className="pt-button pt-button--secondary pt-button--sm"
               >
                 <Save className="h-4 w-4" />
                 Save changes
-              </Button>
+              </button>
             </div>
           </div>
 
-          <nav className="flex min-w-0 gap-1 overflow-x-auto" aria-label="Meeting workspace">
+          <div className="pt-segmented" role="tablist" aria-label="Meeting workspace">
             {([
-              ['outcomes', ListChecks, 'Outcomes'],
+              ['summary', ListChecks, 'Summary'],
               ['transcript', FileText, 'Transcript'],
-              ['context', SlidersHorizontal, 'Context'],
             ] as const).map(([view, Icon, label]) => (
               <button
                 key={view}
                 type="button"
+                role="tab"
+                className="pt-segmented__item"
                 onClick={() => setWorkspaceView(view)}
-                aria-current={workspaceView === view ? 'page' : undefined}
-                className={`relative flex min-h-11 items-center gap-2 px-4 text-sm font-medium transition-colors pt-focus-ring ${workspaceView === view
-                  ? 'text-[var(--pt-text)]'
-                  : 'text-[var(--pt-text-tertiary)] hover:text-[var(--pt-text)]'
-                }`}
+                aria-selected={workspaceView === view}
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {workspaceView === view && <span className="absolute inset-x-3 bottom-0 h-0.5 bg-[var(--pt-accent)]" />}
               </button>
             ))}
-          </nav>
+          </div>
         </div>
       </header>
 
@@ -261,19 +260,7 @@ export default function PageContent({
           onRefetchTranscripts={onRefetchTranscripts}
           mode="transcript"
         />}
-        {workspaceView === 'context' && <TranscriptPanel
-          transcripts={meetingData.transcripts}
-          customPrompt={customPrompt}
-          onPromptChange={setCustomPrompt}
-          onCopyTranscript={copyOperations.handleCopyTranscript}
-          onOpenMeetingFolder={meetingOperations.handleOpenMeetingFolder}
-          isRecording={isRecording}
-          meetingId={meeting.id}
-          meetingFolderPath={meeting.folder_path}
-          onRefetchTranscripts={onRefetchTranscripts}
-          mode="context"
-        />}
-        {workspaceView === 'outcomes' && <SummaryPanel
+        {workspaceView === 'summary' && <SummaryPanel
           meeting={meeting}
           meetingTitle={meetingData.meetingTitle}
           onTitleChange={meetingData.handleTitleChange}
@@ -295,6 +282,7 @@ export default function PageContent({
           onGenerateSummary={summaryGeneration.handleGenerateSummary}
           onStopGeneration={summaryGeneration.handleStopGeneration}
           customPrompt={customPrompt}
+          onPromptChange={setCustomPrompt}
           summaryResponse={summaryResponse}
           onSaveSummary={meetingData.handleSaveSummary}
           onSummaryChange={meetingData.handleSummaryChange}
@@ -307,6 +295,11 @@ export default function PageContent({
           onTemplateSelect={templates.handleTemplateSelection}
           isModelConfigLoading={false}
           onOpenModelSettings={handleRegisterModalOpen}
+          meetingId={meeting.id}
+          meetingFolderPath={meeting.folder_path}
+          onOpenMeetingFolder={meetingOperations.handleOpenMeetingFolder}
+          onRefetchTranscripts={onRefetchTranscripts}
+          isRecording={isRecording}
         />}
       </div>
     </motion.div>

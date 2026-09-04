@@ -49,7 +49,7 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
             onFinishEditing();
           }
         }}
-        className="text-2xl font-bold bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-3 py-1 w-full resize-none overflow-hidden"
+        className="text-2xl font-semibold tracking-[-.01em] bg-[var(--pt-surface)] text-[var(--pt-text)] border border-[var(--pt-border-strong)] pt-focus-ring rounded-[var(--pt-radius-sm)] px-3 py-1 w-full resize-none overflow-hidden"
         style={{ minWidth: '300px', minHeight: '40px' }}
         autoFocus
         rows={1}
@@ -58,15 +58,15 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
   ) : (
     <div className="group flex items-center space-x-2 flex-1">
       <h1
-        className="text-2xl font-bold cursor-pointer hover:bg-gray-50 rounded px-1 flex-1 whitespace-pre-wrap"
+        className="text-2xl font-semibold tracking-[-.01em] text-[var(--pt-text)] cursor-pointer hover:bg-[var(--pt-fill)] rounded-[var(--pt-radius-sm)] px-1 flex-1 whitespace-pre-wrap"
         onClick={onStartEditing}
       >
         {title}
       </h1>
       <div className="flex space-x-1">
-        <button 
+        <button
           onClick={onStartEditing}
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-100 rounded"
+          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 text-[var(--pt-text-secondary)] hover:bg-[var(--pt-fill)] rounded-[var(--pt-radius-sm)] pt-focus-ring"
           title="Edit section title"
         >
           <svg 
@@ -84,9 +84,9 @@ export const EditableTitle: React.FC<EditableTitleProps> = ({
           </svg>
         </button>
         {onDelete && (
-          <button 
+          <button
             onClick={onDelete}
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-100 rounded text-red-600"
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-[var(--pt-fill)] rounded-[var(--pt-radius-sm)] text-[var(--pt-error)] pt-focus-ring"
             title="Delete section"
           >
             <svg 

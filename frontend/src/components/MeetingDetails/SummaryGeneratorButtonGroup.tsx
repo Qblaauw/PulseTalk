@@ -8,8 +8,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { VisuallyHidden } from "@/components/ui/visually-hidden"
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +21,8 @@ import { toast } from 'sonner';
 import { useState, useEffect, useRef, ReactNode } from 'react';
 import { isOllamaNotInstalledError } from '@/lib/utils';
 import { BuiltInModelInfo } from '@/lib/builtin-ai';
+import { PrivacyChip } from '@/components/AppShell/StateChips';
+import { summaryPrivacyState, providerDisplayName } from '@/lib/privacy';
 
 interface SummaryGeneratorButtonGroupProps {
   languageSlot?: ReactNode;
@@ -241,29 +241,28 @@ export function SummaryGeneratorButtonGroup({
   };
 
   const isGenerating = summaryStatus === 'processing' || summaryStatus === 'summarizing' || summaryStatus === 'regenerating';
+  const privacyState = summaryPrivacyState(modelConfig.provider);
 
   return (
-    <ButtonGroup>
-      {/* Generate Summary or Stop button */}
+    <div className="flex flex-wrap items-center gap-2">
+      {/* One primary action: Generate, or Regenerate once a summary exists. Stop replaces it while running. */}
       {isGenerating ? (
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-gradient-to-r from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 border-red-200 xl:px-4"
+        <button
+          type="button"
+          className="pt-button pt-button--secondary pt-button--sm"
           onClick={() => {
             Analytics.trackButtonClick('stop_summary_generation', 'meeting_details');
             onStopGeneration();
           }}
           title="Stop summary generation"
         >
-          <Square className="xl:mr-2" size={18} fill="currentColor" />
-          <span className="hidden lg:inline xl:inline">Stop</span>
-        </Button>
+          <Square size={16} fill="currentColor" />
+          Stop
+        </button>
       ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border-blue-200 xl:px-4"
+        <button
+          type="button"
+          className="pt-button pt-button--accent pt-button--sm"
           onClick={() => {
             Analytics.trackButtonClick('generate_summary', 'meeting_details');
             checkOllamaModelsAndGenerate();
@@ -271,39 +270,39 @@ export function SummaryGeneratorButtonGroup({
           disabled={isCheckingModels || isModelConfigLoading}
           title={
             isModelConfigLoading
-              ? 'Loading model configuration...'
+              ? 'Loading model configuration…'
               : isCheckingModels
-                ? 'Checking models...'
-                : hasSummary ? 'Regenerate AI Summary' : 'Generate AI Summary'
+                ? 'Checking models…'
+                : hasSummary ? 'Regenerate summary' : 'Generate summary'
           }
         >
           {isCheckingModels || isModelConfigLoading ? (
             <>
-              <Loader2 className="animate-spin xl:mr-2" size={18} />
-              <span className="hidden xl:inline">Processing...</span>
+              <Loader2 className="animate-spin" size={16} />
+              Working…
             </>
           ) : (
             <>
-              <Sparkles className="xl:mr-2" size={18} />
-              <span className="hidden lg:inline xl:inline">{hasSummary ? 'Regenerate Summary' : 'Generate Summary'}</span>
+              <Sparkles size={16} />
+              {hasSummary ? 'Regenerate' : 'Generate summary'}
             </>
           )}
-        </Button>
+        </button>
       )}
+
+      {/* Model + privacy state, right next to the generate action */}
+      <span className="text-xs text-[var(--pt-text-tertiary)]">{providerDisplayName(modelConfig.provider)}</span>
+      <PrivacyChip state={privacyState} />
 
       {languageSlot}
 
       {/* Settings button */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
         <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            title="Summary Settings"
-          >
-            <Settings />
-            <span className="hidden lg:inline">AI Model</span>
-          </Button>
+          <button type="button" className="pt-button pt-button--secondary pt-button--sm" title="Summary settings">
+            <Settings size={16} />
+            <span className="hidden lg:inline">AI model</span>
+          </button>
         </DialogTrigger>
         <DialogContent
           aria-describedby={undefined}
@@ -328,14 +327,10 @@ export function SummaryGeneratorButtonGroup({
       {availableTemplates.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              title="Select summary template"
-            >
-              <FileText />
+            <button type="button" className="pt-button pt-button--secondary pt-button--sm" title="Select summary template">
+              <FileText size={16} />
               <span className="hidden lg:inline">Template</span>
-            </Button>
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {availableTemplates.map((template) => (
@@ -347,7 +342,7 @@ export function SummaryGeneratorButtonGroup({
               >
                 <span>{template.name}</span>
                 {selectedTemplate === template.id && (
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-4 w-4 text-[var(--pt-accent)]" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -355,6 +350,6 @@ export function SummaryGeneratorButtonGroup({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </ButtonGroup>
+    </div>
   );
 }

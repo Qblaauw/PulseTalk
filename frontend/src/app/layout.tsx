@@ -1,10 +1,8 @@
 'use client'
 
 import './globals.css'
-import { Archivo, Newsreader } from 'next/font/google'
-import Sidebar from '@/components/Sidebar'
 import { SidebarProvider } from '@/components/Sidebar/SidebarProvider'
-import MainContent from '@/components/MainContent'
+import { AppShell } from '@/components/AppShell/AppShell'
 import AnalyticsProvider from '@/components/AnalyticsProvider'
 import { Toaster, toast } from 'sonner'
 import "sonner/dist/styles.css"
@@ -27,18 +25,6 @@ import { ImportDialogProvider } from '@/contexts/ImportDialogContext'
 import { isAudioExtension, getAudioFormatsDisplayList } from '@/constants/audioFormats'
 import { usePathname } from 'next/navigation'
 
-
-const archivo = Archivo({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-archivo',
-})
-
-const newsreader = Newsreader({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-newsreader',
-})
 
 // Module-level component — stable reference across RootLayout re-renders.
 // Defined here (not inside RootLayout) so React never sees a new function type
@@ -143,7 +129,7 @@ export default function RootLayout({
 
     if (!betaFeatures.importAndRetranscribe) {
       toast.error('Beta feature disabled', {
-        description: 'Enable "Import Audio & Retranscribe" in Settings > Beta to use this feature.'
+        description: 'Turn on import and retranscribe under Settings, Advanced to use this feature.'
       });
       return;
     }
@@ -241,7 +227,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${archivo.variable} ${newsreader.variable} font-sans antialiased`}>
+      <body className="antialiased">
         {isDictationOverlay ? children : (
         <>
         <AnalyticsProvider>
@@ -262,10 +248,7 @@ export default function RootLayout({
                               {showOnboarding ? (
                                 <OnboardingFlow onComplete={handleOnboardingComplete} />
                               ) : (
-                                <div className="flex">
-                                  <Sidebar />
-                                  <MainContent>{children}</MainContent>
-                                </div>
+                                <AppShell>{children}</AppShell>
                               )}
                               {/* Import audio overlay and dialog */}
                               <ImportDropOverlay visible={showDropOverlay} />
@@ -287,7 +270,16 @@ export default function RootLayout({
           </RecordingStateProvider>
         </AnalyticsProvider>
 
-        <Toaster position="bottom-center" richColors closeButton />
+        <Toaster
+          position="bottom-center"
+          closeButton
+          toastOptions={{
+            classNames: {
+              toast: 'pt-card !rounded-[14px] !border-[var(--pt-border)] !bg-[var(--pt-glass)] !text-[var(--pt-text)] !shadow-[var(--pt-shadow-md)] backdrop-blur-xl',
+              description: '!text-[var(--pt-text-secondary)]',
+            },
+          }}
+        />
         </>
         )}
       </body>

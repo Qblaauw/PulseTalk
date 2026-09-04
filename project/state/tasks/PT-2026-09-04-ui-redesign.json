@@ -1,0 +1,127 @@
+{
+  "blocked_by": [],
+  "commits": [
+    "49ff45e3ecf6d89fbc7b92c18f833bed66b583a2"
+  ],
+  "created_at": "2026-09-04T08:10:00Z",
+  "exclusive_resources": [
+    "frontend/src/app",
+    "frontend/src/components/AppShell",
+    "frontend/src/components/Sidebar",
+    "frontend/src/components/MainContent",
+    "DESIGN.md"
+  ],
+  "execution_context": {
+    "base_ref": "integration/pulsetalq-next",
+    "base_sha": "680a8ab19a8c2ad98310f5ddd627800b5e4462df",
+    "branch": "feature/PT-2026-09-04-ui-redesign",
+    "repository": "PulseTalk",
+    "worktree": "F:/Dev Ops/PulseTalk/.worktrees/feature-PT-2026-09-04-ui-redesign"
+  },
+  "files_touched": [
+    "DESIGN.md",
+    "docs/plans/2026-09-04-pulsetalq-ui-redesign-implementation.md",
+    "docs/plans/2026-09-04-pulsetalq-ui-redesign-summary.md",
+    "frontend/src-tauri/src/api/api.rs",
+    "frontend/src-tauri/tauri.conf.json",
+    "frontend/src/app/_components/HomeView.tsx",
+    "frontend/src/app/_components/StatusOverlays.tsx",
+    "frontend/src/app/_components/TranscriptPanel.tsx",
+    "frontend/src/app/account/page.tsx",
+    "frontend/src/app/dictation-history/page.tsx",
+    "frontend/src/app/globals.css",
+    "frontend/src/app/inbox/page.tsx",
+    "frontend/src/app/layout.tsx",
+    "frontend/src/app/library/page.tsx",
+    "frontend/src/app/meeting-details/page-content.tsx",
+    "frontend/src/app/notes/[id]/page.tsx",
+    "frontend/src/app/page.tsx",
+    "frontend/src/app/projects/page.tsx",
+    "frontend/src/app/settings/page.tsx",
+    "frontend/src/components/About.tsx",
+    "frontend/src/components/AnalyticsConsentSwitch.tsx",
+    "frontend/src/components/AppShell/AppShell.tsx",
+    "frontend/src/components/AppShell/PageHeader.tsx",
+    "frontend/src/components/AppShell/StateChips.tsx",
+    "frontend/src/components/BetaSettings.tsx",
+    "frontend/src/components/CaptureModeSwitcher.tsx",
+    "frontend/src/components/CustomDialog.tsx",
+    "frontend/src/components/DictationSettings.tsx",
+    "frontend/src/components/EditableTitle.tsx",
+    "frontend/src/components/EmptyStateSummary.tsx",
+    "frontend/src/components/Info.tsx",
+    "frontend/src/components/Logo.tsx",
+    "frontend/src/components/MainContent/index.tsx",
+    "frontend/src/components/MainNav/index.tsx",
+    "frontend/src/components/MeetingDetails/SummaryGeneratorButtonGroup.tsx",
+    "frontend/src/components/MeetingDetails/SummaryPanel.tsx",
+    "frontend/src/components/MeetingDetails/SummaryUpdaterButtonGroup.tsx",
+    "frontend/src/components/MeetingDetails/TranscriptButtonGroup.tsx",
+    "frontend/src/components/MeetingDetails/TranscriptPanel.tsx",
+    "frontend/src/components/PreferenceSettings.tsx",
+    "frontend/src/components/ProjectWorkspacePreview.tsx",
+    "frontend/src/components/RecordingControls.tsx",
+    "frontend/src/components/RecordingSettings.tsx",
+    "frontend/src/components/SettingTabs.tsx",
+    "frontend/src/components/Sidebar/SidebarProvider.tsx",
+    "frontend/src/components/Sidebar/index.tsx",
+    "frontend/src/components/SummaryModelSettings.tsx",
+    "frontend/src/components/VoiceHub.tsx",
+    "frontend/src/contexts/ImportDialogContext.tsx",
+    "frontend/src/lib/library.ts",
+    "frontend/src/lib/privacy.ts",
+    "frontend/tailwind.config.ts",
+    "project/state/tasks/PT-2026-09-04-ui-redesign.json"
+  ],
+  "host_refs": {},
+  "id": "PT-2026-09-04-ui-redesign",
+  "kind": "feature",
+  "local_id": null,
+  "owner": "claude-code-root",
+  "plan_id": null,
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "ready_for_review",
+  "subject": "Implement the approved PulseTalq UI and navigation redesign with a premium Apple-like visual system",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-04T12:00:00Z",
+  "verification_contract": [
+    "pnpm exec tsc --noEmit in frontend",
+    "pnpm run lint in frontend",
+    "pnpm run build (next) in frontend",
+    "git diff --check",
+    "manual review against docs/plans/2026-09-04-pulsetalq-ui-redesign-summary.md removal, navigation, Home, Library, review, Settings, privacy, and sync decisions"
+  ],
+  "verification_receipts": [
+    {
+      "check": "pnpm exec tsc --noEmit in frontend",
+      "note": "Only the pre-existing tests/lib/blocknote-markdown.test.ts bun:test type error remains",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run lint in frontend",
+      "note": "next lint prompts for ESLint setup; the flat eslint.config.mjs is not detected by Next 14 and eslint is not installed. Pre-existing repo state.",
+      "result": "blocked"
+    },
+    {
+      "check": "pnpm run build (next) in frontend",
+      "note": "All 11 routes prerendered; /settings wrapped in Suspense for useSearchParams",
+      "result": "pass"
+    },
+    {
+      "check": "git diff --check",
+      "result": "pass"
+    },
+    {
+      "check": "cargo check in frontend/src-tauri",
+      "note": "whisper-rs dependency fails to compile in this environment (whisper_full_params field mismatch), unrelated to the api.rs Meeting struct change, which mirrors api.rs:836",
+      "result": "blocked"
+    },
+    {
+      "check": "manual review against decision doc",
+      "note": "Removals, shell navigation, Home, Library, Meeting review, Settings, privacy and sync labels implemented per docs/plans/2026-09-04-pulsetalq-ui-redesign-summary.md",
+      "result": "pass"
+    }
+  ]
+}

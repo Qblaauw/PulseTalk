@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { RecordingControls } from '@/components/RecordingControls';
 import { useSidebar } from '@/components/Sidebar/SidebarProvider';
 import { usePermissionCheck } from '@/hooks/usePermissionCheck';
@@ -21,23 +20,13 @@ import { TranscriptRecovery } from '@/components/TranscriptRecovery';
 import { indexedDBService } from '@/services/indexedDBService';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { CaptureMode } from '@/components/CaptureModeSwitcher';
-import { VoiceHub } from '@/components/VoiceHub';
+import { HomeView } from './_components/HomeView';
 
 export default function Home() {
   // Local page state (not moved to contexts)
   const [isRecording, setIsRecordingState] = useState(false);
   const [barHeights, setBarHeights] = useState(['58%', '76%', '58%']);
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
-  const [captureMode, setCaptureMode] = useState<CaptureMode>('record-meeting');
-  useEffect(() => {
-    const selectMeetingMode = () => setCaptureMode('record-meeting');
-    if (new URLSearchParams(window.location.search).get('mode') === 'record-meeting') {
-      setCaptureMode('record-meeting');
-    }
-    window.addEventListener('pulse-talq:new-capture', selectMeetingMode);
-    return () => window.removeEventListener('pulse-talq:new-capture', selectMeetingMode);
-  }, []);
 
   // Use contexts for state management
   const { meetingTitle, transcripts } = useTranscripts();
@@ -49,7 +38,7 @@ export default function Home() {
 
   // Hooks
   const { hasMicrophone } = usePermissionCheck();
-  const { setIsMeetingActive, isCollapsed: sidebarCollapsed, refetchMeetings, meetings } = useSidebar();
+  const { setIsMeetingActive, refetchMeetings } = useSidebar();
   const { modals, messages, showModal, hideModal } = useModalState(transcriptModelConfig);
   const { isRecordingDisabled, setIsRecordingDisabled } = useRecordingStateSync(isRecording, setIsRecordingState, setIsMeetingActive);
   const { handleRecordingStart } = useRecordingStart(isRecording, setIsRecordingState, showModal);
@@ -199,14 +188,10 @@ export default function Home() {
 
   // Computed values using global status
   const isProcessingStop = status === RecordingStatus.PROCESSING_TRANSCRIPTS || isProcessing;
+  const isIdle = !recordingState.isRecording && transcripts.length === 0 && !isProcessingStop && !isSaving && !isStopping;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex flex-col h-screen bg-[var(--pt-bg)]"
-    >
+    <div className="flex h-full flex-col bg-[var(--pt-bg)]">
       {/* All Modals supported*/}
       <SettingsModals
         modals={modals}
@@ -224,30 +209,25 @@ export default function Home() {
         onLoadPreview={loadMeetingTranscripts}
       />
       <div className="flex flex-1 overflow-hidden">
-        {!recordingState.isRecording && transcripts.length === 0 && !isProcessingStop ? (
-          <VoiceHub meetings={meetings} />
+        {isIdle ? (
+          <HomeView onRecord={handleRecordingStart} recordDisabled={isRecordingDisabled || !hasMicrophone} />
         ) : (
           <TranscriptPanel
             isProcessingStop={isProcessingStop}
             isStopping={isStopping}
             showModal={showModal}
-            captureMode={captureMode}
-            onCaptureModeChange={setCaptureMode}
           />
         )}
 
-        {/* Recording controls - only show when permissions are granted or already recording and not showing status messages */}
-        {captureMode === 'record-meeting' && (hasMicrophone || isRecording) &&
+        {/* Persistent capture controls while a meeting is in progress or being finished */}
+        {!isIdle && (hasMicrophone || isRecording) &&
           status !== RecordingStatus.PROCESSING_TRANSCRIPTS &&
           status !== RecordingStatus.SAVING && (
-            <div className="fixed bottom-7 left-0 right-0 z-20 pointer-events-none">
-              <div
-                className="flex justify-center pl-8 transition-[margin] duration-300"
-                style={{
-                  marginLeft: sidebarCollapsed ? '4rem' : '16rem'
-                }}
-              >
-                <div className="w-[calc(100%_-_3rem)] max-w-[760px] flex justify-center pointer-events-auto">
+            <div
+              className="pointer-events-none fixed bottom-6 right-0 z-20 flex justify-center px-6 transition-[left] duration-200"
+              style={{ left: 'var(--pt-shell-sidebar, 0px)' }}
+            >
+                <div className="w-full max-w-[640px] flex justify-center pointer-events-auto">
                   <div className="w-full flex items-center justify-center">
                     <RecordingControls
                       isRecording={recordingState.isRecording}
@@ -266,7 +246,6 @@ export default function Home() {
                     />
                   </div>
                 </div>
-              </div>
             </div>
           )}
 
@@ -274,9 +253,8 @@ export default function Home() {
         <StatusOverlays
           isProcessing={status === RecordingStatus.PROCESSING_TRANSCRIPTS && !recordingState.isRecording}
           isSaving={status === RecordingStatus.SAVING}
-          sidebarCollapsed={sidebarCollapsed}
         />
       </div>
-    </motion.div>
+    </div>
   );
 }

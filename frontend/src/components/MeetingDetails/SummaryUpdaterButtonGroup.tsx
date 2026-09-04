@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Copy, Save, Loader2, Search, FolderOpen } from 'lucide-react';
+import { Copy, Save, Loader2, FolderOpen } from 'lucide-react';
 import Analytics from '@/lib/analytics';
 
 interface SummaryUpdaterButtonGroupProps {
@@ -20,70 +18,61 @@ export function SummaryUpdaterButtonGroup({
   isDirty,
   onSave,
   onCopy,
-  onFind,
   onOpenFolder,
   hasSummary
 }: SummaryUpdaterButtonGroupProps) {
   return (
-    <ButtonGroup>
-      {/* Save button */}
-      <Button
-        variant="outline"
-        size="sm"
-        className={`${isDirty ? 'bg-green-200' : ""}`}
-        title={isSaving ? "Saving" : "Save Changes"}
+    <div className="flex flex-wrap items-center gap-2">
+      {/* One save action for edits */}
+      <button
+        type="button"
+        className="pt-button pt-button--secondary pt-button--sm"
+        title={isSaving ? 'Saving' : 'Save changes'}
         onClick={() => {
           Analytics.trackButtonClick('save_changes', 'meeting_details');
           onSave();
         }}
-        disabled={isSaving}
+        disabled={isSaving || !isDirty}
       >
         {isSaving ? (
           <>
-            <Loader2 className="animate-spin" />
-            <span className="hidden lg:inline">Saving...</span>
+            <Loader2 className="animate-spin" size={16} />
+            <span className="hidden lg:inline">Saving…</span>
           </>
         ) : (
           <>
-            <Save />
+            <Save size={16} />
             <span className="hidden lg:inline">Save</span>
           </>
         )}
-      </Button>
+      </button>
 
-      {/* Copy button */}
-      <Button
-        variant="outline"
-        size="sm"
-        title="Copy Summary"
+      <button
+        type="button"
+        className="pt-button pt-button--secondary pt-button--sm"
+        title="Copy summary"
         onClick={() => {
           Analytics.trackButtonClick('copy_summary', 'meeting_details');
           onCopy();
         }}
         disabled={!hasSummary}
-        className="cursor-pointer"
       >
-        <Copy />
+        <Copy size={16} />
         <span className="hidden lg:inline">Copy</span>
-      </Button>
+      </button>
 
-      {/* Find button */}
-      {/* {onFind && (
-        <Button
-          variant="outline"
-          size="sm"
-          title="Find in Summary"
-          onClick={() => {
-            Analytics.trackButtonClick('find_in_summary', 'meeting_details');
-            onFind();
-          }}
-          disabled={!hasSummary}
-          className="cursor-pointer"
-        >
-          <Search />
-          <span className="hidden lg:inline">Find</span>
-        </Button>
-      )} */}
-    </ButtonGroup>
+      <button
+        type="button"
+        className="pt-button pt-button--secondary pt-button--sm"
+        title="Open recording folder"
+        onClick={() => {
+          Analytics.trackButtonClick('open_recording_folder', 'meeting_details');
+          onOpenFolder();
+        }}
+      >
+        <FolderOpen size={16} />
+        <span className="hidden lg:inline">Folder</span>
+      </button>
+    </div>
   );
 }

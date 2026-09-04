@@ -146,58 +146,74 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-        <div className="h-8 bg-gray-200 rounded mb-4"></div>
+        <div className="mb-4 h-4 w-1/4 rounded bg-[var(--pt-fill)]"></div>
+        <div className="mb-4 h-8 rounded bg-[var(--pt-fill)]"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div>
-        <h3 className="text-lg font-semibold mb-4">Recording Settings</h3>
-        <p className="text-sm text-gray-600 mb-6">
+        <h3 className="pt-section-title mb-1">Recording settings</h3>
+        <p className="text-sm text-[var(--pt-text-secondary)]">
           Configure how your audio recordings are saved during meetings.
         </p>
       </div>
 
-      {/* Auto Save Toggle */}
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div className="flex-1">
-          <div className="font-medium">Save Audio Recordings</div>
-          <div className="text-sm text-gray-600">
-            Automatically save audio files when recording stops
+      <div className="pt-group">
+        {/* Auto Save Toggle */}
+        <div className="pt-row">
+          <div className="flex-1">
+            <div className="font-medium text-[var(--pt-text)]">Save audio recordings</div>
+            <div className="text-sm text-[var(--pt-text-secondary)]">
+              Automatically save audio files when recording stops
+            </div>
           </div>
+          <Switch
+            checked={preferences.auto_save}
+            onCheckedChange={handleAutoSaveToggle}
+            disabled={saving}
+          />
         </div>
-        <Switch
-          checked={preferences.auto_save}
-          onCheckedChange={handleAutoSaveToggle}
-          disabled={saving}
-        />
+
+        {/* Recording Notification Toggle */}
+        <div className="pt-row">
+          <div className="flex-1">
+            <div className="font-medium text-[var(--pt-text)]">Recording start notification</div>
+            <div className="text-sm text-[var(--pt-text-secondary)]">
+              Show reminder to inform participants when recording starts
+            </div>
+          </div>
+          <Switch
+            checked={showRecordingNotification}
+            onCheckedChange={handleNotificationToggle}
+          />
+        </div>
       </div>
 
       {/* Folder Location - Only shown when auto_save is enabled */}
       {preferences.auto_save && (
-        <div className="space-y-4">
-          <div className="p-4 border rounded-lg bg-gray-50">
-            <div className="font-medium mb-2">Save Location</div>
-            <div className="text-sm text-gray-600 mb-3 break-all">
+        <div className="flex flex-col gap-4">
+          <div className="pt-card p-4">
+            <div className="mb-2 font-medium text-[var(--pt-text)]">Save location</div>
+            <div className="mb-3 break-all font-mono text-xs text-[var(--pt-text-secondary)]">
               {preferences.save_folder || 'Default folder'}
             </div>
             <button
               onClick={handleOpenFolder}
-              className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="pt-button pt-button--secondary pt-button--sm"
             >
               <FolderOpen className="w-4 h-4" />
-              Open Folder
+              Open folder
             </button>
           </div>
 
-          <div className="p-4 border rounded-lg bg-blue-50">
-            <div className="text-sm text-blue-800">
-              <strong>File Format:</strong> {preferences.file_format.toUpperCase()} files
+          <div className="pt-card p-4 bg-[var(--pt-fill)]">
+            <div className="text-sm text-[var(--pt-text)]">
+              <strong>File format:</strong> {preferences.file_format.toUpperCase()} files
             </div>
-            <div className="text-xs text-blue-600 mt-1">
+            <div className="mt-1 text-xs text-[var(--pt-text-secondary)]">
               Recordings are saved with timestamp: recording_YYYYMMDD_HHMMSS.{preferences.file_format}
             </div>
           </div>
@@ -206,45 +222,31 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
 
       {/* Info when auto_save is disabled */}
       {!preferences.auto_save && (
-        <div className="p-4 border rounded-lg bg-yellow-50">
-          <div className="text-sm text-yellow-800">
-            Audio recording is disabled. Enable "Save Audio Recordings" to automatically save your meeting audio.
+        <div className="pt-card p-4">
+          <div className="text-sm text-[var(--pt-warning)]">
+            Audio recording is disabled. Enable "Save audio recordings" to automatically save your meeting audio.
           </div>
         </div>
       )}
 
-      {/* Recording Notification Toggle */}
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div className="flex-1">
-          <div className="font-medium">Recording Start Notification</div>
-          <div className="text-sm text-gray-600">
-            Show reminder to inform participants when recording starts
-          </div>
-        </div>
-        <Switch
-          checked={showRecordingNotification}
-          onCheckedChange={handleNotificationToggle}
-        />
-      </div>
-
       {/* Device Preferences */}
-      <div className="space-y-4">
-        <div className="border-t pt-6">
-          <h4 className="text-base font-medium text-gray-900 mb-4">Default Audio Devices</h4>
-          <p className="text-sm text-gray-600 mb-4">
+      <div className="flex flex-col gap-4 border-t border-[var(--pt-border)] pt-6">
+        <div>
+          <h4 className="pt-label mb-2">Default audio devices</h4>
+          <p className="text-sm text-[var(--pt-text-secondary)]">
             Set your preferred microphone and system audio devices for recording. These will be automatically selected when starting new recordings.
           </p>
+        </div>
 
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <DeviceSelection
-              selectedDevices={{
-                micDevice: preferences.preferred_mic_device,
-                systemDevice: preferences.preferred_system_device
-              }}
-              onDeviceChange={handleDeviceChange}
-              disabled={saving}
-            />
-          </div>
+        <div className="pt-card p-4">
+          <DeviceSelection
+            selectedDevices={{
+              micDevice: preferences.preferred_mic_device,
+              systemDevice: preferences.preferred_system_device
+            }}
+            onDeviceChange={handleDeviceChange}
+            disabled={saving}
+          />
         </div>
       </div>
     </div>
