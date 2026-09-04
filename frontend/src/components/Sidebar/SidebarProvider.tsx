@@ -28,6 +28,17 @@ interface TranscriptSearchResult {
   timestamp: string;
 };
 
+export interface SummaryPollingResult {
+  status: string;
+  error?: string;
+  meetingName?: string;
+  data?: Record<string, unknown> & {
+    MeetingName?: string;
+    markdown?: string;
+    _section_order?: string[];
+  };
+}
+
 interface SidebarContextType {
   currentMeeting: CurrentMeeting | null;
   setCurrentMeeting: (meeting: CurrentMeeting | null) => void;
@@ -48,7 +59,7 @@ interface SidebarContextType {
   setTranscriptServerAddress: (address: string) => void;
   // Summary polling management
   activeSummaryPolls: Map<string, NodeJS.Timeout>;
-  startSummaryPolling: (meetingId: string, processId: string, onUpdate: (result: any) => void) => void;
+  startSummaryPolling: (meetingId: string, processId: string, onUpdate: (result: SummaryPollingResult) => void) => void;
   stopSummaryPolling: (meetingId: string) => void;
   // Refetch meetings from backend
   refetchMeetings: () => Promise<void>;
@@ -74,7 +85,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [meetings, setMeetings] = useState<CurrentMeeting[]>([]);
   const [sidebarItems, setSidebarItems] = useState<SidebarItem[]>([]);
   const [isMeetingActive, setIsMeetingActive] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<TranscriptSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [serverAddress, setServerAddress] = useState('');
   const [transcriptServerAddress, setTranscriptServerAddress] = useState('');
@@ -201,7 +212,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const startSummaryPolling = React.useCallback((
     meetingId: string,
     processId: string,
-    onUpdate: (result: any) => void
+    onUpdate: (result: SummaryPollingResult) => void
   ) => {
     // Stop existing poll for this meeting if any
     if (activeSummaryPolls.has(meetingId)) {
@@ -232,9 +243,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       try {
-        const result = await invoke('api_get_summary', {
+        const result = await invoke<SummaryPollingResult>('api_get_summary', {
           meetingId: meetingId,
-        }) as any;
+        });
 
         console.log(`📊 Polling update for ${meetingId}:`, result.status);
 

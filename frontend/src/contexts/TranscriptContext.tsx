@@ -134,7 +134,7 @@ export function TranscriptProvider({ children }: { children: ReactNode }) {
                   await indexedDBService.saveMeetingMetadata(metadata);
                 }
               }
-            } catch (error) {
+            } catch {
               // Non-fatal - will be set on stop if recording completes normally
             }
           } catch (error) {
@@ -182,7 +182,7 @@ export function TranscriptProvider({ children }: { children: ReactNode }) {
     let unlistenFn: (() => void) | undefined;
     let disposed = false;
     let transcriptCounter = 0;
-    let transcriptBuffer = new Map<number, Transcript>();
+    const transcriptBuffer = new Map<number, Transcript>();
     let lastProcessedSequence = 0;
     let processingTimer: NodeJS.Timeout | undefined;
 
@@ -398,10 +398,10 @@ export function TranscriptProvider({ children }: { children: ReactNode }) {
           console.log(`[Reload Sync] Retrieved ${history.length} transcript segments from backend`);
 
           // Convert backend format to frontend Transcript format
-          const formattedTranscripts: Transcript[] = history.map((segment: any) => ({
+          const formattedTranscripts: Transcript[] = history.map((segment) => ({
             id: segment.id,
             text: segment.text,
-            timestamp: segment.display_time, // Use display_time for UI
+            timestamp: (segment as Transcript & { display_time?: string }).display_time ?? segment.timestamp,
             sequence_id: segment.sequence_id,
             chunk_start_time: segment.audio_start_time,
             is_partial: false, // History segments are always final

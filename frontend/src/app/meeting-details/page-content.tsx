@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Summary, SummaryResponse } from '@/types';
-import { useSidebar } from '@/components/Sidebar/SidebarProvider';
+import { Summary, SummaryResponse, Transcript, TranscriptSegmentData } from '@/types';
 import Analytics from '@/lib/analytics';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
@@ -38,14 +37,14 @@ export default function PageContent({
   loadedCount,
   onLoadMore,
 }: {
-  meeting: any;
+  meeting: { id: string; title: string; created_at: string; folder_path?: string; transcripts: Transcript[] };
   summaryData: Summary | null;
   shouldAutoGenerate?: boolean;
   onAutoGenerateComplete?: () => void;
   onMeetingUpdated?: () => Promise<void>;
   onRefetchTranscripts?: () => Promise<void>;
   // Pagination props
-  segments?: any[];
+  segments?: TranscriptSegmentData[];
   hasMore?: boolean;
   isLoadingMore?: boolean;
   totalCount?: number;
@@ -66,9 +65,6 @@ export default function PageContent({
 
   // Ref to store the modal open function from SummaryGeneratorButtonGroup
   const openModelSettingsRef = useRef<(() => void) | null>(null);
-
-  // Sidebar context
-  const { serverAddress } = useSidebar();
 
   // Get model config from ConfigContext
   const { modelConfig, setModelConfig } = useConfig();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { RefreshCw, Globe, Loader2, AlertCircle, CheckCircle2, X, Cpu } from 'lucide-react';
+import { RefreshCw, Globe, Loader2, AlertCircle, X, Cpu } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import { useConfig } from '@/contexts/ConfigContext';
 import { LANGUAGES } from '@/constants/languages';
 import { useTranscriptionModels, ModelOption } from '@/hooks/useTranscriptionModels';
 import Analytics from '@/lib/analytics';
+import { getErrorMessage } from '@/lib/error-message';
 
 interface RetranscribeDialogProps {
   open: boolean;
@@ -221,9 +222,9 @@ export function RetranscribeDialog({
         model: selectedModelDetails?.name || null,
         provider: selectedModelDetails?.provider || null,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsProcessing(false);
-      const errorMsg = typeof err === 'string' ? err : (err?.message || String(err));
+      const errorMsg = getErrorMessage(err, 'Failed to start retranscription');
       setError(errorMsg);
 
       await Analytics.trackError('enhance_transcript_failed', errorMsg);
@@ -330,7 +331,7 @@ export function RetranscribeDialog({
                   <span className="text-sm font-medium">Language</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Language selection isn't supported for Parakeet. It always uses automatic detection.
+                  Language selection isn&apos;t supported for Parakeet. It always uses automatic detection.
                 </p>
               </div>
             )

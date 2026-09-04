@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import Analytics from '@/lib/analytics';
 import { applyPinnedSummaryLanguageToMeeting } from '@/lib/summary-language-preferences';
+import { getErrorMessage } from '@/lib/error-message';
 import { toast } from 'sonner';
 
 export interface AudioFileInfo {
@@ -173,9 +174,9 @@ export function useImportAudio({
         setStatus('idle');
         return null;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error');
-      const errorMsg = typeof err === 'string' ? err : (err?.message || String(err) || 'Failed to validate file');
+      const errorMsg = getErrorMessage(err, 'Failed to validate file');
       setError(errorMsg);
       onErrorRef.current?.(errorMsg);
       return null;
@@ -192,9 +193,9 @@ export function useImportAudio({
       setFileInfo(result);
       setStatus('idle');
       return result;
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error');
-      const errorMsg = typeof err === 'string' ? err : (err?.message || String(err) || 'Failed to validate file');
+      const errorMsg = getErrorMessage(err, 'Failed to validate file');
       setError(errorMsg);
       onErrorRef.current?.(errorMsg);
       return null;
@@ -233,9 +234,9 @@ export function useImportAudio({
           model: model || null,
           provider: provider || null,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus('error');
-        const errorMsg = typeof err === 'string' ? err : (err?.message || String(err) || 'Failed to start import');
+        const errorMsg = getErrorMessage(err, 'Failed to start import');
         setError(errorMsg);
 
         await Analytics.trackError('import_audio_failed', errorMsg);
@@ -253,7 +254,7 @@ export function useImportAudio({
       await invoke('cancel_import_command');
       setStatus('idle');
       setProgress(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to cancel import:', err);
     }
   }, []);

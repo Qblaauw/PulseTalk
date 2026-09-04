@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
-import { X, Download, Check, Loader2, ArrowBigDownDash } from 'lucide-react';
+import { X, Check, ArrowBigDownDash } from 'lucide-react';
 import { getDownloadTotalMb } from '@/lib/onboarding-summary-model';
 
 interface DownloadProgress {
@@ -50,10 +50,8 @@ function categorizeError(error: string): string {
 // Custom toast component for download progress
 function DownloadToastContent({
   download,
-  onDismiss,
 }: {
   download: DownloadProgress;
-  onDismiss?: () => void;
 }) {
   const isComplete = download.status === 'completed';
   const hasError = download.status === 'error';
@@ -169,21 +167,10 @@ export function useDownloadProgressToast() {
       }
     };
 
-    // Dismiss handler
-    const dismissToast = () => {
-      toast.dismiss(toastId);
-      setDismissedModels(prev => {
-        const next = new Set(prev);
-        next.add(download.modelName);
-        return next;
-      });
-    };
-
     toast.custom(
-      (t) => (
+      () => (
         <DownloadToastContent
           download={download}
-          onDismiss={dismissToast}
         />
       ),
       {

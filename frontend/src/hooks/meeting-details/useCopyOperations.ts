@@ -1,12 +1,12 @@
 import { useCallback, RefObject } from 'react';
-import { Transcript, Summary } from '@/types';
+import { Block, Transcript, Summary } from '@/types';
 import { BlockNoteSummaryViewRef } from '@/components/AISummary/BlockNoteSummaryView';
 import { toast } from 'sonner';
 import Analytics from '@/lib/analytics';
 import { invoke as invokeTauri } from '@tauri-apps/api/core';
 
 interface UseCopyOperationsProps {
-  meeting: any;
+  meeting: { id: string; title?: string; created_at: string };
   transcripts: Transcript[];
   meetingTitle: string;
   aiSummary: Summary | null;
@@ -15,7 +15,6 @@ interface UseCopyOperationsProps {
 
 export function useCopyOperations({
   meeting,
-  transcripts,
   meetingTitle,
   aiSummary,
   blockNoteSummaryRef,
@@ -121,7 +120,7 @@ export function useCopyOperations({
       // Fallback: Check if aiSummary has markdown property
       if (!summaryMarkdown && aiSummary && 'markdown' in aiSummary) {
         console.log('📝 Using markdown from aiSummary');
-        summaryMarkdown = (aiSummary as any).markdown || '';
+        summaryMarkdown = (aiSummary as unknown as { markdown?: string }).markdown || '';
         console.log('📝 Markdown from aiSummary, length:', summaryMarkdown.length);
       }
 
@@ -137,7 +136,7 @@ export function useCopyOperations({
             if (section && typeof section === 'object' && 'title' in section && 'blocks' in section) {
               const sectionTitle = `## ${section.title}\n\n`;
               const sectionContent = section.blocks
-                .map((block: any) => `- ${block.content}`)
+                .map((block: Block) => `- ${block.content}`)
                 .join('\n');
               return sectionTitle + sectionContent;
             }

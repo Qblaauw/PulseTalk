@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Download, AlertCircle, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,11 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Button } from './ui/button';
-import { updateService, UpdateInfo, UpdateProgress } from '@/services/updateService';
+import { UpdateInfo, UpdateProgress } from '@/services/updateService';
 import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/error-message';
 
 interface UpdateDialogProps {
   open: boolean;
@@ -40,9 +41,9 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
         } else {
           setError('Update no longer available');
         }
-      }).catch((err) => {
+      }).catch((err: unknown) => {
         console.error('Failed to get update object:', err);
-        setError('Failed to prepare update: ' + (err.message || 'Unknown error'));
+        setError('Failed to prepare update: ' + getErrorMessage(err, 'Unknown error'));
       });
     } else {
       // Reset state when dialog closes
@@ -66,8 +67,8 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
           setError('Update not available');
           return;
         }
-      } catch (err: any) {
-        setError('Failed to get update: ' + (err.message || 'Unknown error'));
+      } catch (err: unknown) {
+        setError('Failed to get update: ' + getErrorMessage(err, 'Unknown error'));
         return;
       }
     }
@@ -133,11 +134,12 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
 
       // Relaunch the app
       await relaunch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Update failed:', err);
-      setError(err.message || 'Failed to download or install update');
+      const message = getErrorMessage(err, 'Failed to download or install update');
+      setError(message);
       setIsDownloading(false);
-      toast.error('Update failed: ' + (err.message || 'Unknown error'));
+      toast.error('Update failed: ' + message);
     }
   };
 

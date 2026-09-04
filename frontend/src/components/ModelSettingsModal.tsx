@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSidebar } from './Sidebar/SidebarProvider';
 import { invoke } from '@tauri-apps/api/core';
 import { Button } from '@/components/ui/button';
 import { useOllamaDownload } from '@/contexts/OllamaDownloadContext';
@@ -16,7 +15,6 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
 import { Lock, Unlock, Eye, EyeOff, RefreshCw, CheckCircle2, XCircle, ChevronDown, ChevronUp, Download, ExternalLink, Check, ChevronsUpDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -29,6 +27,7 @@ import {
 } from '@/components/ui/command';
 import { cn, isOllamaNotInstalledError } from '@/lib/utils';
 import { toast } from 'sonner';
+import { BuiltInModelInfo } from '@/lib/builtin-ai';
 
 export interface ModelConfig {
   provider: 'ollama' | 'groq' | 'claude' | 'openai' | 'openrouter' | 'builtin-ai' | 'custom-openai';
@@ -38,8 +37,19 @@ export interface ModelConfig {
   ollamaEndpoint?: string | null;
   // Custom OpenAI fields
   customOpenAIEndpoint?: string | null;
+  customOpenAIDisplayName?: string | null;
   customOpenAIModel?: string | null;
   customOpenAIApiKey?: string | null;
+  maxTokens?: number | null;
+  temperature?: number | null;
+  topP?: number | null;
+}
+
+export interface CustomOpenAIConfig {
+  displayName?: string | null;
+  endpoint?: string | null;
+  model?: string | null;
+  apiKey?: string | null;
   maxTokens?: number | null;
   temperature?: number | null;
   topP?: number | null;
@@ -129,9 +139,7 @@ export function ModelSettingsModal({
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [isApiKeyLocked, setIsApiKeyLocked] = useState<boolean>(!!modelConfig.apiKey?.trim());
   const [isLockButtonVibrating, setIsLockButtonVibrating] = useState<boolean>(false);
-  const { serverAddress } = useSidebar();
   const [openRouterModels, setOpenRouterModels] = useState<OpenRouterModel[]>([]);
-  const [openRouterError, setOpenRouterError] = useState<string>('');
   const [isLoadingOpenRouter, setIsLoadingOpenRouter] = useState<boolean>(false);
   const [ollamaEndpoint, setOllamaEndpoint] = useState<string>(modelConfig.ollamaEndpoint || '');
   const [isLoadingOllama, setIsLoadingOllama] = useState<boolean>(false);
@@ -140,7 +148,6 @@ export function ModelSettingsModal({
   const [hasAutoFetched, setHasAutoFetched] = useState<boolean>(false);
   const hasSyncedFromParent = useRef<boolean>(false);
   const hasLoadedInitialConfig = useRef<boolean>(false);
-  const [autoGenerateEnabled, setAutoGenerateEnabled] = useState<boolean>(true); // Default to true
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isEndpointSectionCollapsed, setIsEndpointSectionCollapsed] = useState<boolean>(true); // Collapsed by default
   const [ollamaNotInstalled, setOllamaNotInstalled] = useState<boolean>(false); // Track if Ollama is not installed
@@ -170,7 +177,7 @@ export function ModelSettingsModal({
   const { isDownloading, getProgress, downloadingModels } = useOllamaDownload();
 
   // Built-in AI models state
-  const [builtinAiModels, setBuiltinAiModels] = useState<any[]>([]);
+  const [builtinAiModels, setBuiltinAiModels] = useState<BuiltInModelInfo[]>([]);
 
   // Cache models by endpoint to avoid refetching when reverting endpoint changes
   const modelsCache = useRef<Map<string, OllamaModel[]>>(new Map());
@@ -202,18 +209,6 @@ export function ModelSettingsModal({
 
     return () => clearTimeout(timer);
   }, [ollamaEndpoint]);
-
-  const fetchApiKey = async (provider: string) => {
-    try {
-      const data = (await invoke('api_get_api_key', {
-        provider,
-      })) as string;
-      setApiKey(data || '');
-    } catch (err) {
-      console.error('Error fetching API key:', err);
-      setApiKey(null);
-    }
-  };
 
   // Auto-unlock when API key becomes empty, 
   useEffect(() => {
@@ -263,7 +258,7 @@ export function ModelSettingsModal({
       }
 
       try {
-        const data = (await invoke('api_get_model_config')) as any;
+        const data = await invoke<ModelConfig | null>('api_get_model_config');
         if (data && data.provider !== null) {
           setModelConfig(data);
 
@@ -290,7 +285,7 @@ export function ModelSettingsModal({
           // Fetch Custom OpenAI config if that's the active provider
           if (data.provider === 'custom-openai') {
             try {
-              const customConfig = (await invoke('api_get_custom_openai_config')) as any;
+              const customConfig = await invoke<CustomOpenAIConfig | null>('api_get_custom_openai_config');
               if (customConfig) {
                 setCustomOpenAIEndpoint(customConfig.endpoint || '');
                 setCustomOpenAIModel(customConfig.model || '');
@@ -312,22 +307,6 @@ export function ModelSettingsModal({
 
     fetchModelConfig();
   }, [skipInitialFetch]);
-
-  // Fetch auto-generate setting on mount
-  useEffect(() => {
-    const fetchAutoGenerateSetting = async () => {
-      try {
-        const enabled = (await invoke('api_get_auto_generate_setting')) as boolean;
-        setAutoGenerateEnabled(enabled);
-        console.log('Auto-generate setting loaded:', enabled);
-      } catch (err) {
-        console.error('Failed to fetch auto-generate setting:', err);
-        // Keep default value (true) on error
-      }
-    };
-
-    fetchAutoGenerateSetting();
-  }, []);
 
   // Sync ollamaEndpoint state when modelConfig.ollamaEndpoint changes from parent
   useEffect(() => {
@@ -490,14 +469,10 @@ export function ModelSettingsModal({
 
     try {
       setIsLoadingOpenRouter(true);
-      setOpenRouterError('');
       const data = (await invoke('get_openrouter_models')) as OpenRouterModel[];
       setOpenRouterModels(data);
     } catch (err) {
       console.error('Error loading OpenRouter models:', err);
-      setOpenRouterError(
-        err instanceof Error ? err.message : 'Failed to load OpenRouter models'
-      );
     } finally {
       setIsLoadingOpenRouter(false);
     }
@@ -507,12 +482,12 @@ export function ModelSettingsModal({
     if (builtinAiModels.length > 0) return; // Already loaded
 
     try {
-      const data = (await invoke('builtin_ai_list_models')) as any[];
+      const data = await invoke<BuiltInModelInfo[]>('builtin_ai_list_models');
       setBuiltinAiModels(data);
 
       // Auto-select first available model if none selected
       if (data.length > 0 && !modelConfig.model) {
-        const firstAvailable = data.find((m: any) => m.status?.type === 'available');
+        const firstAvailable = data.find((model) => model.status.type === 'available');
         if (firstAvailable) {
           setModelConfig((prev: ModelConfig) => ({ ...prev, model: firstAvailable.name }));
         }
@@ -746,24 +721,6 @@ export function ModelSettingsModal({
     }
   };
 
-  // Function to delete Ollama model
-  const deleteOllamaModel = async (modelName: string) => {
-    try {
-      const endpoint = ollamaEndpoint.trim() || null;
-      await invoke('delete_ollama_model', {
-        modelName,
-        endpoint
-      });
-
-      toast.success(`Model ${modelName} deleted`);
-      await fetchOllamaModels(true); // Refresh list
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to delete model';
-      toast.error(errorMsg);
-      console.error('Error deleting model:', err);
-    }
-  };
-
   // Track previous downloading models to detect completions
   const previousDownloadingRef = useRef<Set<string>>(new Set());
 
@@ -855,7 +812,7 @@ export function ModelSettingsModal({
 
                 // Load custom OpenAI config when selected
                 if (provider === 'custom-openai') {
-                  invoke<any>('api_get_custom_openai_config').then((config) => {
+                  invoke<CustomOpenAIConfig | null>('api_get_custom_openai_config').then((config) => {
                     if (config) {
                       setCustomOpenAIEndpoint(config.endpoint || '');
                       setCustomOpenAIModel(config.model || '');
@@ -1183,7 +1140,7 @@ export function ModelSettingsModal({
                 {ollamaEndpointChanged && !error && (
                   <Alert className="mt-3 border-yellow-500 bg-yellow-50">
                     <AlertDescription className="text-yellow-800">
-                      Endpoint changed. Please click "Fetch Models" to load models from the new endpoint before saving.
+                      Endpoint changed. Please click &quot;Fetch Models&quot; to load models from the new endpoint before saving.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -1240,7 +1197,7 @@ export function ModelSettingsModal({
                       Download Ollama
                     </Button>
                     <div className="text-sm text-muted-foreground text-center">
-                      After installing Ollama, restart this application and click "Fetch Models" to continue.
+                      After installing Ollama, restart this application and click &quot;Fetch Models&quot; to continue.
                     </div>
                   </div>
                 ) : (
@@ -1302,7 +1259,7 @@ export function ModelSettingsModal({
                 {filteredModels.length === 0 ? (
                   <Alert>
                     <AlertDescription>
-                      No models found matching "{searchQuery}". Try a different search term.
+                      No models found matching &quot;{searchQuery}&quot;. Try a different search term.
                     </AlertDescription>
                   </Alert>
                 ) : (
