@@ -5,7 +5,11 @@
   ],
   "commits": [
     "f52cecc008b324abe59744220b73c2ae1214af1a",
-    "11a35b153b55e38f1ee02f6c547dae62dd47e230"
+    "11a35b153b55e38f1ee02f6c547dae62dd47e230",
+    "672d550de5832e58950923c0761b0c50a6cf283e",
+    "c0f649f28c9e0241d73fc0dbdb47d59c4195560f",
+    "a965c73749211dd43ca42459ca482a9f2e710b16",
+    "92a23dccf6d709758ea1ace0e7d4df5bc4099e8f"
   ],
   "created_at": "2026-09-04T09:26:01Z",
   "exclusive_resources": [
@@ -28,6 +32,7 @@
     "worktree": "F:/Dev Ops/PulseTalk/.worktrees/chore-PT-2026-09-04-rust-build"
   },
   "files_touched": [
+    "Cargo.lock",
     "docs/BUILDING.md",
     "docs/installer-verification.md",
     "frontend/package.json",
@@ -36,6 +41,9 @@
     "frontend/scripts/prepare-sidecars.test.js",
     "frontend/scripts/tauri-auto.js",
     "frontend/src-tauri/Cargo.toml",
+    "frontend/src-tauri/build.rs",
+    "frontend/src-tauri/build/ffmpeg.rs",
+    "frontend/src-tauri/build/llama.rs",
     "project/state/tasks/PT-2026-09-04-rust-build.json"
   ],
   "host_refs": {
@@ -52,7 +60,7 @@
   "status": "in_review",
   "subject": "Make cargo check and Tauri sidecar acquisition reproducible from a clean worktree",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T09:46:07Z",
+  "updated_at": "2026-09-04T10:15:51Z",
   "verification_contract": [
     "cargo check --locked passes in frontend/src-tauri from a clean task worktree",
     "the committed lockfile resolves a compatible whisper-rs and whisper.cpp pairing",
@@ -68,37 +76,56 @@
       "result": "blocked"
     },
     {
-      "check": "cargo tree --locked -p pulse-talq -i whisper-rs-sys at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
-      "note": "Resolved whisper-rs 0.13.2 to whisper-rs-sys 0.11.1. The sys crate vendors whisper.cpp 1.7.1 and Cargo.lock remained unchanged.",
-      "result": "pass"
-    },
-    {
-      "check": "pnpm run test:sidecars in frontend at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
-      "note": "All 6 Node tests passed for feature mapping, target-triple names, target directory overrides, executable formats, LLVM version parsing, and CLI arguments.",
-      "result": "pass"
-    },
-    {
-      "check": "pnpm run rust:check in frontend at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
-      "note": "Passed on x86_64-pc-windows-msvc with libclang 18.1.1. Built a real 6167552-byte llama-helper PE from workspace source, ran cargo check --locked for pulse-talq, verified the 99264000-byte FFmpeg PE, and validated both exact target-triple filenames.",
-      "result": "pass"
-    },
-    {
-      "check": "cargo check --locked in frontend/src-tauri at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
-      "note": "Passed with LIBCLANG_PATH set to libclang 18.1.1 and CARGO_TARGET_DIR set to the short directory used by the wrapper. Existing compiler warnings remain.",
-      "result": "pass"
-    },
-    {
-      "check": "pnpm run sidecars:check non-destructive verification at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
-      "note": "Passed. SHA-256 hashes and last-write timestamps for both target-named binaries were identical before and after the read-only check.",
-      "result": "pass"
-    },
-    {
-      "check": "cargo fmt --all -- --check",
-      "note": "The repository-wide command reports pre-existing formatting drift across unchanged Rust sources. This task changes no .rs files, so the changed-Rust formatting scope is empty.",
+      "check": "reviewer clean git-archive cargo check at 672d550de5832e58950923c0761b0c50a6cf283e",
+      "note": "Failed because Tauri validated externalBin before the untracked llama-helper existed. Earlier cargo-check receipts at 11a35b153b55e38f1ee02f6c547dae62dd47e230 reused pre-existing sidecars and did not prove the clean-checkout contract.",
       "result": "known_failure"
     },
     {
-      "check": "git diff --check 610b71d63deb4a46e3f9342d896ab0422663808d..11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "check": "cargo tree --locked -p pulse-talq -i whisper-rs-sys at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "Resolved whisper-rs 0.13.2 to whisper-rs-sys 0.11.1. The sys crate vendors whisper.cpp 1.7.1. Cargo.lock is the canonical workspace lockfile and now also records the sha2 build dependency used for FFmpeg integrity checks.",
+      "result": "pass"
+    },
+    {
+      "check": "node --test scripts/prepare-sidecars.test.js in frontend at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "All 6 Node tests passed. Coverage includes CPU feature normalization, exact target names, PE/ELF/Mach-O architecture parsing, target rejection, CLI parsing, and fail-closed rejection of LLVM 22 or unparseable versions.",
+      "result": "pass"
+    },
+    {
+      "check": "clean git-archive cargo check --locked in frontend/src-tauri at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "Passed on x86_64-pc-windows-msvc with LIBCLANG_PATH set to libclang 18.1.1 and a short CARGO_TARGET_DIR. Before the literal Cargo command, the archive checkout had no binaries directory and no node_modules. build.rs built and architecture-checked a real 6167552-byte llama-helper, verified the 106259850-byte FFmpeg archive against SHA-256 e2aaeaa0fdbc397d4794828086424d4aaa2102cef1fb6874f6ffd29c0b88b673 before extraction, then verified the 99264000-byte x86_64 PE against SHA-256 5af82a0d4fe2b9eae211b967332ea97edfc51c6b328ca35b827e73eac560dc0d before executing it. Existing compiler warnings remain.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run rust:check in frontend at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "Passed in 14.6 seconds with caches. The wrapper detected libclang 18 from DLL product metadata, propagated LIBCLANG_PATH and the short Cargo target directory, built and checked both x86_64 sidecars, and completed cargo check --locked.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run sidecars:check non-destructive verification at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "Passed. The helper was identified as a 6167552-byte x86_64 PE and FFmpeg as a 99264000-byte x86_64 PE. SHA-256 hashes, sizes, and last-write timestamps were identical before and after the command.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm install --frozen-lockfile and Tauri CLI resolution at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "The frozen pnpm 9.15.9 install passed without lockfile changes. require.resolve found @tauri-apps/cli/tauri.js and running it reported tauri-cli 2.11.1.",
+      "result": "pass"
+    },
+    {
+      "check": "rustfmt --edition 2021 --check frontend/src-tauri/build.rs frontend/src-tauri/build/ffmpeg.rs frontend/src-tauri/build/llama.rs at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "result": "pass"
+    },
+    {
+      "check": "cargo fmt --all -- --check at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "note": "The repository-wide command still reports pre-existing formatting drift across unchanged Rust sources. The three Rust files changed by this task pass a direct rustfmt check.",
+      "result": "known_failure"
+    },
+    {
+      "check": "git diff --check 610b71d63deb4a46e3f9342d896ab0422663808d..92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
+      "result": "pass"
+    },
+    {
+      "check": "branch handoff before receipt commit",
+      "note": "Branch chore/PT-2026-09-04-rust-build was at 92a23dccf6d709758ea1ace0e7d4df5bc4099e8f with only this task record modified. The base remains integration/pulsetalq-next at 610b71d63deb4a46e3f9342d896ab0422663808d. Five task-owned orphaned MSBuild worker nodes were stopped after their parents had exited; no Cargo, rustc, MSBuild, CMake, Ninja, cl, or link process remained. Validated clean-archive test directories were moved to the Recycle Bin.",
       "result": "pass"
     }
   ]
