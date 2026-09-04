@@ -113,6 +113,17 @@ function parseClangMajor(versionOutput) {
   return match ? Number.parseInt(match[1], 10) : null;
 }
 
+function validateClangVersion(versionOutput, source) {
+  const major = versionOutput ? parseClangMajor(versionOutput) : null;
+  if (!major) {
+    fail(`Could not verify the LLVM version for ${source}; use LLVM 18 or 19`);
+  }
+  if (![18, 19].includes(major)) {
+    fail(`LLVM ${major} is not supported by whisper-rs-sys 0.11.1 on Windows; use LLVM 18 or 19`);
+  }
+  return major;
+}
+
 function windowsFileVersion(filePath) {
   const result = spawnSync(
     'powershell.exe',
@@ -172,13 +183,7 @@ function prepareWindowsLibclang(target) {
     versionOutput = windowsFileVersion(dllPath);
   }
 
-  const major = versionOutput ? parseClangMajor(versionOutput) : null;
-  if (!major) {
-    fail(`Could not verify the LLVM version for ${dllPath}; use LLVM 18 or 19`);
-  }
-  if (![18, 19].includes(major)) {
-    fail(`LLVM ${major} is not supported by whisper-rs-sys 0.11.1 on Windows; use LLVM 18 or 19`);
-  }
+  const major = validateClangVersion(versionOutput, dllPath);
 
   process.env.LIBCLANG_PATH = libclangDir;
   console.log(`Using LLVM ${major} libclang from ${libclangDir}`);
@@ -408,6 +413,7 @@ module.exports = {
   inspectExecutable,
   normalizeFeature,
   parseClangMajor,
+  validateClangVersion,
   parseArgs,
   prepareWindowsLibclang,
   sidecarPaths,

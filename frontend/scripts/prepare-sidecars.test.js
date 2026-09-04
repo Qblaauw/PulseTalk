@@ -13,6 +13,7 @@ const {
   parseArgs,
   prepareWindowsLibclang,
   sidecarPaths,
+  validateClangVersion,
 } = require('./prepare-sidecars');
 
 test('maps app acceleration features to llama-helper features', () => {
@@ -70,6 +71,9 @@ test('reads supported LLVM major versions from clang output', () => {
   assert.equal(parseClangMajor('Apple clang version 19.1.0'), 19);
   assert.equal(parseClangMajor('18.1.1'), 18);
   assert.equal(parseClangMajor('unexpected output'), null);
+  assert.equal(validateClangVersion('19.1.7', 'test DLL'), 19);
+  assert.throws(() => validateClangVersion('22.1.6', 'test DLL'), /LLVM 22 is not supported/);
+  assert.throws(() => validateClangVersion('unknown', 'test DLL'), /Could not verify/);
   assert.equal(prepareWindowsLibclang('x86_64-unknown-linux-gnu'), null);
 });
 
