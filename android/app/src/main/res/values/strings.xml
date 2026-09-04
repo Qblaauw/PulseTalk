@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PulseTalq</string>
+    <string name="ime_name">PulseTalq Voice Keyboard</string>
+    <string name="subtype_english">English (United States)</string>
+    <string name="voice_notification_channel">PulseTalq dictation</string>
+    <string name="voice_notification_title">PulseTalq is listening</string>
+    <string name="voice_notification_description">Keeps local speech recognition active while you dictate.</string>
+</resources>
