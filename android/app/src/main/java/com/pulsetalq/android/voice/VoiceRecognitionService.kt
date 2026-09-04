@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Debug
 import android.os.IBinder
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.pulsetalq.android.asr.RecognizerError
 import com.pulsetalq.android.asr.RecognizerOutcome
@@ -108,6 +109,16 @@ class VoiceRecognitionService : Service() {
                     failCurrent("No speech was recognized. Try again closer to the microphone.")
                     return
                 }
+                val realTimeFactor = if (captured.durationMillis == 0L) 0.0 else {
+                    result.value.transcriptionDurationMillis.toDouble() / captured.durationMillis
+                }
+                Log.i(
+                    METRICS_TAG,
+                    "requestId=$requestId modelLoadMs=$loadDuration " +
+                        "transcriptionMs=${result.value.transcriptionDurationMillis} " +
+                        "audioMs=${captured.durationMillis} rtf=$realTimeFactor " +
+                        "peakPssBytes=$peakProcessBytes",
+                )
                 runCatching {
                     target?.onResult(
                         result.value.text,
@@ -177,6 +188,7 @@ class VoiceRecognitionService : Service() {
     }
 
     companion object {
+        const val METRICS_TAG = "PulseTalqMetrics"
         const val STATUS_IDLE = 0
         const val STATUS_LISTENING = 1
         const val STATUS_TRANSCRIBING = 2
