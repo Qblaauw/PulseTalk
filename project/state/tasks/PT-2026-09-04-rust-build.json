@@ -7,12 +7,14 @@
   "created_at": "2026-09-04T09:26:01Z",
   "exclusive_resources": [
     "frontend/src-tauri/Cargo.toml",
-    "frontend/src-tauri/Cargo.lock",
+    "Cargo.lock",
     "frontend/src-tauri/.gitignore",
     "frontend/src-tauri/build.rs",
     "frontend/src-tauri/build",
     "frontend/src-tauri/tauri.conf.json",
     "frontend scripts or package commands for external binary acquisition",
+    "docs/BUILDING.md",
+    "docs/installer-verification.md",
     "Tauri external binary names: llama-helper and ffmpeg"
   ],
   "execution_context": {
@@ -23,6 +25,14 @@
     "worktree": "F:/Dev Ops/PulseTalk/.worktrees/chore-PT-2026-09-04-rust-build"
   },
   "files_touched": [
+    "docs/BUILDING.md",
+    "docs/installer-verification.md",
+    "frontend/package.json",
+    "frontend/scripts/check-rust.js",
+    "frontend/scripts/prepare-sidecars.js",
+    "frontend/scripts/prepare-sidecars.test.js",
+    "frontend/scripts/tauri-auto.js",
+    "frontend/src-tauri/Cargo.toml",
     "project/state/tasks/PT-2026-09-04-rust-build.json"
   ],
   "host_refs": {

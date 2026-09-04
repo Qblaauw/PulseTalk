@@ -55,7 +55,7 @@ The legacy hashes were captured on 2026-09-02 from the working tree immediately 
 ```powershell
 # From a "x64 Native Tools Command Prompt for VS 2022" shell, or after
 # calling vcvars64.bat, so that cl.exe and the MSVC INCLUDE paths are set.
-$env:WHISPER_DONT_GENERATE_BINDINGS = "1"   # use whisper-rs-sys bundled bindings
+$env:LIBCLANG_PATH = "C:\path\to\LLVM-19\bin"
 pnpm run tauri:build          # from frontend/
 pwsh scripts/verify-installer-branding.ps1
 ```

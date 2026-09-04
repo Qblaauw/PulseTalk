@@ -2,6 +2,51 @@
 
 This guide provides detailed instructions for building PulseTalq from source on different operating systems.
 
+## Reproducible desktop build
+
+The repository-root `Cargo.lock` is the only Rust lockfile. It pins
+`whisper-rs 0.13.2` to `whisper-rs-sys 0.11.1`; that sys crate vendors
+whisper.cpp 1.7.1. Keep these versions together unless an upgrade is tested as
+one dependency change.
+
+Install Rust 1.77 or newer, Node.js 20 or newer, pnpm 9, CMake, and the native
+compiler toolchain for your operating system. Windows also needs LLVM 18 or 19
+because `whisper-rs-sys 0.11.1` runs bindgen during compilation. Point
+`LIBCLANG_PATH` at the directory containing `libclang.dll`:
+
+```powershell
+$env:LIBCLANG_PATH = "C:\path\to\LLVM-19\bin"
+Test-Path "$env:LIBCLANG_PATH\libclang.dll"
+& "$env:LIBCLANG_PATH\clang.exe" --version
+```
+
+Do not set `WHISPER_DONT_GENERATE_BINDINGS=1` on Windows. The crate's bundled
+bindings contain Unix layouts and fail to compile for the MSVC target.
+The sidecar preparation script uses a short build directory under `%TEMP%` on
+Windows so CMake and MSBuild do not hit the legacy 260-character path limit. Set
+`CARGO_TARGET_DIR` if you need a different build location.
+
+Tauri packages two external binaries. `llama-helper` is built from the workspace
+source and FFmpeg is downloaded and verified by `frontend/src-tauri/build.rs`.
+From `frontend/`, run this clean-worktree check:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm run rust:check
+```
+
+`rust:check` runs sidecar preparation, `cargo check --locked`, and read-only
+sidecar validation with one shared Cargo target directory. This keeps native
+CMake paths short on Windows. `sidecars:prepare` detects and validates the Rust
+host target, builds
+`llama-helper`, and copies it to the exact target-triple filename required by
+Tauri. Pass `--target <triple>`, `--profile release`, or `--feature cuda` after
+`node scripts/prepare-sidecars.js` for an explicit build. `sidecars:check` only
+reads the two binaries and validates their filenames and executable formats.
+
+The regular `pnpm run tauri:dev` and `pnpm run tauri:build` commands run sidecar
+preparation automatically. Their CPU and GPU variants use the same path.
+
 <details>
 <summary>Linux</summary>
 
