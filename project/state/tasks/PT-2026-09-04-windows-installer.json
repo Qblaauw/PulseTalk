@@ -1,0 +1,47 @@
+{
+  "blocked_by": [],
+  "collision_notes": [
+    "The installer is built only in this task-owned worktree. Existing 2026-09-03 installer worktrees and artifacts are treated as read-only historical evidence."
+  ],
+  "commits": [],
+  "created_at": "2026-09-04T15:14:18Z",
+  "exclusive_resources": [
+    "Windows NSIS packaging output and short Cargo target directory for this worktree",
+    "docs/releases/2026-09-04-windows-installer.md",
+    "project/state/tasks/PT-2026-09-04-windows-installer.json"
+  ],
+  "execution_context": {
+    "base_ref": "integration/pulsetalq-next",
+    "base_sha": "436adc672a04b2a57d51784913c5beebe5e7c2d8",
+    "branch": "release/PT-2026-09-04-windows-installer",
+    "repository": "PulseTalk",
+    "worktree": "F:/Dev Ops/PulseTalk/.worktrees/release-PT-2026-09-04-windows-installer"
+  },
+  "files_touched": [
+    "docs/releases/2026-09-04-windows-installer.md",
+    "project/state/tasks/PT-2026-09-04-windows-installer.json"
+  ],
+  "host_refs": {
+    "runtime": "codex-root/t3-code"
+  },
+  "id": "PT-2026-09-04-windows-installer",
+  "kind": "release",
+  "local_id": null,
+  "owner": "codex-root",
+  "plan_id": "docs/plans/2026-09-04-pulsetalq-ui-redesign-implementation.md#4-follow-up-plan",
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "in_progress",
+  "subject": "Build and verify a new unsigned Windows NSIS installer from the current PulseTalq integration candidate",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-04T15:14:18Z",
+  "verification_contract": [
+    "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
+    "python scripts/verify-installer-assets.py passes before packaging",
+    "pnpm install --frozen-lockfile and pnpm run tauri:build:windows-local pass",
+    "the resulting NSIS executable passes scripts/verify-installer-branding.ps1 without being launched",
+    "the artifact receipt records its absolute path, byte size, SHA-256, signing state, source SHA, task SHA, and skipped installed-state checks"
+  ],
+  "verification_receipts": []
+}
