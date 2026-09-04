@@ -1,7 +1,8 @@
 {
   "blocked_by": [],
   "commits": [
-    "42c3847baa03c112459621afcd2eba631385f08d"
+    "42c3847baa03c112459621afcd2eba631385f08d",
+    "08f60c246277b1096bb194face7412bdf7e47ca7"
   ],
   "created_at": "2026-09-03T18:00:00Z",
   "execution_context": {
@@ -19,6 +20,8 @@
   ],
   "files_touched": [
     "project/scope-briefs/android-sideload-keyboard.md",
+    "project/plans/android-sideload-keyboard.md",
+    "project/state/goals/P-2026-09-04-android-sideload-keyboard.json",
     "project/state/tasks/PT-2026-09-03-android-sideload-keyboard.json"
   ],
   "host_refs": {},
@@ -26,14 +29,14 @@
   "kind": "feature",
   "local_id": null,
   "owner": "codex",
-  "plan_id": null,
+  "plan_id": "P-2026-09-04-android-sideload-keyboard",
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "scoped",
+  "status": "planned",
   "subject": "Build the first sideloadable Android voice keyboard",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-03T18:00:00Z",
+  "updated_at": "2026-09-04T05:30:20Z",
   "verification_contract": [
     "scope brief approved",
     "dispatchable implementation plan validated",
@@ -42,6 +45,7 @@
   ],
   "verification_receipts": [
     "Baseline cargo build attempted before scope edit and failed in inherited desktop dependency llama-cpp-sys-2 because libclang.dll was not configured.",
-    "Scope checkpoint 42c3847baa03c112459621afcd2eba631385f08d passed task JSON parsing, git diff --check, and ProductOps prose lint."
+    "Scope checkpoint 42c3847baa03c112459621afcd2eba631385f08d passed task JSON parsing, git diff --check, and ProductOps prose lint.",
+    "Plan P-2026-09-04-android-sideload-keyboard passed validate-plan with no findings, passed ProductOps prose lint, and sealed goal contract revision 1 at digest 264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe."
   ]
 }

@@ -1,0 +1,609 @@
+{
+  "contract": {
+    "criteria": [
+      {
+        "id": "G1",
+        "satisfied_by": [
+          "T1",
+          "T12",
+          "T2",
+          "T3"
+        ],
+        "text": "`assembleDebug` produces one installable APK and the handoff records its SHA-256."
+      },
+      {
+        "id": "G2",
+        "satisfied_by": [
+          "T13"
+        ],
+        "text": "The APK installs on the Android 16 test handset without root access."
+      },
+      {
+        "id": "G3",
+        "satisfied_by": [
+          "T11",
+          "T13",
+          "T7"
+        ],
+        "text": "The setup activity guides the tester through microphone permission, model installation, keyboard enablement, and keyboard selection."
+      },
+      {
+        "id": "G4",
+        "satisfied_by": [
+          "T13",
+          "T8"
+        ],
+        "text": "PulseTalq appears in Android's keyboard picker and basic tap typing works in another app."
+      },
+      {
+        "id": "G5",
+        "satisfied_by": [
+          "T10",
+          "T13",
+          "T6",
+          "T9"
+        ],
+        "text": "The tester records speech from the keyboard and the final local transcript appears at the current cursor in at least a messaging app and a notes app."
+      },
+      {
+        "id": "G6",
+        "satisfied_by": [
+          "T13"
+        ],
+        "text": "Dictation still works in airplane mode after model installation."
+      },
+      {
+        "id": "G7",
+        "satisfied_by": [
+          "T10",
+          "T13",
+          "T4"
+        ],
+        "text": "Cancelled dictation inserts nothing, and a failed insertion retains the transcript for retry or copy."
+      },
+      {
+        "id": "G8",
+        "satisfied_by": [
+          "T10",
+          "T13",
+          "T9"
+        ],
+        "text": "Killing the ASR process does not crash the keyboard. The next voice attempt either reloads the model or shows a recoverable error."
+      },
+      {
+        "id": "G9",
+        "satisfied_by": [
+          "T13",
+          "T9"
+        ],
+        "text": "The test report records model load time, transcription latency, real-time factor, and peak memory on the handset."
+      },
+      {
+        "id": "G10",
+        "satisfied_by": [
+          "T12",
+          "T5",
+          "T6"
+        ],
+        "text": "No GPL-derived source is present, and bundled notices cover the ASR model and native dependencies."
+      }
+    ],
+    "goal_contract_version": 2,
+    "plan_id": "P-2026-09-04-android-sideload-keyboard",
+    "schema": "product-ops.goal-contract/v2",
+    "scope_brief": {
+      "path": "project/scope-briefs/android-sideload-keyboard.md",
+      "section6_sha256": "cb2d49cdcd1bb9a1536ef31c46ae35a69e09088575bcc1daed27441a5a2d4ae1"
+    },
+    "tasks": [
+      {
+        "disposition": {
+          "criteria": [
+            "G1"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T1"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G5",
+            "G7",
+            "G8"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T10"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G3"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T11"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G1",
+            "G10"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T12"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G2",
+            "G3",
+            "G4",
+            "G5",
+            "G6",
+            "G7",
+            "G8",
+            "G9"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T13"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G1"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T2"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G1"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T3"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G7"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T4"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G10"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T5"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G10",
+            "G5"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T6"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G3"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T7"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G4"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T8"
+      },
+      {
+        "disposition": {
+          "criteria": [
+            "G5",
+            "G8",
+            "G9"
+          ],
+          "kind": "mapped"
+        },
+        "id": "T9"
+      }
+    ]
+  },
+  "contract_digest": "264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe",
+  "contract_revision": 1,
+  "created_at": "2026-09-04T05:30:20Z",
+  "criteria": [
+    {
+      "criterion": "`assembleDebug` produces one installable APK and the handoff records its SHA-256.",
+      "definition_digest": "3b1cada2ac1b405842c0aca6ff3b553e3954bbedf8242188f7868deb8fbcac41",
+      "id": "G1",
+      "receipts": [],
+      "satisfied_by": [
+        "T1",
+        "T12",
+        "T2",
+        "T3"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "The APK installs on the Android 16 test handset without root access.",
+      "definition_digest": "21b40e9d5aa3ddeef6e1bea5b201a23d7cbaa2e2339e2ba1dd322abd5a4a4aa1",
+      "id": "G2",
+      "receipts": [],
+      "satisfied_by": [
+        "T13"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "The setup activity guides the tester through microphone permission, model installation, keyboard enablement, and keyboard selection.",
+      "definition_digest": "4b33a96f4bc13eed002030238c626b2f74c8909485d198c506b6b2b3b421561f",
+      "id": "G3",
+      "receipts": [],
+      "satisfied_by": [
+        "T11",
+        "T13",
+        "T7"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "PulseTalq appears in Android's keyboard picker and basic tap typing works in another app.",
+      "definition_digest": "cf8f05d13e03163bdcd6202a5815c56c84a0d718ed92053ee381512a70dfa9fc",
+      "id": "G4",
+      "receipts": [],
+      "satisfied_by": [
+        "T13",
+        "T8"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "The tester records speech from the keyboard and the final local transcript appears at the current cursor in at least a messaging app and a notes app.",
+      "definition_digest": "2cf609925bb0906ae31910e7360a888c98f6fd38c32b56ba339179650258864e",
+      "id": "G5",
+      "receipts": [],
+      "satisfied_by": [
+        "T10",
+        "T13",
+        "T6",
+        "T9"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "Dictation still works in airplane mode after model installation.",
+      "definition_digest": "05e3a6c0af0d6e9e058259159dc55a1526bbf5a19cc16f273642c25009e2c81d",
+      "id": "G6",
+      "receipts": [],
+      "satisfied_by": [
+        "T13"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "Cancelled dictation inserts nothing, and a failed insertion retains the transcript for retry or copy.",
+      "definition_digest": "afadc063cfb62d6d637628287cb100e6f8029f1ff4ae3d4afc24a29b4a69a67c",
+      "id": "G7",
+      "receipts": [],
+      "satisfied_by": [
+        "T10",
+        "T13",
+        "T4"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "Killing the ASR process does not crash the keyboard. The next voice attempt either reloads the model or shows a recoverable error.",
+      "definition_digest": "1ed0e248feccf1d5df4a8ab28dfcf5063f720395861eb179223fa8b503f29062",
+      "id": "G8",
+      "receipts": [],
+      "satisfied_by": [
+        "T10",
+        "T13",
+        "T9"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "The test report records model load time, transcription latency, real-time factor, and peak memory on the handset.",
+      "definition_digest": "ae8a82abb84fbe6ae8cbc8789f387f8604c372aec6c3e14a1ac3b95a5fe949e7",
+      "id": "G9",
+      "receipts": [],
+      "satisfied_by": [
+        "T13",
+        "T9"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    },
+    {
+      "criterion": "No GPL-derived source is present, and bundled notices cover the ASR model and native dependencies.",
+      "definition_digest": "e78f31defe3db3b171c61b65c2cafa882f478769748f757ced37d1c2e4b5a620",
+      "id": "G10",
+      "receipts": [],
+      "satisfied_by": [
+        "T12",
+        "T5",
+        "T6"
+      ],
+      "status": "pending",
+      "updated_at": "2026-09-04T05:30:20Z"
+    }
+  ],
+  "plan_id": "P-2026-09-04-android-sideload-keyboard",
+  "plan_path": "project/plans/android-sideload-keyboard.md",
+  "revision_history": [
+    {
+      "applied_at": "2026-09-04T05:30:20Z",
+      "approval_ref": null,
+      "contract": {
+        "criteria": [
+          {
+            "id": "G1",
+            "satisfied_by": [
+              "T1",
+              "T12",
+              "T2",
+              "T3"
+            ],
+            "text": "`assembleDebug` produces one installable APK and the handoff records its SHA-256."
+          },
+          {
+            "id": "G2",
+            "satisfied_by": [
+              "T13"
+            ],
+            "text": "The APK installs on the Android 16 test handset without root access."
+          },
+          {
+            "id": "G3",
+            "satisfied_by": [
+              "T11",
+              "T13",
+              "T7"
+            ],
+            "text": "The setup activity guides the tester through microphone permission, model installation, keyboard enablement, and keyboard selection."
+          },
+          {
+            "id": "G4",
+            "satisfied_by": [
+              "T13",
+              "T8"
+            ],
+            "text": "PulseTalq appears in Android's keyboard picker and basic tap typing works in another app."
+          },
+          {
+            "id": "G5",
+            "satisfied_by": [
+              "T10",
+              "T13",
+              "T6",
+              "T9"
+            ],
+            "text": "The tester records speech from the keyboard and the final local transcript appears at the current cursor in at least a messaging app and a notes app."
+          },
+          {
+            "id": "G6",
+            "satisfied_by": [
+              "T13"
+            ],
+            "text": "Dictation still works in airplane mode after model installation."
+          },
+          {
+            "id": "G7",
+            "satisfied_by": [
+              "T10",
+              "T13",
+              "T4"
+            ],
+            "text": "Cancelled dictation inserts nothing, and a failed insertion retains the transcript for retry or copy."
+          },
+          {
+            "id": "G8",
+            "satisfied_by": [
+              "T10",
+              "T13",
+              "T9"
+            ],
+            "text": "Killing the ASR process does not crash the keyboard. The next voice attempt either reloads the model or shows a recoverable error."
+          },
+          {
+            "id": "G9",
+            "satisfied_by": [
+              "T13",
+              "T9"
+            ],
+            "text": "The test report records model load time, transcription latency, real-time factor, and peak memory on the handset."
+          },
+          {
+            "id": "G10",
+            "satisfied_by": [
+              "T12",
+              "T5",
+              "T6"
+            ],
+            "text": "No GPL-derived source is present, and bundled notices cover the ASR model and native dependencies."
+          }
+        ],
+        "goal_contract_version": 2,
+        "plan_id": "P-2026-09-04-android-sideload-keyboard",
+        "schema": "product-ops.goal-contract/v2",
+        "scope_brief": {
+          "path": "project/scope-briefs/android-sideload-keyboard.md",
+          "section6_sha256": "cb2d49cdcd1bb9a1536ef31c46ae35a69e09088575bcc1daed27441a5a2d4ae1"
+        },
+        "tasks": [
+          {
+            "disposition": {
+              "criteria": [
+                "G1"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T1"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G5",
+                "G7",
+                "G8"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T10"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G3"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T11"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G1",
+                "G10"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T12"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G2",
+                "G3",
+                "G4",
+                "G5",
+                "G6",
+                "G7",
+                "G8",
+                "G9"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T13"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G1"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T2"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G1"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T3"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G7"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T4"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G10"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T5"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G10",
+                "G5"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T6"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G3"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T7"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G4"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T8"
+          },
+          {
+            "disposition": {
+              "criteria": [
+                "G5",
+                "G8",
+                "G9"
+              ],
+              "kind": "mapped"
+            },
+            "id": "T9"
+          }
+        ]
+      },
+      "contract_digest": "264d80da43e758b39ea909bea25868aacaed439c9c4b09cca957e5ad2a2d0bfe",
+      "reason": "initial prepare",
+      "revision": 1
+    }
+  ],
+  "schema": "product-ops.goal-dod/v2",
+  "scope_brief": {
+    "path": "project/scope-briefs/android-sideload-keyboard.md",
+    "section6_sha256": "cb2d49cdcd1bb9a1536ef31c46ae35a69e09088575bcc1daed27441a5a2d4ae1"
+  },
+  "tombstones": [],
+  "updated_at": "2026-09-04T05:30:20Z"
+}

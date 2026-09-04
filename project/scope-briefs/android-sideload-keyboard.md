@@ -13,7 +13,7 @@ Produce the first installable Android test build. It must prove the complete pat
 - A companion setup activity for microphone permission, model installation, keyboard enablement, and keyboard selection.
 - A minimal `InputMethodService` with ordinary tap typing, backspace, shift, symbols, enter, and a prominent voice control.
 - Android `AudioRecord` capture with start, stop, cancel, elapsed-time, transcribing, and failure states.
-- Local ASR in a separate app process. Start with Parakeet INT8 and retain the existing provider boundary so a smaller model can replace it if the device benchmark fails.
+- Local ASR in a separate app process. Use sherpa-onnx 1.13.7 with Parakeet TDT 0.6B v2 INT8 and keep a narrow recognizer interface so a smaller model can replace it if the device benchmark fails.
 - IPC between the keyboard and ASR process.
 - Cursor-safe insertion through `InputConnection`.
 - Recovery that retains completed text when insertion fails and offers copy and retry actions.
@@ -35,7 +35,7 @@ Produce the first installable Android test build. It must prove the complete pat
 | Android project | `android/` | Gradle Kotlin DSL, Kotlin, Compose setup activity, and one debug application module |
 | Keyboard service | `android/app/src/main/` | Minimal IME declaration, layout, lifecycle, and `InputConnection` delivery |
 | Voice service | Android service plus native library boundary | Separate process, model lifecycle, transcription request, result, cancellation, and error contract |
-| Local ASR core | New mobile-safe Rust crate or a narrowly extracted shared crate | No Tauri, desktop path, `cpal`, or Windows delivery dependencies |
+| Local ASR adapter | Kotlin interface backed by the sherpa-onnx Android AAR | No Tauri, Rust, NDK, desktop path, `cpal`, or Windows delivery dependencies in the first APK |
 | Model installer | Companion setup activity | Download or import with progress, free-space check, checksum, attribution, and retry |
 | Automated checks | Android unit, instrumentation, and Rust tests | Cover state transitions, IPC payloads, and insertion recovery where practical |
 | Test package | Debug APK under the Android build output | Exact path and SHA-256 recorded in the task handoff |
@@ -49,9 +49,10 @@ Produce the first installable Android test build. It must prove the complete pat
 - The model lives outside the IME process. The keyboard must remain usable if Android kills or restarts the ASR process.
 - The first build is English-only unless the selected Parakeet package adds other languages without extra keyboard work.
 - Do not copy GPL keyboard code. Permissive reference code and separately licensed model assets require attribution and a dependency notice.
+- Pin sherpa-onnx to 1.13.7 and verify the downloaded AAR digest. Pin each Parakeet model file by byte size and SHA-256.
 - The inherited desktop workspace currently fails `cargo build` because `llama-cpp-sys-2` cannot find `libclang.dll`. Android planning must either configure that prerequisite or isolate Android builds from the desktop LLM package.
 
-### 6. Success criteria
+### 6. Success Criteria
 
 - [ ] `assembleDebug` produces one installable APK and the handoff records its SHA-256.
 - [ ] The APK installs on the Android 16 test handset without root access.
@@ -80,7 +81,7 @@ This is an internal engineering build for the PulseTalq team. Testers sideload i
 |---|---|---:|---|
 | Objective | Certain | 98 | User requested: "Build the first Android app that we can side load and test." |
 | Boundaries | Confident | 90 | User confirmed: "first sideloaded APK already install as a system keyboard and dictate into another Android app." |
-| Deliverables | Confident | 88 | `docs/research/ANDROID_KEYBOARD_VIABILITY.md` specifies the Kotlin IME, separate ASR process, IPC, portable Rust model, and internal voice milestone. |
+| Deliverables | Confident | 88 | The repository has no Android project. `frontend/src-tauri/src/parakeet_engine/model.rs` confirms Parakeet behavior exists only in the desktop Tauri package, so the APK needs a new Android app, IME, and local recognizer adapter. |
 | Constraints | Confident | 84 | User specified "S20 and above" and "andriod 16". The research sets local Parakeet and separate-process constraints. |
 | Success | Confident | 90 | The user's end-to-end requirement fixes installation, keyboard registration, dictation, and cross-app insertion as the core proof. |
 | Audience | Certain | 96 | "side load and test" identifies an internal tester rather than a Play Store user. |
@@ -93,6 +94,6 @@ This is an internal engineering build for the PulseTalq team. Testers sideload i
 
 ### 11. Calibration log
 
-Empty at initial scope.
+- 2026-09-04: Deliverables was scored 88 at gate; the proposed Rust or shared-core implementation was too specific because the installed machine has no NDK or `cargo-ndk`, while sherpa-onnx publishes a prebuilt Android AAR with Parakeet support. Anchor implication: scope mobile behavior and the recognizer interface before choosing the native implementation.
 
-**Created:** 2026-09-03 . **Last opened:** 2026-09-03 . **Last edited:** 2026-09-03 . **Status:** needs-review . **Owner:** Q. Blaauw
+**Created:** 2026-09-03 . **Last opened:** 2026-09-04 . **Last edited:** 2026-09-04 . **Status:** stable . **Owner:** Q. Blaauw

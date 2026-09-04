@@ -1,0 +1,31 @@
+{
+  "blocked_by": [
+    "P-2026-09-04-android-sideload-keyboard/T12"
+  ],
+  "commits": [],
+  "created_at": "2026-09-04T05:30:12Z",
+  "execution_context": {
+    "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
+    "repository": "feature-PT-2026-09-03-android-sideload-keyboard",
+    "worktree": "feature-PT-2026-09-03-android-sideload-keyboard"
+  },
+  "files_touched": [
+    "docs/verification/android-device-smoke.md",
+    "scripts/android/device-smoke.ps1"
+  ],
+  "host_refs": {},
+  "id": "P-2026-09-04-android-sideload-keyboard/T13",
+  "kind": "implementation",
+  "local_id": "T13",
+  "owner": null,
+  "plan_id": "P-2026-09-04-android-sideload-keyboard",
+  "roadmap_items": [
+    "none"
+  ],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "pending",
+  "subject": "Verify the APK on Android 16 hardware",
+  "updated_at": "2026-09-04T05:30:12Z",
+  "verification_receipts": []
+}

@@ -1,0 +1,35 @@
+{
+  "blocked_by": [
+    "P-2026-09-04-android-sideload-keyboard/T8",
+    "P-2026-09-04-android-sideload-keyboard/T9"
+  ],
+  "commits": [],
+  "created_at": "2026-09-04T05:30:12Z",
+  "execution_context": {
+    "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
+    "repository": "feature-PT-2026-09-03-android-sideload-keyboard",
+    "worktree": "feature-PT-2026-09-03-android-sideload-keyboard"
+  },
+  "files_touched": [
+    "android/app/src/main/java/com/pulsetalq/android/dictation/DictationReducer.kt",
+    "android/app/src/main/java/com/pulsetalq/android/ime/ImeDictationController.kt",
+    "android/app/src/main/java/com/pulsetalq/android/ime/PulseKeyboardView.kt",
+    "android/app/src/main/java/com/pulsetalq/android/ime/PulseTalqImeService.kt",
+    "android/app/src/test/java/com/pulsetalq/android/ime/ImeDictationControllerTest.kt"
+  ],
+  "host_refs": {},
+  "id": "P-2026-09-04-android-sideload-keyboard/T10",
+  "kind": "implementation",
+  "local_id": "T10",
+  "owner": null,
+  "plan_id": "P-2026-09-04-android-sideload-keyboard",
+  "roadmap_items": [
+    "none"
+  ],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "pending",
+  "subject": "Wire voice dictation and transcript recovery into the IME",
+  "updated_at": "2026-09-04T05:30:12Z",
+  "verification_receipts": []
+}

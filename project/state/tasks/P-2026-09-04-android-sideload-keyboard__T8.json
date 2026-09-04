@@ -1,0 +1,35 @@
+{
+  "blocked_by": [
+    "P-2026-09-04-android-sideload-keyboard/T3",
+    "P-2026-09-04-android-sideload-keyboard/T4"
+  ],
+  "commits": [],
+  "created_at": "2026-09-04T05:30:11Z",
+  "execution_context": {
+    "branch": "feature/PT-2026-09-03-android-sideload-keyboard",
+    "repository": "feature-PT-2026-09-03-android-sideload-keyboard",
+    "worktree": "feature-PT-2026-09-03-android-sideload-keyboard"
+  },
+  "files_touched": [
+    "android/app/src/main/java/com/pulsetalq/android/ime/EditorGateway.kt",
+    "android/app/src/main/java/com/pulsetalq/android/ime/KeyboardLayout.kt",
+    "android/app/src/main/java/com/pulsetalq/android/ime/PulseKeyboardView.kt",
+    "android/app/src/main/java/com/pulsetalq/android/ime/PulseTalqImeService.kt",
+    "android/app/src/test/java/com/pulsetalq/android/ime/EditorGatewayTest.kt"
+  ],
+  "host_refs": {},
+  "id": "P-2026-09-04-android-sideload-keyboard/T8",
+  "kind": "implementation",
+  "local_id": "T8",
+  "owner": null,
+  "plan_id": "P-2026-09-04-android-sideload-keyboard",
+  "roadmap_items": [
+    "none"
+  ],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "pending",
+  "subject": "Implement the minimal tap keyboard",
+  "updated_at": "2026-09-04T05:30:11Z",
+  "verification_receipts": []
+}
