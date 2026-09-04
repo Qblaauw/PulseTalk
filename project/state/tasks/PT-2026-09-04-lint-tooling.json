@@ -4,7 +4,8 @@
     "dc6f5657772248f344c203ec413d40d1b93c7da0",
     "2d188babdc9a709354927382c1335e2b67f8a6a1",
     "a4df6be087f8ff7212c827cb884b0a45fce122ab",
-    "8ba3609c2b47593b61af723b9ead27790171bf21"
+    "8ba3609c2b47593b61af723b9ead27790171bf21",
+    "76df7d72fe9b2c0c853792f564a518737c119c34"
   ],
   "created_at": "2026-09-04T07:51:40Z",
   "exclusive_resources": [
@@ -98,6 +99,7 @@
     "runtime": "codex-root/t3-code"
   },
   "id": "PT-2026-09-04-lint-tooling",
+  "integration_merge_sha": "76df7d72fe9b2c0c853792f564a518737c119c34",
   "kind": "chore",
   "local_id": null,
   "owner": "codex-root",
@@ -105,10 +107,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "ready_for_review",
+  "status": "done",
   "subject": "Make the Next 14 frontend lint check non-interactive and fix its findings",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T08:39:20Z",
+  "updated_at": "2026-09-04T09:07:25Z",
   "verification_contract": [
     "pnpm run lint in frontend exits successfully without prompting",
     "pnpm exec tsc --noEmit in frontend introduces no errors beyond the known missing bun:test types",
@@ -158,6 +160,11 @@
     {
       "check": "target integration freshness before handoff",
       "note": "origin/integration/pulsetalq-next remained at 7ca2a1572e85a471c2dd328223bbe63d32c62625; implementation head was 0 commits behind and 4 commits ahead before the handoff metadata commit",
+      "result": "pass"
+    },
+    {
+      "check": "combined integration verification at 76df7d72fe9b2c0c853792f564a518737c119c34",
+      "note": "Frozen pnpm 9.15.9 install passed; lint exited 0 with the same 36 pre-existing hook warnings; Next production build generated all 11 static pages; TypeScript retained only the accepted missing bun:test declaration; git diff --check passed",
       "result": "pass"
     }
   ]
