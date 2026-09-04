@@ -3,7 +3,10 @@
   "collision_notes": [
     "The stale dirty worktree feature/dictation-ux-refinement also modifies frontend/src-tauri/Cargo.toml. This task does not read from, write to, or merge that worktree; any future reconciliation must preserve its uncommitted state."
   ],
-  "commits": [],
+  "commits": [
+    "f52cecc008b324abe59744220b73c2ae1214af1a",
+    "11a35b153b55e38f1ee02f6c547dae62dd47e230"
+  ],
   "created_at": "2026-09-04T09:26:01Z",
   "exclusive_resources": [
     "frontend/src-tauri/Cargo.toml",
@@ -46,10 +49,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "in_progress",
+  "status": "in_review",
   "subject": "Make cargo check and Tauri sidecar acquisition reproducible from a clean worktree",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T09:26:01Z",
+  "updated_at": "2026-09-04T09:46:07Z",
   "verification_contract": [
     "cargo check --locked passes in frontend/src-tauri from a clean task worktree",
     "the committed lockfile resolves a compatible whisper-rs and whisper.cpp pairing",
@@ -58,5 +61,45 @@
     "cargo fmt --all -- --check passes for changed Rust files",
     "git diff --check passes"
   ],
-  "verification_receipts": []
+  "verification_receipts": [
+    {
+      "check": "baseline cargo check in frontend/src-tauri",
+      "note": "Failed in whisper-rs-sys because libclang.dll was absent. Setting WHISPER_DONT_GENERATE_BINDINGS exposed incompatible Unix layout assertions on the Windows MSVC target.",
+      "result": "blocked"
+    },
+    {
+      "check": "cargo tree --locked -p pulse-talq -i whisper-rs-sys at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "note": "Resolved whisper-rs 0.13.2 to whisper-rs-sys 0.11.1. The sys crate vendors whisper.cpp 1.7.1 and Cargo.lock remained unchanged.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run test:sidecars in frontend at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "note": "All 6 Node tests passed for feature mapping, target-triple names, target directory overrides, executable formats, LLVM version parsing, and CLI arguments.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run rust:check in frontend at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "note": "Passed on x86_64-pc-windows-msvc with libclang 18.1.1. Built a real 6167552-byte llama-helper PE from workspace source, ran cargo check --locked for pulse-talq, verified the 99264000-byte FFmpeg PE, and validated both exact target-triple filenames.",
+      "result": "pass"
+    },
+    {
+      "check": "cargo check --locked in frontend/src-tauri at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "note": "Passed with LIBCLANG_PATH set to libclang 18.1.1 and CARGO_TARGET_DIR set to the short directory used by the wrapper. Existing compiler warnings remain.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run sidecars:check non-destructive verification at 11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "note": "Passed. SHA-256 hashes and last-write timestamps for both target-named binaries were identical before and after the read-only check.",
+      "result": "pass"
+    },
+    {
+      "check": "cargo fmt --all -- --check",
+      "note": "The repository-wide command reports pre-existing formatting drift across unchanged Rust sources. This task changes no .rs files, so the changed-Rust formatting scope is empty.",
+      "result": "known_failure"
+    },
+    {
+      "check": "git diff --check 610b71d63deb4a46e3f9342d896ab0422663808d..11a35b153b55e38f1ee02f6c547dae62dd47e230",
+      "result": "pass"
+    }
+  ]
 }
