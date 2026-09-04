@@ -28,7 +28,9 @@
     "9a9190af967bc2d60f6a654c12e74785adba69da",
     "146f0dd409c783f753587be81cddcb9df50c5842",
     "907638095a37bba4a3fc0551ee2c8e6c537e3f1c",
-    "c61a1f625d00154a5ba4076038f6c3428eeb0732"
+    "c61a1f625d00154a5ba4076038f6c3428eeb0732",
+    "060ae83ca8094a5d13c198b42cb2d766ce41ceff",
+    "5679adb908777b9b698e6a38bc16fa83cc4f30a5"
   ],
   "created_at": "2026-09-04T15:14:18Z",
   "exclusive_resources": [
@@ -68,6 +70,7 @@
     "runtime": "codex-root/t3-code"
   },
   "id": "PT-2026-09-04-windows-installer",
+  "integration_merge_sha": "5679adb908777b9b698e6a38bc16fa83cc4f30a5",
   "kind": "release",
   "local_id": null,
   "owner": "codex-root",
@@ -75,10 +78,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "ready_for_review",
+  "status": "done",
   "subject": "Build and verify a versioned Windows NSIS installer that upgrades the installed PulseTalq 0.4.2 app",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T17:21:50Z",
+  "updated_at": "2026-09-04T17:23:43Z",
   "verification_contract": [
     "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
     "python scripts/verify-installer-assets.py passes before packaging",
@@ -172,6 +175,11 @@
     {
       "check": "corrected exported UI markers",
       "note": "The built frontend contains Account and sync, Record meeting, Guide this summary, and v0.4.3. No visible 0.4.0, 0.4.1, or 0.4.2 marker remains in frontend/out.",
+      "result": "pass"
+    },
+    {
+      "check": "combined integration verification at 5679adb908777b9b698e6a38bc16fa83cc4f30a5",
+      "note": "pnpm install --frozen-lockfile, pnpm run lint, node scripts/installer-version.mjs verify, six sidecar tests, and the installer asset gate passed. The corrected artifact still had SHA-256 ffd9df3572523260d6b35c7b3463cd3bd1363f64f96e32e8ee4e19d57ff70ca2 and ProductVersion 0.4.3. No app-source file changed after build commit c61a1f625d00154a5ba4076038f6c3428eeb0732.",
       "result": "pass"
     }
   ]
