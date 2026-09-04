@@ -3,7 +3,18 @@
   "collision_notes": [
     "The installer is built only in this task-owned worktree. Existing 2026-09-03 installer worktrees and artifacts are treated as read-only historical evidence."
   ],
-  "commits": [],
+  "artifact": {
+    "created_at": "2026-09-04T15:28:30.1243140Z",
+    "path": "F:/ptbuild/pulsetalq-20260904/release/bundle/nsis/PulseTalq_0.4.0_x64-setup.exe",
+    "product_version": "0.4.0",
+    "sha256": "ad1f46056222468b3cb1a494a2baa839a2c6845f4d1f7d760a64d406f02131d8",
+    "signature_status": "NotSigned",
+    "size_bytes": 42692430,
+    "target": "x86_64-pc-windows-msvc NSIS CPU profile"
+  },
+  "commits": [
+    "9a9190af967bc2d60f6a654c12e74785adba69da"
+  ],
   "created_at": "2026-09-04T15:14:18Z",
   "exclusive_resources": [
     "Windows NSIS packaging output and short Cargo target directory for this worktree",
@@ -32,10 +43,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "in_progress",
+  "status": "ready_for_review",
   "subject": "Build and verify a new unsigned Windows NSIS installer from the current PulseTalq integration candidate",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T15:14:18Z",
+  "updated_at": "2026-09-04T15:29:35Z",
   "verification_contract": [
     "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
     "python scripts/verify-installer-assets.py passes before packaging",
@@ -43,5 +54,56 @@
     "the resulting NSIS executable passes scripts/verify-installer-branding.ps1 without being launched",
     "the artifact receipt records its absolute path, byte size, SHA-256, signing state, source SHA, task SHA, and skipped installed-state checks"
   ],
-  "verification_receipts": []
+  "verification_receipts": [
+    {
+      "check": "initial pnpm run tauri:build:windows-local",
+      "note": "Stopped before compilation because the invoking shell did not inherit LIBCLANG_PATH. Relaunched with the verified LLVM 18.1.1 directory explicitly set.",
+      "result": "known_failure"
+    },
+    {
+      "check": "release sidecar build with the default Windows target directory",
+      "note": "MSBuild rejected tracked output below the system Temp directory. The successful build used the task-exclusive F:/ptbuild/pulsetalq-20260904 target instead; no source change was required.",
+      "result": "known_failure"
+    },
+    {
+      "check": "python scripts/verify-installer-assets.py",
+      "note": "Passed 20 checks with 0 failures. Five warnings identify unused, unchanged Next.js starter SVGs.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm install --frozen-lockfile",
+      "note": "Passed with the lockfile unchanged using the repository-pinned pnpm 9.15.9.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run tauri:build:windows-local at 9a9190af967bc2d60f6a654c12e74785adba69da",
+      "note": "Passed with LLVM 18.1.1 and CARGO_TARGET_DIR=F:/ptbuild/pulsetalq-20260904. The pinned FFmpeg archive and executable were verified before use, the x86_64 llama-helper passed architecture verification, and Tauri produced one unsigned NSIS bundle.",
+      "result": "pass"
+    },
+    {
+      "check": "scripts/verify-installer-branding.ps1 against the NSIS executable",
+      "note": "Passed 3 checks with 0 failures and 0 warnings. ProductName and FileDescription are PulseTalq; the legal copyright retains the approved PolyphronAI attribution form.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run sidecars:check",
+      "note": "Passed. llama-helper (3,772,416 bytes) and FFmpeg (99,264,000 bytes) are verified x86_64 PE executables.",
+      "result": "pass"
+    },
+    {
+      "check": "artifact hash, version, and Authenticode inspection",
+      "note": "The 42,692,430-byte installer has SHA-256 ad1f46056222468b3cb1a494a2baa839a2c6845f4d1f7d760a64d406f02131d8, ProductVersion 0.4.0, and Authenticode status NotSigned.",
+      "result": "pass"
+    },
+    {
+      "check": "installed-state branding and application smoke test",
+      "note": "Not run because the installer was not launched. Registry, Start menu, upgrade, and runtime checks require an explicit installation pass.",
+      "result": "not_run"
+    },
+    {
+      "check": "build provenance and worktree state",
+      "note": "At build commit 9a9190af967bc2d60f6a654c12e74785adba69da, the only difference from integration source 436adc672a04b2a57d51784913c5beebe5e7c2d8 was the task claim record. The build worktree was clean, git diff --check passed, and no task-owned build process remained after packaging.",
+      "result": "pass"
+    }
+  ]
 }
