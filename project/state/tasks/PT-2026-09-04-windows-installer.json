@@ -1,15 +1,17 @@
 {
   "blocked_by": [],
   "collision_notes": [
-    "The installer is built only in this task-owned worktree. Existing 2026-09-03 installer worktrees and artifacts are treated as read-only historical evidence."
+    "The installer is built only in this task-owned worktree. Existing 2026-09-03 installer worktrees and artifacts are treated as read-only historical evidence.",
+    "PT-2026-09-04-ui-redesign still says ready_for_review in its task record, but its commits are merged into main and this integration base. Version-only edits to Settings and Sidebar preserve the merged UI behavior."
   ],
-  "artifact": {
+  "superseded_artifact": {
     "created_at": "2026-09-04T15:28:30.1243140Z",
     "path": "F:/ptbuild/pulsetalq-20260904/release/bundle/nsis/PulseTalq_0.4.0_x64-setup.exe",
     "product_version": "0.4.0",
     "sha256": "ad1f46056222468b3cb1a494a2baa839a2c6845f4d1f7d760a64d406f02131d8",
     "signature_status": "NotSigned",
     "size_bytes": 42692430,
+    "superseded_reason": "The package version was 0.4.0, below the installed PulseTalq 0.4.2 version, so Windows did not replace the installed app.",
     "target": "x86_64-pc-windows-msvc NSIS CPU profile"
   },
   "commits": [
@@ -19,6 +21,10 @@
   "created_at": "2026-09-04T15:14:18Z",
   "exclusive_resources": [
     "Windows NSIS packaging output and short Cargo target directory for this worktree",
+    "application and installer version metadata",
+    "installer-version.json and scripts/installer-version.mjs",
+    "frontend/package.json, frontend/src-tauri/Cargo.toml, frontend/src-tauri/tauri.conf.json, and Cargo.lock version fields",
+    "frontend version labels and analytics version literals",
     "docs/releases/2026-09-04-windows-installer.md",
     "project/state/tasks/PT-2026-09-04-windows-installer.json"
   ],
@@ -30,7 +36,20 @@
     "worktree": "F:/Dev Ops/PulseTalk/.worktrees/release-PT-2026-09-04-windows-installer"
   },
   "files_touched": [
+    "Cargo.lock",
+    "docs/plans/2026-09-03-installer-versioning-design.md",
     "docs/releases/2026-09-04-windows-installer.md",
+    "docs/windows-local-build.md",
+    "frontend/package.json",
+    "frontend/src-tauri/Cargo.toml",
+    "frontend/src-tauri/tauri.conf.json",
+    "frontend/src/app/settings/page.tsx",
+    "frontend/src/components/AnalyticsConsentSwitch.tsx",
+    "frontend/src/components/AnalyticsDataModal.tsx",
+    "frontend/src/components/AnalyticsProvider.tsx",
+    "frontend/src/components/Sidebar/index.tsx",
+    "installer-version.json",
+    "scripts/installer-version.mjs",
     "project/state/tasks/PT-2026-09-04-windows-installer.json"
   ],
   "host_refs": {
@@ -44,16 +63,18 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "done",
-  "subject": "Build and verify a new unsigned Windows NSIS installer from the current PulseTalq integration candidate",
+  "status": "in_progress",
+  "subject": "Build and verify a versioned Windows NSIS installer that upgrades the installed PulseTalq 0.4.2 app",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T15:30:36Z",
+  "updated_at": "2026-09-04T17:08:33Z",
   "verification_contract": [
     "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
     "python scripts/verify-installer-assets.py passes before packaging",
     "pnpm install --frozen-lockfile and pnpm run tauri:build:windows-local pass",
     "the resulting NSIS executable passes scripts/verify-installer-branding.ps1 without being launched",
-    "the artifact receipt records its absolute path, byte size, SHA-256, signing state, source SHA, task SHA, and skipped installed-state checks"
+    "the artifact receipt records its absolute path, byte size, SHA-256, signing state, source SHA, task SHA, and skipped installed-state checks",
+    "the app and installer report version 0.4.3, which is newer than the installed 0.4.2 app",
+    "the installer filename includes installer revision 1 and the build refuses stale installer fingerprints"
   ],
   "verification_receipts": [
     {
