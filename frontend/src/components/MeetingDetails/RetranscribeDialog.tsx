@@ -23,6 +23,7 @@ import { useConfig } from '@/contexts/ConfigContext';
 import { LANGUAGES } from '@/constants/languages';
 import { useTranscriptionModels, ModelOption } from '@/hooks/useTranscriptionModels';
 import Analytics from '@/lib/analytics';
+import { getErrorMessage } from '@/lib/error-message';
 
 interface RetranscribeDialogProps {
   open: boolean;
@@ -223,7 +224,7 @@ export function RetranscribeDialog({
       });
     } catch (err: unknown) {
       setIsProcessing(false);
-      const errorMsg = typeof err === 'string' ? err : err instanceof Error ? err.message : String(err);
+      const errorMsg = getErrorMessage(err, 'Failed to start retranscription');
       setError(errorMsg);
 
       await Analytics.trackError('enhance_transcript_failed', errorMsg);

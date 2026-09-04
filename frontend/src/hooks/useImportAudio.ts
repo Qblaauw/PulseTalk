@@ -3,10 +3,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import Analytics from '@/lib/analytics';
 import { applyPinnedSummaryLanguageToMeeting } from '@/lib/summary-language-preferences';
+import { getErrorMessage } from '@/lib/error-message';
 import { toast } from 'sonner';
-
-const getErrorMessage = (error: unknown, fallback: string) =>
-  typeof error === 'string' ? error : error instanceof Error ? error.message : fallback;
 
 export interface AudioFileInfo {
   path: string;

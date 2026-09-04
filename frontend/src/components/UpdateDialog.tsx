@@ -13,6 +13,7 @@ import { UpdateInfo, UpdateProgress } from '@/services/updateService';
 import { check, Update } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/error-message';
 
 interface UpdateDialogProps {
   open: boolean;
@@ -40,9 +41,9 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
         } else {
           setError('Update no longer available');
         }
-      }).catch((err) => {
+      }).catch((err: unknown) => {
         console.error('Failed to get update object:', err);
-        setError('Failed to prepare update: ' + (err.message || 'Unknown error'));
+        setError('Failed to prepare update: ' + getErrorMessage(err, 'Unknown error'));
       });
     } else {
       // Reset state when dialog closes
@@ -67,7 +68,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
           return;
         }
       } catch (err: unknown) {
-        setError('Failed to get update: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        setError('Failed to get update: ' + getErrorMessage(err, 'Unknown error'));
         return;
       }
     }
@@ -135,7 +136,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
       await relaunch();
     } catch (err: unknown) {
       console.error('Update failed:', err);
-      const message = err instanceof Error ? err.message : 'Failed to download or install update';
+      const message = getErrorMessage(err, 'Failed to download or install update');
       setError(message);
       setIsDownloading(false);
       toast.error('Update failed: ' + message);

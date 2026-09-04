@@ -20,6 +20,7 @@ import AnalyticsConsentSwitch from '@/components/AnalyticsConsentSwitch';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useUpdateCheckContext } from '@/components/UpdateCheckProvider';
 import { updateService, UpdateInfo } from '@/services/updateService';
+import { getErrorMessage } from '@/lib/error-message';
 
 // Old tab query values map onto the new anchors so existing links keep working.
 const TAB_TO_SECTION: Record<string, string> = {
@@ -168,7 +169,7 @@ function AdvancedSection({ open, onOpenChange }: { open: boolean; onOpenChange: 
     try {
       await invoke('open_diagnostics_folder');
     } catch (cause) {
-      toast.error(`Could not open diagnostics: ${String(cause)}`);
+      toast.error(`Could not open diagnostics: ${getErrorMessage(cause, 'Unknown error')}`);
     } finally {
       setOpeningDiagnostics(false);
     }
@@ -231,7 +232,7 @@ function AboutSection() {
         toast.success('You are running the latest version');
       }
     } catch (error: unknown) {
-      toast.error('Failed to check for updates: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error('Failed to check for updates: ' + getErrorMessage(error, 'Unknown error'));
     } finally {
       setIsChecking(false);
     }
