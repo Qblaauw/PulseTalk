@@ -10,7 +10,7 @@ From the repository root in PowerShell:
 .\scripts\android\build-debug.ps1
 ```
 
-The script runs unit tests, builds the app and instrumentation APKs, checks that only `arm64-v8a` native libraries are packaged, confirms that no model files are bundled, and prints the app APK SHA-256.
+The script runs unit tests and Android lint, builds the app and instrumentation APKs, checks that only `arm64-v8a` native libraries are packaged, confirms that no model files are bundled, and prints the app APK SHA-256.
 
 ## Install
 

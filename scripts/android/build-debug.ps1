@@ -24,7 +24,7 @@ $env:ANDROID_HOME = $AndroidSdk
 
 Push-Location $androidRoot
 try {
-    & .\gradlew.bat clean testDebugUnitTest assembleDebug assembleDebugAndroidTest --no-daemon
+    & .\gradlew.bat clean testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest --no-daemon
     if ($LASTEXITCODE -ne 0) {
         throw "Android debug build failed with exit code $LASTEXITCODE"
     }
