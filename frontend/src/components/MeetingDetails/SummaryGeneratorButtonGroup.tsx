@@ -18,7 +18,7 @@ import { Sparkles, Settings, Loader2, FileText, Check, Square } from 'lucide-rea
 import Analytics from '@/lib/analytics';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
-import { useState, useEffect, useRef, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { isOllamaNotInstalledError } from '@/lib/utils';
 import { BuiltInModelInfo } from '@/lib/builtin-ai';
 import { PrivacyChip } from '@/components/AppShell/StateChips';
@@ -196,7 +196,7 @@ export function SummaryGeneratorButtonGroup({
     setIsCheckingModels(true);
     try {
       const endpoint = modelConfig.ollamaEndpoint || null;
-      const models = await invoke('get_ollama_models', { endpoint }) as any[];
+      const models = await invoke<Array<{ name: string }>>('get_ollama_models', { endpoint });
 
       if (!models || models.length === 0) {
         // No models available, show message and open settings

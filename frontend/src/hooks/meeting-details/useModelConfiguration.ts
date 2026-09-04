@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ModelConfig } from '@/components/ModelSettingsModal';
+import { CustomOpenAIConfig, ModelConfig } from '@/components/ModelSettingsModal';
 import { invoke as invokeTauri } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
 import Analytics from '@/lib/analytics';
@@ -24,7 +24,7 @@ export function useModelConfiguration({ serverAddress }: UseModelConfigurationPr
       setIsLoading(true);
       try {
         console.log('🔄 Fetching model configuration from database...');
-        const data = await invokeTauri('api_get_model_config', {}) as any;
+        const data = await invokeTauri<ModelConfig | null>('api_get_model_config', {});
         if (data && data.provider !== null) {
           console.log('✅ Loaded model config from database:', {
             provider: data.provider,
@@ -48,7 +48,7 @@ export function useModelConfiguration({ serverAddress }: UseModelConfigurationPr
           // Fetch custom OpenAI config if provider is custom-openai
           if (data.provider === 'custom-openai') {
             try {
-              const customConfig = await invokeTauri('api_get_custom_openai_config') as any;
+              const customConfig = await invokeTauri<CustomOpenAIConfig | null>('api_get_custom_openai_config');
               if (customConfig) {
                 data.customOpenAIDisplayName = customConfig.displayName || null;
                 data.customOpenAIEndpoint = customConfig.endpoint || null;

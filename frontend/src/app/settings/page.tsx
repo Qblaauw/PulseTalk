@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { invoke } from '@tauri-apps/api/core';
 import { getVersion } from '@tauri-apps/api/app';
@@ -10,6 +10,7 @@ import { PageHeader, PageBody } from '@/components/AppShell/PageHeader';
 import { PrivacyChip } from '@/components/AppShell/StateChips';
 import { transcriptionPrivacyState, summaryPrivacyState } from '@/lib/privacy';
 import { TranscriptSettings } from '@/components/TranscriptSettings';
+import type { TranscriptModelProps } from '@/components/TranscriptSettings';
 import { RecordingSettings } from '@/components/RecordingSettings';
 import { PreferenceSettings } from '@/components/PreferenceSettings';
 import { SummaryModelSettings } from '@/components/SummaryModelSettings';
@@ -54,7 +55,7 @@ function SettingsContent() {
   useEffect(() => {
     const loadTranscriptConfig = async () => {
       try {
-        const config = await invoke('api_get_transcript_config') as any;
+        const config = await invoke<{ provider?: TranscriptModelProps['provider']; model?: string; apiKey?: string | null } | null>('api_get_transcript_config');
         if (config) {
           setTranscriptModelConfig({
             provider: config.provider || 'localWhisper',
@@ -71,8 +72,8 @@ function SettingsContent() {
 
   // Track the summary provider only for the privacy chip; SummaryModelSettings owns the real state.
   useEffect(() => {
-    invoke('api_get_model_config')
-      .then((config: any) => setSummaryProvider(config?.provider ?? null))
+    invoke<{ provider?: string } | null>('api_get_model_config')
+      .then((config) => setSummaryProvider(config?.provider ?? null))
       .catch(() => setSummaryProvider(null));
   }, []);
 
@@ -229,8 +230,8 @@ function AboutSection() {
       } else {
         toast.success('You are running the latest version');
       }
-    } catch (error: any) {
-      toast.error('Failed to check for updates: ' + (error?.message || 'Unknown error'));
+    } catch (error: unknown) {
+      toast.error('Failed to check for updates: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setIsChecking(false);
     }

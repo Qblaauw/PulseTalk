@@ -224,7 +224,7 @@ export function RecordingSettings({ onSave }: RecordingSettingsProps) {
       {!preferences.auto_save && (
         <div className="pt-card p-4">
           <div className="text-sm text-[var(--pt-warning)]">
-            Audio recording is disabled. Enable "Save audio recordings" to automatically save your meeting audio.
+            Audio recording is disabled. Enable &quot;Save audio recordings&quot; to automatically save your meeting audio.
           </div>
         </div>
       )}

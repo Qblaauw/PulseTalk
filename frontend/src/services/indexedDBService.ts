@@ -21,13 +21,29 @@ export interface StoredTranscript {
   text: string;               // Transcript text
   timestamp: string;          // ISO 8601 timestamp
   confidence: number;         // Whisper confidence score
-  sequenceId: number;         // Sequence number for ordering
+  sequenceId?: number;        // Sequence number for ordering
+  sequence_id?: number;       // Backend transcript sequence number
   storedAt: number;           // Unix timestamp when saved
   audio_start_time?: number;  // Recording-relative start time in seconds
   audio_end_time?: number;    // Recording-relative end time in seconds
   duration?: number;          // Duration in seconds
-  [key: string]: any;         // Allow additional fields from TranscriptUpdate
+  chunk_start_time?: number;
+  is_partial?: boolean;
+  [key: string]: unknown;     // Allow additional fields from TranscriptUpdate
 }
+
+type TranscriptRecord = {
+  text: string;
+  timestamp: string;
+  confidence: number;
+  sequenceId?: number;
+  sequence_id?: number;
+  chunk_start_time?: number;
+  is_partial?: boolean;
+  audio_start_time?: number;
+  audio_end_time?: number;
+  duration?: number;
+};
 
 class IndexedDBService {
   private db: IDBDatabase | null = null;
@@ -227,7 +243,7 @@ class IndexedDBService {
   /**
    * Save a transcript segment
    */
-  async saveTranscript(meetingId: string, transcript: any): Promise<void> {
+  async saveTranscript(meetingId: string, transcript: TranscriptRecord): Promise<void> {
     try {
       if (!this.db) await this.init();
 
@@ -286,7 +302,7 @@ class IndexedDBService {
         request.onsuccess = () => {
           const transcripts = request.result as StoredTranscript[];
           // Sort by sequence ID
-          transcripts.sort((a, b) => a.sequenceId - b.sequenceId);
+          transcripts.sort((a, b) => (a.sequenceId ?? a.sequence_id ?? 0) - (b.sequenceId ?? b.sequence_id ?? 0));
           resolve(transcripts);
         };
         request.onerror = () => reject(request.error);

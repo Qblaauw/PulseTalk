@@ -52,8 +52,6 @@ export default function Home() {
   // Recovery hook
   const {
     recoverableMeetings,
-    isLoading: isLoadingRecovery,
-    isRecovering,
     checkForRecoverableTranscripts,
     recoverMeeting,
     loadMeetingTranscripts,

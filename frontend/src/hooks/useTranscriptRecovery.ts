@@ -96,7 +96,7 @@ export function useTranscriptRecovery(): UseTranscriptRecoveryReturn {
     try {
       const transcripts = await indexedDBService.getTranscripts(meetingId);
       // Sort by sequence ID
-      transcripts.sort((a, b) => (a.sequenceId || 0) - (b.sequenceId || 0));
+      transcripts.sort((a, b) => (a.sequenceId ?? a.sequence_id ?? 0) - (b.sequenceId ?? b.sequence_id ?? 0));
       return transcripts;
     } catch (error) {
       console.error('Failed to load meeting transcripts:', error);
@@ -130,7 +130,7 @@ export function useTranscriptRecovery(): UseTranscriptRecoveryReturn {
         // Try to get from backend (might exist if only app crashed, not system)
         try {
           folderPath = await invoke<string>('get_meeting_folder_path');
-        } catch (error) {
+        } catch {
           folderPath = undefined;
         }
       }
@@ -166,13 +166,13 @@ export function useTranscriptRecovery(): UseTranscriptRecoveryReturn {
         id: t.id?.toString() || `${Date.now()}-${index}`,
         text: t.text,
         timestamp: t.timestamp,
-        sequence_id: t.sequenceId || index,
-        chunk_start_time: (t as any).chunk_start_time,
-        is_partial: (t as any).is_partial || false,
+        sequence_id: t.sequenceId ?? t.sequence_id ?? index,
+        chunk_start_time: t.chunk_start_time,
+        is_partial: t.is_partial || false,
         confidence: t.confidence,
-        audio_start_time: (t as any).audio_start_time,
-        audio_end_time: (t as any).audio_end_time,
-        duration: (t as any).duration,
+        audio_start_time: t.audio_start_time,
+        audio_end_time: t.audio_end_time,
+        duration: t.duration,
       }));
 
       // 6. Save to backend database using existing save utilities

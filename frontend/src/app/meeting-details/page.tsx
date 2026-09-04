@@ -1,7 +1,7 @@
 "use client"
 import { useSidebar } from "@/components/Sidebar/SidebarProvider";
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { Transcript, Summary } from "@/types";
+import { Block, Transcript, Summary, SummaryDataResponse } from "@/types";
 import PageContent from "./page-content";
 import { useRouter, useSearchParams } from "next/navigation";
 import Analytics from "@/lib/analytics";
@@ -51,8 +51,8 @@ function MeetingDetailsContent() {
   // Check if gemma3:1b model is available in Ollama
   const checkForGemmaModel = useCallback(async (): Promise<boolean> => {
     try {
-      const models = await invoke('get_ollama_models', { endpoint: null }) as any[];
-      const hasGemma = models.some((m: any) => m.name === 'gemma3:1b');
+      const models = await invoke<Array<{ name: string }>>('get_ollama_models', { endpoint: null });
+      const hasGemma = models.some((model) => model.name === 'gemma3:1b');
       console.log('🔍 Checked for gemma3:1b:', hasGemma);
       return hasGemma;
     } catch (error) {
@@ -81,7 +81,7 @@ function MeetingDetailsContent() {
 
     try {
       // Check what's currently in database
-      const currentConfig = await invoke('api_get_model_config') as any;
+      const currentConfig = await invoke<{ model?: string } | null>('api_get_model_config');
 
       // If DB already has a model, use it (never override!)
       if (currentConfig && currentConfig.model) {
@@ -201,9 +201,9 @@ function MeetingDetailsContent() {
 
     const fetchMeetingSummary = async () => {
       try {
-        const summary = await invoke('api_get_summary', {
+        const summary = await invoke<{ status: string; data?: unknown; error?: string }>('api_get_summary', {
           meetingId: meetingId,
-        }) as any;
+        });
 
         console.log('FETCH SUMMARY: Raw response:', summary);
 
@@ -222,7 +222,7 @@ function MeetingDetailsContent() {
         if (typeof summaryData === 'string') {
           try {
             parsedData = JSON.parse(summaryData);
-          } catch (e) {
+          } catch {
             parsedData = {};
           }
         }
@@ -230,21 +230,21 @@ function MeetingDetailsContent() {
         console.log('🔍 FETCH SUMMARY: Parsed data:', parsedData);
 
         // Priority 1: BlockNote JSON format
-        if (parsedData.summary_json) {
-          setMeetingSummary(parsedData as any);
+        if (typeof parsedData === 'object' && parsedData !== null && 'summary_json' in parsedData) {
+          setMeetingSummary(parsedData as unknown as Summary);
           return;
         }
 
         // Priority 2: Markdown format
-        if (parsedData.markdown) {
-          setMeetingSummary(parsedData as any);
+        if (typeof parsedData === 'object' && parsedData !== null && 'markdown' in parsedData) {
+          setMeetingSummary(parsedData as unknown as Summary);
           return;
         }
 
         // Legacy format - apply formatting
         console.log('LEGACY FORMAT: Detected legacy format, applying section formatting');
 
-        const { MeetingName, _section_order, ...restSummaryData } = parsedData;
+        const { _section_order, ...restSummaryData } = parsedData as SummaryDataResponse;
 
         // Format the summary data with consistent styling - PRESERVE ORDER
         const formattedSummary: Summary = {};
@@ -262,18 +262,18 @@ function MeetingDetailsContent() {
               typeof section === 'object' &&
               'title' in section &&
               'blocks' in section) {
-              const typedSection = section as { title?: string; blocks?: any[] };
+              const typedSection = section as { title?: string; blocks?: Partial<Block>[] };
 
               // Ensure blocks is an array before mapping
               if (Array.isArray(typedSection.blocks)) {
                 formattedSummary[key] = {
                   title: typedSection.title || key,
-                  blocks: typedSection.blocks.map((block: any) => ({
+                  blocks: typedSection.blocks.map((block) => ({
                     ...block,
                     // type: 'bullet',
                     color: 'default',
-                    content: block?.content?.trim() || ''
-                  }))
+                    content: block.content?.trim() || ''
+                  } as Block))
                 };
               } else {
                 // Handle case where blocks is not an array

@@ -12,6 +12,7 @@ interface OnboardingFlowProps {
 }
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
+  void onComplete;
   const { currentStep } = useOnboarding();
   const [isMac, setIsMac] = React.useState(false);
 
