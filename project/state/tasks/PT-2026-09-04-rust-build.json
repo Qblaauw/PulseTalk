@@ -1,0 +1,52 @@
+{
+  "blocked_by": [],
+  "collision_notes": [
+    "The stale dirty worktree feature/dictation-ux-refinement also modifies frontend/src-tauri/Cargo.toml. This task does not read from, write to, or merge that worktree; any future reconciliation must preserve its uncommitted state."
+  ],
+  "commits": [],
+  "created_at": "2026-09-04T09:26:01Z",
+  "exclusive_resources": [
+    "frontend/src-tauri/Cargo.toml",
+    "frontend/src-tauri/Cargo.lock",
+    "frontend/src-tauri/.gitignore",
+    "frontend/src-tauri/build.rs",
+    "frontend/src-tauri/build",
+    "frontend/src-tauri/tauri.conf.json",
+    "frontend scripts or package commands for external binary acquisition",
+    "Tauri external binary names: llama-helper and ffmpeg"
+  ],
+  "execution_context": {
+    "base_ref": "integration/pulsetalq-next",
+    "base_sha": "610b71d63deb4a46e3f9342d896ab0422663808d",
+    "branch": "chore/PT-2026-09-04-rust-build",
+    "repository": "PulseTalk",
+    "worktree": "F:/Dev Ops/PulseTalk/.worktrees/chore-PT-2026-09-04-rust-build"
+  },
+  "files_touched": [
+    "project/state/tasks/PT-2026-09-04-rust-build.json"
+  ],
+  "host_refs": {
+    "runtime": "codex-root/t3-code"
+  },
+  "id": "PT-2026-09-04-rust-build",
+  "kind": "chore",
+  "local_id": null,
+  "owner": "codex-root",
+  "plan_id": "docs/plans/2026-09-04-pulsetalq-ui-redesign-implementation.md#4-follow-up-plan",
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "in_progress",
+  "subject": "Make cargo check and Tauri sidecar acquisition reproducible from a clean worktree",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-04T09:26:01Z",
+  "verification_contract": [
+    "cargo check --locked passes in frontend/src-tauri from a clean task worktree",
+    "the committed lockfile resolves a compatible whisper-rs and whisper.cpp pairing",
+    "a documented or scripted preparation command acquires every Tauri external binary without relying on untracked pre-existing files",
+    "sidecar preparation validates target-triple filenames and supports a non-destructive verification mode",
+    "cargo fmt --all -- --check passes for changed Rust files",
+    "git diff --check passes"
+  ],
+  "verification_receipts": []
+}
