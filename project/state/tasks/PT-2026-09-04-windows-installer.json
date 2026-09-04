@@ -1,0 +1,178 @@
+{
+  "blocked_by": [],
+  "collision_notes": [
+    "The installer is built only in this task-owned worktree. Existing 2026-09-03 installer worktrees and artifacts are treated as read-only historical evidence.",
+    "PT-2026-09-04-ui-redesign still says ready_for_review in its task record, but its commits are merged into main and this integration base. Version-only edits to Settings and Sidebar preserve the merged UI behavior."
+  ],
+  "artifact": {
+    "created_at": "2026-09-04T17:20:56Z",
+    "installer_revision": 1,
+    "path": "F:/ptbuild/pulsetalq-20260904/release/bundle/nsis/PulseTalq_0.4.3_installer.1_x64-setup.exe",
+    "product_version": "0.4.3",
+    "sha256": "ffd9df3572523260d6b35c7b3463cd3bd1363f64f96e32e8ee4e19d57ff70ca2",
+    "signature_status": "NotSigned",
+    "size_bytes": 42704653,
+    "target": "x86_64-pc-windows-msvc NSIS CPU profile"
+  },
+  "superseded_artifact": {
+    "created_at": "2026-09-04T15:28:30.1243140Z",
+    "path": "F:/ptbuild/pulsetalq-20260904/superseded/PulseTalq_0.4.0_x64-setup.SUPERSEDED.exe",
+    "product_version": "0.4.0",
+    "sha256": "ad1f46056222468b3cb1a494a2baa839a2c6845f4d1f7d760a64d406f02131d8",
+    "signature_status": "NotSigned",
+    "size_bytes": 42692430,
+    "superseded_reason": "The package version was 0.4.0, below the installed PulseTalq 0.4.2 version, so Windows did not replace the installed app.",
+    "target": "x86_64-pc-windows-msvc NSIS CPU profile"
+  },
+  "commits": [
+    "9a9190af967bc2d60f6a654c12e74785adba69da",
+    "146f0dd409c783f753587be81cddcb9df50c5842",
+    "907638095a37bba4a3fc0551ee2c8e6c537e3f1c",
+    "c61a1f625d00154a5ba4076038f6c3428eeb0732"
+  ],
+  "created_at": "2026-09-04T15:14:18Z",
+  "exclusive_resources": [
+    "Windows NSIS packaging output and short Cargo target directory for this worktree",
+    "application and installer version metadata",
+    "installer-version.json and scripts/installer-version.mjs",
+    "frontend/package.json, frontend/src-tauri/Cargo.toml, frontend/src-tauri/tauri.conf.json, and Cargo.lock version fields",
+    "frontend version labels and analytics version literals",
+    "docs/releases/2026-09-04-windows-installer.md",
+    "project/state/tasks/PT-2026-09-04-windows-installer.json"
+  ],
+  "execution_context": {
+    "base_ref": "integration/pulsetalq-next",
+    "base_sha": "436adc672a04b2a57d51784913c5beebe5e7c2d8",
+    "branch": "release/PT-2026-09-04-windows-installer",
+    "repository": "PulseTalk",
+    "worktree": "F:/Dev Ops/PulseTalk/.worktrees/release-PT-2026-09-04-windows-installer"
+  },
+  "files_touched": [
+    "Cargo.lock",
+    "docs/plans/2026-09-03-installer-versioning-design.md",
+    "docs/releases/2026-09-04-windows-installer.md",
+    "docs/windows-local-build.md",
+    "frontend/package.json",
+    "frontend/src-tauri/Cargo.toml",
+    "frontend/src-tauri/tauri.conf.json",
+    "frontend/src/app/settings/page.tsx",
+    "frontend/src/components/AnalyticsConsentSwitch.tsx",
+    "frontend/src/components/AnalyticsDataModal.tsx",
+    "frontend/src/components/AnalyticsProvider.tsx",
+    "frontend/src/components/Sidebar/index.tsx",
+    "installer-version.json",
+    "scripts/installer-version.mjs",
+    "project/state/tasks/PT-2026-09-04-windows-installer.json"
+  ],
+  "host_refs": {
+    "runtime": "codex-root/t3-code"
+  },
+  "id": "PT-2026-09-04-windows-installer",
+  "kind": "release",
+  "local_id": null,
+  "owner": "codex-root",
+  "plan_id": "docs/plans/2026-09-04-pulsetalq-ui-redesign-implementation.md#4-follow-up-plan",
+  "roadmap_items": [],
+  "schema": "product-ops.task/v1",
+  "secret_overrides": [],
+  "status": "ready_for_review",
+  "subject": "Build and verify a versioned Windows NSIS installer that upgrades the installed PulseTalq 0.4.2 app",
+  "target_integration_branch": "integration/pulsetalq-next",
+  "updated_at": "2026-09-04T17:21:50Z",
+  "verification_contract": [
+    "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
+    "python scripts/verify-installer-assets.py passes before packaging",
+    "pnpm install --frozen-lockfile and pnpm run tauri:build:windows-local pass",
+    "the resulting NSIS executable passes scripts/verify-installer-branding.ps1 without being launched",
+    "the artifact receipt records its absolute path, byte size, SHA-256, signing state, source SHA, task SHA, and skipped installed-state checks",
+    "the app and installer report version 0.4.3, which is newer than the installed 0.4.2 app",
+    "the installer filename includes installer revision 1 and the build refuses stale installer fingerprints"
+  ],
+  "verification_receipts": [
+    {
+      "check": "initial pnpm run tauri:build:windows-local",
+      "note": "Stopped before compilation because the invoking shell did not inherit LIBCLANG_PATH. Relaunched with the verified LLVM 18.1.1 directory explicitly set.",
+      "result": "known_failure"
+    },
+    {
+      "check": "release sidecar build with the default Windows target directory",
+      "note": "MSBuild rejected tracked output below the system Temp directory. The successful build used the task-exclusive F:/ptbuild/pulsetalq-20260904 target instead; no source change was required.",
+      "result": "known_failure"
+    },
+    {
+      "check": "python scripts/verify-installer-assets.py",
+      "note": "Passed 20 checks with 0 failures. Five warnings identify unused, unchanged Next.js starter SVGs.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm install --frozen-lockfile",
+      "note": "Passed with the lockfile unchanged using the repository-pinned pnpm 9.15.9.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run tauri:build:windows-local at 9a9190af967bc2d60f6a654c12e74785adba69da",
+      "note": "Passed with LLVM 18.1.1 and CARGO_TARGET_DIR=F:/ptbuild/pulsetalq-20260904. The pinned FFmpeg archive and executable were verified before use, the x86_64 llama-helper passed architecture verification, and Tauri produced one unsigned NSIS bundle.",
+      "result": "pass"
+    },
+    {
+      "check": "scripts/verify-installer-branding.ps1 against the NSIS executable",
+      "note": "Passed 3 checks with 0 failures and 0 warnings. ProductName and FileDescription are PulseTalq; the legal copyright retains the approved PolyphronAI attribution form.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run sidecars:check",
+      "note": "Passed. llama-helper (3,772,416 bytes) and FFmpeg (99,264,000 bytes) are verified x86_64 PE executables.",
+      "result": "pass"
+    },
+    {
+      "check": "artifact hash, version, and Authenticode inspection",
+      "note": "The 42,692,430-byte installer has SHA-256 ad1f46056222468b3cb1a494a2baa839a2c6845f4d1f7d760a64d406f02131d8, ProductVersion 0.4.0, and Authenticode status NotSigned.",
+      "result": "pass"
+    },
+    {
+      "check": "installed-state branding and application smoke test",
+      "note": "Not run because the installer was not launched. Registry, Start menu, upgrade, and runtime checks require an explicit installation pass.",
+      "result": "not_run"
+    },
+    {
+      "check": "build provenance and worktree state",
+      "note": "At build commit 9a9190af967bc2d60f6a654c12e74785adba69da, the only difference from integration source 436adc672a04b2a57d51784913c5beebe5e7c2d8 was the task claim record. The build worktree was clean, git diff --check passed, and no task-owned build process remained after packaging.",
+      "result": "pass"
+    },
+    {
+      "check": "installed version diagnosis",
+      "note": "The existing HKCU PulseTalq uninstall entry and C:/Users/qblaa/AppData/Local/PulseTalq/pulse-talq.exe both report 0.4.2. The first 0.4.0 artifact was older and could not replace that installed app, so it was moved out of the normal bundle folder and marked superseded.",
+      "result": "pass"
+    },
+    {
+      "check": "application and installer version contract",
+      "note": "Cargo.lock, frontend/package.json, frontend/src-tauri/Cargo.toml, frontend/src-tauri/tauri.conf.json, Settings, Sidebar, and analytics fields now report 0.4.3. The stale manifest test failed before the controlled bump, then node scripts/installer-version.mjs verify passed with 0.4.3_installer.1 before and after packaging.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run lint at c61a1f625d00154a5ba4076038f6c3428eeb0732",
+      "note": "Passed with the existing React hook warnings and no errors.",
+      "result": "pass"
+    },
+    {
+      "check": "node --test frontend/scripts/prepare-sidecars.test.js",
+      "note": "All 6 tests passed.",
+      "result": "pass"
+    },
+    {
+      "check": "corrected pnpm run tauri:build:windows-local at c61a1f625d00154a5ba4076038f6c3428eeb0732",
+      "note": "Passed. The pre-build version gate reported 0.4.3_installer.1, Tauri built pulse-talq 0.4.3 from the redesigned source, and the post-build gate stamped PulseTalq_0.4.3_installer.1_x64-setup.exe.",
+      "result": "pass"
+    },
+    {
+      "check": "corrected artifact branding, version, hash, and Authenticode inspection",
+      "note": "The 42,704,653-byte installer has SHA-256 ffd9df3572523260d6b35c7b3463cd3bd1363f64f96e32e8ee4e19d57ff70ca2. Installer and packaged app resources both report PulseTalq 0.4.3. Branding passed 3 checks with 0 failures and 0 warnings. Authenticode status is NotSigned.",
+      "result": "pass"
+    },
+    {
+      "check": "corrected exported UI markers",
+      "note": "The built frontend contains Account and sync, Record meeting, Guide this summary, and v0.4.3. No visible 0.4.0, 0.4.1, or 0.4.2 marker remains in frontend/out.",
+      "result": "pass"
+    }
+  ]
+}

@@ -214,7 +214,7 @@ function AdvancedSection({ open, onOpenChange }: { open: boolean; onOpenChange: 
 }
 
 function AboutSection() {
-  const [version, setVersion] = useState('0.4.0');
+  const [version, setVersion] = useState('0.4.3');
   const [isChecking, setIsChecking] = useState(false);
   const { showUpdateDialog } = useUpdateCheckContext();
 
