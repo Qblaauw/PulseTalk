@@ -1,26 +1,20 @@
 'use client';
 
-import React from 'react';
-import { useSidebar } from '@/components/Sidebar/SidebarProvider';
+import type { ReactNode } from 'react';
 
-interface MainContentProps {
-  children: React.ReactNode;
-}
-
-const MainContent: React.FC<MainContentProps> = ({ children }) => {
-  const { isCollapsed } = useSidebar();
-
+/**
+ * Main content region. Sits beside the sidebar inside the shell flex row, so
+ * it needs no margin bookkeeping. Fixed overlays that must align to this
+ * region read `--pt-shell-sidebar` from the shell instead.
+ */
+export default function MainContent({ children }: { children: ReactNode }) {
   return (
-    <main 
-      className={`flex-1 min-w-0 h-screen overflow-hidden bg-[var(--pt-bg)] transition-all duration-300 ${
-        isCollapsed ? 'ml-16' : 'ml-64'
-      }`}
+    <main
+      id="pt-main"
+      className="relative h-screen min-w-0 flex-1 overflow-hidden bg-[var(--pt-bg)] text-[var(--pt-text)]"
+      tabIndex={-1}
     >
-      <div className="h-full">
-        {children}
-      </div>
+      {children}
     </main>
   );
-};
-
-export default MainContent;
+}

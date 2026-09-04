@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { FileQuestion, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
@@ -24,39 +23,41 @@ export function EmptyStateSummary({ onGenerate, hasModel, isGenerating = false }
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="flex flex-col items-center justify-center h-full p-8 text-center"
     >
-      <FileQuestion className="w-16 h-16 text-gray-300 mb-4" />
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        No Summary Generated Yet
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--pt-fill)]">
+        <FileQuestion className="h-8 w-8 text-[var(--pt-text-tertiary)]" />
+      </div>
+      <h3 className="text-lg font-semibold text-[var(--pt-text)] mb-2">
+        No summary yet
       </h3>
-      <p className="text-sm text-gray-500 mb-6 max-w-md">
-        Generate an AI-powered summary of your meeting transcript to get key points, action items, and decisions.
+      <p className="text-sm text-[var(--pt-text-secondary)] mb-6 max-w-md">
+        Generate a summary of this transcript to get key points, action items, and decisions.
       </p>
 
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <div>
-              <Button
+              <button
                 onClick={onGenerate}
                 disabled={!hasModel || isGenerating}
-                className="gap-2"
+                className="pt-button pt-button--accent gap-2"
               >
                 <Sparkles className="w-4 h-4" />
-                {isGenerating ? 'Generating...' : 'Generate Summary'}
-              </Button>
+                {isGenerating ? 'Generating…' : 'Generate summary'}
+              </button>
             </div>
           </TooltipTrigger>
           {!hasModel && (
             <TooltipContent>
-              <p>Please select a model in Settings first</p>
+              <p>Select a model in Settings first</p>
             </TooltipContent>
           )}
         </Tooltip>
       </TooltipProvider>
 
       {!hasModel && (
-        <p className="text-xs text-amber-600 mt-3">
-          Please select a model in Settings first
+        <p className="text-xs text-[var(--pt-text-tertiary)] mt-3">
+          Select a model in Settings first
         </p>
       )}
     </motion.div>

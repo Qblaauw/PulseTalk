@@ -342,11 +342,11 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
   return (
     <TooltipProvider>
       <div className="w-full flex flex-col space-y-2">
-        <div className={`w-full flex items-center gap-3 bg-[var(--pt-surface-dark)] text-[var(--pt-text-inverse)] rounded-[3px] shadow-[0_14px_34px_rgba(11,11,12,.18)] px-4 py-3 border border-black ${isRecording ? 'border-t-2 border-t-[var(--pt-accent)]' : ''}`}>
+        <div className={`pt-card pt-card--glass w-full flex items-center gap-3 text-[var(--pt-text)] rounded-[var(--pt-radius-pill)] shadow-[var(--pt-shadow-lg)] px-3 py-2 ${isRecording ? 'border-t-2 border-t-[var(--pt-accent)]' : ''}`}>
           {isProcessing && !isParentProcessing ? (
             <div className="flex items-center space-x-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--pt-accent)]"></div>
-              <span className="text-sm text-[var(--pt-text-inverse-muted)]">Processing recording…</span>
+              <span className="text-sm text-[var(--pt-text-secondary)]">Processing recording…</span>
             </div>
           ) : (
             <>
@@ -354,32 +354,32 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
                 <>
                   <button
                     onClick={handleStartRecording}
-                    className="w-10 h-10 flex items-center justify-center bg-[var(--pt-accent)] rounded-[3px] text-[var(--pt-text)] hover:bg-[var(--pt-accent-hover)] transition-all active:scale-[.98] pt-focus-ring"
+                    className="w-10 h-10 flex items-center justify-center bg-[var(--pt-accent)] rounded-full text-[var(--pt-accent-contrast)] hover:bg-[var(--pt-accent-hover)] transition-all active:scale-[.98] pt-focus-ring"
                   >
                     <Mic size={16} />
                   </button>
 
-                  <div className="w-px h-6 bg-white/15 mx-1" />
+                  <div className="w-px h-6 bg-[var(--pt-border)] mx-1" />
 
                   <div className="flex items-center space-x-1 mx-2">
-                    <div className="text-sm text-[var(--pt-text-inverse-muted)] min-w-[40px]">
+                    <div className="text-sm text-[var(--pt-text-secondary)] min-w-[40px]">
                       {formatTime(currentTime)}
                     </div>
                     <div
-                      className="relative w-24 h-1 bg-white/15"
+                      className="relative w-24 h-1 rounded-full bg-[var(--pt-fill)]"
                     >
                       <div
-                        className="absolute h-full bg-[var(--pt-accent)]"
+                        className="absolute h-full rounded-full bg-[var(--pt-accent)]"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
-                    <div className="text-sm text-[var(--pt-text-inverse-muted)] min-w-[40px]">
+                    <div className="text-sm text-[var(--pt-text-secondary)] min-w-[40px]">
                       {formatTime(duration)}
                     </div>
                   </div>
 
                   <button
-                    className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-[3px] text-[var(--pt-text-inverse-muted)] cursor-not-allowed"
+                    className="w-10 h-10 flex items-center justify-center bg-[var(--pt-fill)] rounded-full text-[var(--pt-text-tertiary)] cursor-not-allowed"
                     disabled
                   >
                     <Play size={16} />
@@ -397,8 +397,8 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
                             handleStartRecording();
                           }}
                           disabled={isStarting || isProcessing || isRecordingDisabled || isValidatingModel}
-                          className={`w-12 h-12 flex items-center justify-center ${isStarting || isProcessing || isValidatingModel ? 'bg-white/15 text-[var(--pt-text-inverse-muted)]' : 'bg-[var(--pt-accent)] hover:bg-[var(--pt-accent-hover)] text-[var(--pt-text)]'
-                            } rounded-[3px] transition-all active:scale-[.98] relative pt-focus-ring`}
+                          className={`w-12 h-12 flex items-center justify-center ${isStarting || isProcessing || isValidatingModel ? 'bg-[var(--pt-fill)] text-[var(--pt-text-tertiary)]' : 'bg-[var(--pt-accent)] hover:bg-[var(--pt-accent-hover)] text-[var(--pt-accent-contrast)]'
+                            } rounded-full transition-all active:scale-[.98] relative pt-focus-ring`}
                         >
                           {isValidatingModel ? (
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -428,9 +428,9 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
                             }}
                             disabled={isPausing || isResuming || isStopping}
                             className={`w-10 h-10 flex items-center justify-center ${isPausing || isResuming || isStopping
-                              ? 'bg-white/5 border border-white/10 text-[var(--pt-text-inverse-muted)]'
-                              : 'bg-transparent border border-white/20 text-[var(--pt-text-inverse)] hover:border-[var(--pt-accent-soft)] hover:bg-white/[0.07]'
-                              } rounded-[3px] transition-colors relative pt-focus-ring`}
+                              ? 'bg-[var(--pt-fill)] border border-[var(--pt-border)] text-[var(--pt-text-tertiary)]'
+                              : 'bg-transparent border border-[var(--pt-border)] text-[var(--pt-text)] hover:border-[var(--pt-accent-soft)] hover:bg-[var(--pt-fill)]'
+                              } rounded-full transition-colors relative pt-focus-ring`}
                           >
                             {isPaused ? <Play size={16} /> : <Pause size={16} />}
                             {(isPausing || isResuming) && (
@@ -453,8 +453,8 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
                               handleStopRecording();
                             }}
                             disabled={isStopping || isPausing || isResuming}
-                            className={`w-10 h-10 flex items-center justify-center ${isStopping || isPausing || isResuming ? 'bg-white/15 text-[var(--pt-text-inverse-muted)]' : 'bg-[var(--pt-accent)] hover:bg-[var(--pt-accent-hover)] text-[var(--pt-text)]'
-                              } rounded-[3px] transition-all active:scale-[.98] relative pt-focus-ring`}
+                            className={`w-10 h-10 flex items-center justify-center ${isStopping || isPausing || isResuming ? 'bg-[var(--pt-fill)] text-[var(--pt-text-tertiary)]' : 'bg-[var(--pt-accent)] hover:bg-[var(--pt-accent-hover)] text-[var(--pt-accent-contrast)]'
+                              } rounded-full transition-all active:scale-[.98] relative pt-focus-ring`}
                           >
                             <Square size={16} />
                             {isStopping && (
