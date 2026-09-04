@@ -3,7 +3,8 @@
     "P-2026-09-04-android-sideload-keyboard/T12"
   ],
   "commits": [
-    "e0b56edb44db84a3ef8b4cf18fd680526838a845"
+    "e0b56edb44db84a3ef8b4cf18fd680526838a845",
+    "e1a2458c41cdc34ba5d7bd6829e2fd371ccab17d"
   ],
   "created_at": "2026-09-04T05:30:12Z",
   "execution_context": {
@@ -28,7 +29,7 @@
   "secret_overrides": [],
   "status": "pending",
   "subject": "Verify the APK on Android 16 hardware",
-  "updated_at": "2026-09-04T06:29:29Z",
+  "updated_at": "2026-09-04T06:40:17Z",
   "verification_receipts": [
     "Device smoke harness validates exact APK hash, API 36, Samsung manufacturer, IME registration/selection, captures structured metrics, and can kill :voice through run-as. Its preflight correctly rejected the Google API 36 emulator."
   ]
