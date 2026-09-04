@@ -4,12 +4,12 @@ Date: 2026-09-04
 
 ## Debug artifact
 
-- Source commit: `41bea4dbcf1ad0b6a806c899fba70c57fc7c219f`
+- Source commit: `2a95d3209a993ba0dfc9ed87b1921cdd4ae5a81d`
 - APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 - Package: `com.pulsetalq.android.debug`
 - Version: `0.1.0-dev-debug` (`versionCode` 1)
 - Byte size: 59,083,306
-- SHA-256: `0c7ccbfbfc7a7701ad98a76f2a5ffa65c9f81dc53d3bab484ffae19ce96a3f96`
+- SHA-256: `a600b8099bbcfc58c3809fd6803594221497abe5a5a4852bdffa5e31cde5d8f7`
 - Compile and target SDK: 36 / Android 16
 - Minimum SDK: 29
 - Native ABI: `arm64-v8a` only
@@ -22,7 +22,7 @@ The sherpa-onnx 1.13.7 AAR resolved by Gradle has SHA-256 `c4ef49e309f24fcee5c10
 
 | Check | Result | Evidence |
 |---|---|---|
-| Clean package gate | Pass | `scripts/android/build-debug.ps1` completed 86 Gradle actions from source commit `41bea4d` |
+| Clean package gate | Pass | `scripts/android/build-debug.ps1` completed 86 Gradle actions from source commit `2a95d32` |
 | Unit tests | Pass | 18 tests, 0 failures, 0 errors |
 | Android lint | Pass | `lintDebug` completed with no blocking findings |
 | Debug app APK | Pass | `assembleDebug` produced the checksummed artifact above |
