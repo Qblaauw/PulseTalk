@@ -204,7 +204,7 @@ export default function Sidebar() {
       </nav>
 
       <div className={cn('flex items-center justify-between border-t border-[var(--pt-border)] px-3 py-2', compact && 'justify-center px-2')}>
-        <span className="pt-sidebar-label text-[11px] text-[var(--pt-text-tertiary)]">v0.4.0</span>
+        <span className="pt-sidebar-label text-[11px] text-[var(--pt-text-tertiary)]">v0.4.3</span>
         <button
           type="button"
           onClick={toggleCollapse}
