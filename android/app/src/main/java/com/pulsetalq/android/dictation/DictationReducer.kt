@@ -14,7 +14,10 @@ sealed interface DictationEvent {
 object DictationReducer {
     fun reduce(state: DictationState, event: DictationEvent): DictationState = when {
         event is DictationEvent.Reset -> DictationState.Idle
-        event is DictationEvent.Cancel && state is DictationState.Listening -> DictationState.Cancelled
+        event is DictationEvent.Cancel &&
+            (state is DictationState.Listening || state is DictationState.Transcribing) -> {
+            DictationState.Cancelled
+        }
         state is DictationState.Idle && event is DictationEvent.Start -> {
             DictationState.Listening(event.startedAtMillis)
         }

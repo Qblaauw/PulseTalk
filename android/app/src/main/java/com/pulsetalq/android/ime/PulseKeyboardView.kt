@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.view.MotionEvent
 import android.view.View
+import com.pulsetalq.android.dictation.DictationState
 import kotlin.math.roundToInt
 
 class PulseKeyboardView(context: Context) : View(context) {
@@ -15,6 +16,9 @@ class PulseKeyboardView(context: Context) : View(context) {
         fun onBackspace()
         fun onEnter()
         fun onVoice()
+        fun onCancelVoice()
+        fun onRetryDelivery()
+        fun onCopyTranscript()
     }
 
     var listener: Listener? = null
@@ -36,6 +40,7 @@ class PulseKeyboardView(context: Context) : View(context) {
     private val renderedKeys = mutableListOf<Pair<KeySpec, RectF>>()
     private var shifted = false
     private var symbols = false
+    private var dictationState: DictationState = DictationState.Idle
 
     init {
         setBackgroundColor(Color.rgb(17, 19, 26))
@@ -63,7 +68,12 @@ class PulseKeyboardView(context: Context) : View(context) {
             KeyAction.Text, KeyAction.Space -> listener?.onText(key.output)
             KeyAction.Backspace -> listener?.onBackspace()
             KeyAction.Enter -> listener?.onEnter()
-            KeyAction.Voice -> listener?.onVoice()
+            KeyAction.Voice -> when (key.output) {
+                "cancel" -> listener?.onCancelVoice()
+                "retry" -> listener?.onRetryDelivery()
+                "copy" -> listener?.onCopyTranscript()
+                else -> listener?.onVoice()
+            }
             KeyAction.Shift -> {
                 shifted = !shifted
                 invalidate()
@@ -77,14 +87,40 @@ class PulseKeyboardView(context: Context) : View(context) {
         return true
     }
 
+    fun renderState(state: DictationState) {
+        dictationState = state
+        invalidate()
+    }
+
     private fun drawVoiceBar(canvas: Canvas) {
         val margin = 8f * density
-        val bounds = RectF(margin, margin, width - margin, 54f * density)
-        canvas.drawRoundRect(bounds, 18f * density, 18f * density, accentPaint)
-        textPaint.textSize = 16f * density
-        canvas.drawText("●  Hold to talk", bounds.centerX(), bounds.centerY() + 6f * density, textPaint)
-        renderedKeys += KeySpec("Voice", KeyAction.Voice) to bounds
+        val full = RectF(margin, margin, width - margin, 54f * density)
+        when (val state = dictationState) {
+            is DictationState.Listening -> {
+                val split = full.left + full.width() * 0.72f
+                drawVoiceButton(canvas, RectF(full.left, full.top, split - 3f * density, full.bottom), "■  Stop", "voice")
+                drawVoiceButton(canvas, RectF(split + 3f * density, full.top, full.right, full.bottom), "Cancel", "cancel")
+            }
+            is DictationState.Transcribing -> drawVoiceButton(canvas, full, "…  Transcribing locally • Cancel", "cancel")
+            is DictationState.RecoverableFailure -> if (state.retainedResult != null) {
+                val split = full.left + full.width() * 0.68f
+                drawVoiceButton(canvas, RectF(full.left, full.top, split - 3f * density, full.bottom), "↻  Retry insertion", "retry")
+                drawVoiceButton(canvas, RectF(split + 3f * density, full.top, full.right, full.bottom), "Copy", "copy")
+            } else {
+                drawVoiceButton(canvas, full, "●  Try dictation again", "voice")
+            }
+            is DictationState.Completed -> drawVoiceButton(canvas, full, "✓  Inserted • Tap to dictate", "voice")
+            is DictationState.Cancelled -> drawVoiceButton(canvas, full, "Cancelled • Tap to dictate", "voice")
+            else -> drawVoiceButton(canvas, full, "●  Tap to dictate", "voice")
+        }
         hintPaint.textAlign = Paint.Align.LEFT
+    }
+
+    private fun drawVoiceButton(canvas: Canvas, bounds: RectF, label: String, output: String) {
+        canvas.drawRoundRect(bounds, 18f * density, 18f * density, accentPaint)
+        textPaint.textSize = if (label.length > 22) 13f * density else 16f * density
+        canvas.drawText(label, bounds.centerX(), bounds.centerY() + 6f * density, textPaint)
+        renderedKeys += KeySpec(label, KeyAction.Voice, output = output) to bounds
     }
 
     private fun drawRows(canvas: Canvas) {
