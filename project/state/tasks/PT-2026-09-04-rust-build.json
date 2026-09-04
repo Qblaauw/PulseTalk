@@ -10,7 +10,9 @@
     "c0f649f28c9e0241d73fc0dbdb47d59c4195560f",
     "a965c73749211dd43ca42459ca482a9f2e710b16",
     "92a23dccf6d709758ea1ace0e7d4df5bc4099e8f",
-    "408e6cc2975819c7ce203d6708a5b59237789ef0"
+    "408e6cc2975819c7ce203d6708a5b59237789ef0",
+    "07daa46d3ba166b3cacb96340cd39575dee96efc",
+    "91cdc5d514e64659dd96e348e06dd7b177f20541"
   ],
   "created_at": "2026-09-04T09:26:01Z",
   "exclusive_resources": [
@@ -51,6 +53,7 @@
     "runtime": "codex-root/t3-code"
   },
   "id": "PT-2026-09-04-rust-build",
+  "integration_merge_sha": "91cdc5d514e64659dd96e348e06dd7b177f20541",
   "kind": "chore",
   "local_id": null,
   "owner": "codex-root",
@@ -58,10 +61,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "in_review",
+  "status": "done",
   "subject": "Make cargo check and Tauri sidecar acquisition reproducible from a clean worktree",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T10:18:30Z",
+  "updated_at": "2026-09-04T15:11:32Z",
   "verification_contract": [
     "cargo check --locked passes in frontend/src-tauri from a clean task worktree",
     "the committed lockfile resolves a compatible whisper-rs and whisper.cpp pairing",
@@ -127,6 +130,16 @@
     {
       "check": "branch handoff after receipt commit",
       "note": "Branch chore/PT-2026-09-04-rust-build was clean at receipt head 408e6cc2975819c7ce203d6708a5b59237789ef0 before this metadata-only handoff update. The base remains integration/pulsetalq-next at 610b71d63deb4a46e3f9342d896ab0422663808d. Five task-owned orphaned MSBuild worker nodes were stopped after their parents had exited; no Cargo, rustc, MSBuild, CMake, Ninja, cl, or link process remained. Validated clean-archive test directories were moved to the Recycle Bin.",
+      "result": "pass"
+    },
+    {
+      "check": "independent re-review at 07daa46d3ba166b3cacb96340cd39575dee96efc",
+      "note": "No blocking findings. The reviewer confirmed raw clean-checkout Cargo behavior, pre-execution FFmpeg integrity checks, exact target and architecture validation, fail-closed LLVM detection, safe Tauri argument execution, lockfile pairing, and task receipts. macOS and Linux native execution remains part of their normal platform release checks.",
+      "result": "pass"
+    },
+    {
+      "check": "combined integration verification at 91cdc5d514e64659dd96e348e06dd7b177f20541",
+      "note": "pnpm run rust:check passed on x86_64-pc-windows-msvc after merging onto integration head a3137e93abc5dcc40fba8475fc1d3bcfb7068b12. It built and verified the real llama-helper, verified the pinned FFmpeg archive and executable before execution, completed cargo check --locked, and finished with only the recorded pre-existing Rust warnings.",
       "result": "pass"
     }
   ]
