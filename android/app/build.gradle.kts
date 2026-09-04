@@ -21,6 +21,9 @@ android {
 
         ndk {
             abiFilters += "arm64-v8a"
+            if (providers.gradleProperty("pulsetalqEmulatorAbi").orNull == "true") {
+                abiFilters += "x86_64"
+            }
         }
     }
 
