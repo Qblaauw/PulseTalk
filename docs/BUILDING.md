@@ -22,13 +22,52 @@ Test-Path "$env:LIBCLANG_PATH\libclang.dll"
 
 Do not set `WHISPER_DONT_GENERATE_BINDINGS=1` on Windows. The crate's bundled
 bindings contain Unix layouts and fail to compile for the MSVC target.
-The sidecar preparation script uses a short build directory under `%TEMP%` on
-Windows so CMake and MSBuild do not hit the legacy 260-character path limit. Set
-`CARGO_TARGET_DIR` if you need a different build location.
+The scripts reject LLVM releases other than 18 and 19. When `clang.exe` is not
+next to the DLL, they read the DLL product version and fail if Windows cannot
+report it. A libclang-only installation works only when its DLL has valid
+version metadata.
 
-Tauri packages two external binaries. `llama-helper` is built from the workspace
-source and FFmpeg is downloaded and verified by `frontend/src-tauri/build.rs`.
-From `frontend/`, run this clean-worktree check:
+Use a short `CARGO_TARGET_DIR` on Windows so whisper.cpp's CMake paths stay below
+the legacy 260-character path limit. The build script compiles llama.cpp in a
+separate cache under `C:\ptl` by default. Set
+`PULSETALQ_SIDECAR_TARGET_DIR` to another short absolute path if the system drive
+root is not writable.
+
+Tauri packages two external binaries. `llama-helper` is built from workspace
+source. `frontend/src-tauri/build.rs` builds it before Tauri validates
+`externalBin`, so literal Cargo commands work without an untracked placeholder.
+The same build script downloads FFmpeg. It verifies the archive SHA-256 before
+extraction, then verifies the selected executable's SHA-256 and architecture
+before running it.
+
+From a clean checkout on Windows, the direct Rust check is:
+
+```powershell
+cd frontend\src-tauri
+$env:LIBCLANG_PATH = "C:\path\to\LLVM-19\bin"
+$env:CARGO_TARGET_DIR = "$env:LOCALAPPDATA\Temp\pt-rust"
+cargo check --locked
+```
+
+On macOS or Linux, run `cargo check --locked` from `frontend/src-tauri`. You may
+set `CARGO_TARGET_DIR` to move the build cache.
+
+The repository has pinned FFmpeg assets only for these exact target triples:
+
+| Target | Executable architecture |
+| --- | --- |
+| `x86_64-pc-windows-msvc` | PE x86_64 |
+| `x86_64-apple-darwin` | Mach-O x86_64 |
+| `aarch64-apple-darwin` | Mach-O arm64 |
+| `x86_64-unknown-linux-gnu` | ELF x86_64 |
+| `aarch64-unknown-linux-gnu` | ELF arm64 |
+
+Other targets fail before downloading or building a sidecar. macOS Cargo builds
+compile `llama-helper` with Metal by default, matching the app's target-specific
+whisper configuration.
+
+The Node workflow prepares the helper before invoking Tauri and checks the
+installed LLVM version. From `frontend/`, run:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -38,11 +77,12 @@ pnpm run rust:check
 `rust:check` runs sidecar preparation, `cargo check --locked`, and read-only
 sidecar validation with one shared Cargo target directory. This keeps native
 CMake paths short on Windows. `sidecars:prepare` detects and validates the Rust
-host target, builds
-`llama-helper`, and copies it to the exact target-triple filename required by
-Tauri. Pass `--target <triple>`, `--profile release`, or `--feature cuda` after
-`node scripts/prepare-sidecars.js` for an explicit build. `sidecars:check` only
-reads the two binaries and validates their filenames and executable formats.
+host target, builds `llama-helper`, and copies it to the exact target-triple
+filename required by Tauri. Pass `--target <triple>`, `--profile release`, or
+`--feature cuda` after `node scripts/prepare-sidecars.js` for an explicit build.
+The value `cpu` is normalized to `none`; unsupported feature names fail.
+`sidecars:check` only reads the two binaries and validates their filenames,
+container formats, and executable architectures.
 
 The regular `pnpm run tauri:dev` and `pnpm run tauri:build` commands run sidecar
 preparation automatically. Their CPU and GPU variants use the same path.

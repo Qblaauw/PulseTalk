@@ -6,6 +6,7 @@ const path = require('path');
 const {
   cargoTargetDir,
   hostTarget,
+  normalizeFeature,
   prepareWindowsLibclang,
 } = require('./prepare-sidecars');
 
@@ -29,8 +30,18 @@ if (process.argv.length > 2) {
 const target = hostTarget();
 prepareWindowsLibclang(target);
 const targetDir = cargoTargetDir(target);
-const feature = process.env.TAURI_GPU_FEATURE || 'none';
-const env = { ...process.env, CARGO_TARGET_DIR: targetDir };
+let feature;
+try {
+  feature = normalizeFeature(process.env.TAURI_GPU_FEATURE || 'none');
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
+const env = {
+  ...process.env,
+  CARGO_TARGET_DIR: targetDir,
+  PULSETALQ_LLAMA_HELPER_PREPARED: '1',
+};
 
 function run(command, args, cwd) {
   execFileSync(command, args, { cwd, env, stdio: 'inherit' });

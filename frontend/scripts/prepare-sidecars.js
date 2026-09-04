@@ -10,6 +10,14 @@ const frontendDir = path.resolve(__dirname, '..');
 const workspaceRoot = path.resolve(frontendDir, '..');
 const binariesDir = path.join(frontendDir, 'src-tauri', 'binaries');
 
+const SUPPORTED_TARGETS = Object.freeze({
+  'x86_64-pc-windows-msvc': { architecture: 'x86_64', format: 'PE' },
+  'x86_64-apple-darwin': { architecture: 'x86_64', format: 'Mach-O' },
+  'aarch64-apple-darwin': { architecture: 'aarch64', format: 'Mach-O' },
+  'x86_64-unknown-linux-gnu': { architecture: 'x86_64', format: 'ELF' },
+  'aarch64-unknown-linux-gnu': { architecture: 'aarch64', format: 'ELF' },
+});
+
 function fail(message) {
   throw new Error(message);
 }
@@ -62,6 +70,10 @@ function validateTarget(target) {
     fail(`Invalid Rust target triple: ${target}`);
   }
 
+  if (!SUPPORTED_TARGETS[target]) {
+    fail(`PulseTalq has no sidecar assets for target ${target}`);
+  }
+
   const availableTargets = new Set(
     capture('rustc', ['--print', 'target-list'])
       .split(/\r?\n/)
@@ -69,10 +81,6 @@ function validateTarget(target) {
   );
   if (!availableTargets.has(target)) {
     fail(`Rust does not recognize target triple ${target}`);
-  }
-
-  if (!target.includes('windows') && !target.includes('apple-darwin') && !target.includes('linux')) {
-    fail(`PulseTalq does not package sidecars for target ${target}`);
   }
 
   return target;
@@ -94,9 +102,34 @@ function helperFeature(feature) {
   fail(`Unsupported GPU feature: ${feature}`);
 }
 
+function normalizeFeature(feature) {
+  const normalized = feature || 'none';
+  helperFeature(normalized);
+  return normalized === 'cpu' ? 'none' : normalized;
+}
+
 function parseClangMajor(versionOutput) {
-  const match = versionOutput.match(/(?:Apple\s+)?clang version\s+(\d+)/i);
+  const match = versionOutput.trim().match(/^(?:(?:Apple\s+)?clang version\s+)?(\d+)(?:\.\d+)?/i);
   return match ? Number.parseInt(match[1], 10) : null;
+}
+
+function windowsFileVersion(filePath) {
+  const result = spawnSync(
+    'powershell.exe',
+    [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      '(Get-Item -LiteralPath $env:PULSETALQ_LIBCLANG_DLL).VersionInfo.FileVersion',
+    ],
+    {
+      encoding: 'utf8',
+      env: { ...process.env, PULSETALQ_LIBCLANG_DLL: filePath },
+      windowsHide: true,
+    },
+  );
+  if (result.error || result.status !== 0) return null;
+  return result.stdout.trim() || null;
 }
 
 function prepareWindowsLibclang(target) {
@@ -120,7 +153,11 @@ function prepareWindowsLibclang(target) {
     );
   }
 
+  const dllPath = ['libclang.dll', 'clang.dll']
+    .map((name) => path.join(libclangDir, name))
+    .find((candidate) => fs.existsSync(candidate));
   const clangPath = path.join(libclangDir, 'clang.exe');
+  let versionOutput = null;
   if (fs.existsSync(clangPath)) {
     const version = spawnSync(clangPath, ['--version'], {
       encoding: 'utf8',
@@ -130,14 +167,21 @@ function prepareWindowsLibclang(target) {
       fail(`Could not verify the clang version in ${libclangDir}`);
     }
 
-    const major = parseClangMajor(`${version.stdout}\n${version.stderr}`);
-    if (major && ![18, 19].includes(major)) {
-      fail(`LLVM ${major} is not supported by whisper-rs-sys 0.11.1 on Windows; use LLVM 18 or 19`);
-    }
+    versionOutput = `${version.stdout}\n${version.stderr}`;
+  } else {
+    versionOutput = windowsFileVersion(dllPath);
+  }
+
+  const major = versionOutput ? parseClangMajor(versionOutput) : null;
+  if (!major) {
+    fail(`Could not verify the LLVM version for ${dllPath}; use LLVM 18 or 19`);
+  }
+  if (![18, 19].includes(major)) {
+    fail(`LLVM ${major} is not supported by whisper-rs-sys 0.11.1 on Windows; use LLVM 18 or 19`);
   }
 
   process.env.LIBCLANG_PATH = libclangDir;
-  console.log(`Using libclang from ${libclangDir}`);
+  console.log(`Using LLVM ${major} libclang from ${libclangDir}`);
   return libclangDir;
 }
 
@@ -156,23 +200,59 @@ function cargoTargetDir(target, configuredTargetDir = process.env.CARGO_TARGET_D
 }
 
 function expectedFormat(target) {
-  if (target.includes('windows')) return 'PE';
-  if (target.includes('apple-darwin')) return 'Mach-O';
-  if (target.includes('linux')) return 'ELF';
-  fail(`Cannot determine binary format for target ${target}`);
+  const spec = SUPPORTED_TARGETS[target];
+  if (!spec) fail(`PulseTalq has no sidecar assets for target ${target}`);
+  return spec.format;
+}
+
+function architectureName(machine) {
+  if ([0x8664, 0x3e, 0x01000007].includes(machine)) return 'x86_64';
+  if ([0xaa64, 0xb7, 0x0100000c].includes(machine)) return 'aarch64';
+  return `unknown-0x${machine.toString(16)}`;
+}
+
+function inspectExecutable(header) {
+  if (header.length >= 64 && header[0] === 0x4d && header[1] === 0x5a) {
+    const peOffset = header.readUInt32LE(0x3c);
+    if (peOffset + 6 > header.length || header.toString('ascii', peOffset, peOffset + 4) !== 'PE\0\0') {
+      return { architectures: [], format: 'PE' };
+    }
+    return { architectures: [architectureName(header.readUInt16LE(peOffset + 4))], format: 'PE' };
+  }
+
+  if (header.length >= 20 && header.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46]))) {
+    const machine = header[5] === 1 ? header.readUInt16LE(18) : header.readUInt16BE(18);
+    return { architectures: [architectureName(machine)], format: 'ELF' };
+  }
+
+  if (header.length >= 8) {
+    const magic = header.readUInt32BE(0);
+    const thinEndianness = new Map([
+      [0xfeedface, 'BE'],
+      [0xfeedfacf, 'BE'],
+      [0xcefaedfe, 'LE'],
+      [0xcffaedfe, 'LE'],
+    ]);
+    if (thinEndianness.has(magic)) {
+      const machine = thinEndianness.get(magic) === 'LE' ? header.readUInt32LE(4) : header.readUInt32BE(4);
+      return { architectures: [architectureName(machine)], format: 'Mach-O' };
+    }
+
+    if (magic === 0xcafebabe) {
+      const count = header.readUInt32BE(4);
+      const architectures = [];
+      for (let index = 0; index < count && 8 + index * 20 + 4 <= header.length; index += 1) {
+        architectures.push(architectureName(header.readUInt32BE(8 + index * 20)));
+      }
+      return { architectures, format: 'Mach-O' };
+    }
+  }
+
+  return { architectures: [], format: 'unknown' };
 }
 
 function detectFormat(header) {
-  if (header.length >= 2 && header[0] === 0x4d && header[1] === 0x5a) return 'PE';
-  if (header.length >= 4 && header.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46]))) return 'ELF';
-
-  if (header.length >= 4) {
-    const magic = header.readUInt32BE(0);
-    const machOMagic = new Set([0xfeedface, 0xfeedfacf, 0xcefaedfe, 0xcffaedfe, 0xcafebabe, 0xbebafeca]);
-    if (machOMagic.has(magic)) return 'Mach-O';
-  }
-
-  return 'unknown';
+  return inspectExecutable(header).format;
 }
 
 function verifyBinary(binaryPath, target) {
@@ -186,24 +266,34 @@ function verifyBinary(binaryPath, target) {
   }
 
   const fd = fs.openSync(binaryPath, 'r');
-  const header = Buffer.alloc(4);
+  const header = Buffer.alloc(Math.min(stat.size, 4096));
   try {
     fs.readSync(fd, header, 0, header.length, 0);
   } finally {
     fs.closeSync(fd);
   }
 
-  const actual = detectFormat(header);
+  const inspection = inspectExecutable(header);
+  const actual = inspection.format;
   const expected = expectedFormat(target);
   if (actual !== expected) {
     fail(`Sidecar ${path.basename(binaryPath)} is ${actual}, expected ${expected} for ${target}`);
+  }
+
+  const expectedArchitecture = SUPPORTED_TARGETS[target].architecture;
+  if (!inspection.architectures.includes(expectedArchitecture)) {
+    fail(
+      `Sidecar ${path.basename(binaryPath)} has architecture ${inspection.architectures.join(', ') || 'unknown'}, expected ${expectedArchitecture}`,
+    );
   }
 
   if (!target.includes('windows') && (stat.mode & 0o111) === 0) {
     fail(`Sidecar is not executable: ${binaryPath}`);
   }
 
-  console.log(`Verified ${path.relative(frontendDir, binaryPath)} (${actual}, ${stat.size} bytes)`);
+  console.log(
+    `Verified ${path.relative(frontendDir, binaryPath)} (${actual}, ${expectedArchitecture}, ${stat.size} bytes)`,
+  );
 }
 
 function parseArgs(argv) {
@@ -233,6 +323,7 @@ function parseArgs(argv) {
   if (!['debug', 'release'].includes(options.profile)) {
     fail(`Invalid profile ${options.profile}; use debug or release`);
   }
+  options.feature = normalizeFeature(options.feature);
 
   return options;
 }
@@ -314,10 +405,14 @@ module.exports = {
   expectedFormat,
   helperFeature,
   hostTarget,
+  inspectExecutable,
+  normalizeFeature,
   parseClangMajor,
   parseArgs,
   prepareWindowsLibclang,
   sidecarPaths,
+  SUPPORTED_TARGETS,
+  windowsFileVersion,
 };
 
 if (require.main === module) {

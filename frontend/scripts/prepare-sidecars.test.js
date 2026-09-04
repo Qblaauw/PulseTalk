@@ -7,6 +7,8 @@ const {
   executableSuffix,
   expectedFormat,
   helperFeature,
+  inspectExecutable,
+  normalizeFeature,
   parseClangMajor,
   parseArgs,
   prepareWindowsLibclang,
@@ -19,6 +21,8 @@ test('maps app acceleration features to llama-helper features', () => {
   assert.equal(helperFeature('coreml'), 'metal');
   assert.equal(helperFeature('openblas'), null);
   assert.equal(helperFeature('none'), null);
+  assert.equal(normalizeFeature('cpu'), 'none');
+  assert.equal(normalizeFeature('cuda'), 'cuda');
   assert.throws(() => helperFeature('invalid'), /Unsupported GPU feature/);
 });
 
@@ -37,16 +41,34 @@ test('honors an explicit Cargo target directory', () => {
 });
 
 test('recognizes executable formats used by supported targets', () => {
-  assert.equal(detectFormat(Buffer.from([0x4d, 0x5a, 0x00, 0x00])), 'PE');
-  assert.equal(detectFormat(Buffer.from([0x7f, 0x45, 0x4c, 0x46])), 'ELF');
-  assert.equal(detectFormat(Buffer.from([0xfe, 0xed, 0xfa, 0xcf])), 'Mach-O');
+  const pe = Buffer.alloc(256);
+  pe.write('MZ');
+  pe.writeUInt32LE(128, 0x3c);
+  pe.write('PE\0\0', 128, 'ascii');
+  pe.writeUInt16LE(0x8664, 132);
+
+  const elf = Buffer.alloc(64);
+  Buffer.from([0x7f, 0x45, 0x4c, 0x46]).copy(elf);
+  elf[5] = 1;
+  elf.writeUInt16LE(0xb7, 18);
+
+  const machO = Buffer.alloc(32);
+  Buffer.from([0xcf, 0xfa, 0xed, 0xfe]).copy(machO);
+  machO.writeUInt32LE(0x0100000c, 4);
+
+  assert.deepEqual(inspectExecutable(pe), { architectures: ['x86_64'], format: 'PE' });
+  assert.deepEqual(inspectExecutable(elf), { architectures: ['aarch64'], format: 'ELF' });
+  assert.deepEqual(inspectExecutable(machO), { architectures: ['aarch64'], format: 'Mach-O' });
+  assert.equal(detectFormat(pe), 'PE');
   assert.equal(detectFormat(Buffer.from([0x00, 0x00, 0x00, 0x00])), 'unknown');
   assert.equal(expectedFormat('aarch64-apple-darwin'), 'Mach-O');
+  assert.throws(() => expectedFormat('x86_64-pc-windows-gnu'), /no sidecar assets/);
 });
 
 test('reads supported LLVM major versions from clang output', () => {
   assert.equal(parseClangMajor('clang version 18.1.8'), 18);
   assert.equal(parseClangMajor('Apple clang version 19.1.0'), 19);
+  assert.equal(parseClangMajor('18.1.1'), 18);
   assert.equal(parseClangMajor('unexpected output'), null);
   assert.equal(prepareWindowsLibclang('x86_64-unknown-linux-gnu'), null);
 });

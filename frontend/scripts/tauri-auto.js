@@ -3,12 +3,13 @@
  * Auto-detect GPU and run Tauri with appropriate features
  */
 
-const { execFileSync, execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const path = require('path');
 const os = require('os');
 const {
   cargoTargetDir,
   hostTarget,
+  normalizeFeature,
   prepareWindowsLibclang,
 } = require('./prepare-sidecars');
 
@@ -30,30 +31,17 @@ if (optionArgs[0] === '--feature' && optionArgs[1] && optionArgs.length === 2) {
   process.exit(1);
 }
 
-if (tauriArgs.some((arg) => !/^[A-Za-z0-9_./:-]+$/.test(arg))) {
-  console.error('Tauri arguments may only contain path and option characters');
-  process.exit(1);
-}
-
-const allowedFeatures = new Set(['none', 'cpu', 'cuda', 'vulkan', 'metal', 'coreml', 'openblas', 'hipblas']);
-if (forcedFeature && !allowedFeatures.has(forcedFeature)) {
-  console.error(`Unsupported GPU feature: ${forcedFeature}`);
-  process.exit(1);
-}
-
 // Detect GPU feature
-let feature = '';
+let feature = 'none';
 
 // Check for environment variable override first
 if (forcedFeature) {
-  feature = forcedFeature === 'cpu' ? 'none' : forcedFeature;
-  console.log(`Using requested GPU feature: ${feature}`);
+  feature = forcedFeature;
 } else if (process.env.TAURI_GPU_FEATURE) {
   feature = process.env.TAURI_GPU_FEATURE;
-  console.log(`Using GPU feature from TAURI_GPU_FEATURE: ${feature}`);
 } else {
   try {
-    const result = execSync('node scripts/auto-detect-gpu.js', {
+    const result = execFileSync(process.execPath, [path.join(__dirname, 'auto-detect-gpu.js')], {
       encoding: 'utf8',
       stdio: ['pipe', 'pipe', 'inherit']
     });
@@ -62,6 +50,16 @@ if (forcedFeature) {
     // If detection fails, continue with no features
   }
 }
+
+try {
+  feature = normalizeFeature(feature);
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
+
+if (forcedFeature) console.log(`Using requested GPU feature: ${feature}`);
+else if (process.env.TAURI_GPU_FEATURE) console.log(`Using GPU feature from TAURI_GPU_FEATURE: ${feature}`);
 
 console.log(''); // Empty line for spacing
 
@@ -98,11 +96,12 @@ try {
   process.exit(err.status || 1);
 }
 
+env.PULSETALQ_LLAMA_HELPER_PREPARED = '1';
+
 // Build the tauri command
-let tauriCmd = `tauri ${command}`;
-if (tauriArgs.length > 0) tauriCmd += ` ${tauriArgs.join(' ')}`;
+const commandArgs = [command, ...tauriArgs];
 if (feature && feature !== 'none') {
-  tauriCmd += ` -- --features ${feature}`;
+  commandArgs.push('--', '--features', feature);
   console.log(`🚀 Running: tauri ${command} with features: ${feature}`);
 } else {
   console.log(`🚀 Running: tauri ${command} (CPU-only mode)`);
@@ -111,7 +110,9 @@ console.log('');
 
 // Execute the command
 try {
-  execSync(tauriCmd, { stdio: 'inherit', env });
+  const tauriCli = require.resolve('@tauri-apps/cli/tauri.js', { paths: [path.resolve(__dirname, '..')] });
+  execFileSync(process.execPath, [tauriCli, ...commandArgs], { stdio: 'inherit', env });
 } catch (err) {
+  if (err.code === 'MODULE_NOT_FOUND') console.error('Install frontend dependencies before running Tauri.');
   process.exit(err.status || 1);
 }
