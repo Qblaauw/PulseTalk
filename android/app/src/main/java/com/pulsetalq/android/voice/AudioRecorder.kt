@@ -1,8 +1,10 @@
 package com.pulsetalq.android.voice
 
+import android.Manifest
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import androidx.annotation.RequiresPermission
 import java.util.Collections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +27,7 @@ class AudioRecorder(
     private var startedAtMillis = 0L
 
     @Synchronized
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun start(scope: CoroutineScope) {
         check(!capturing) { "Audio capture is already active." }
         val minimum = AudioRecord.getMinBufferSize(

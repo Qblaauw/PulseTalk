@@ -63,6 +63,7 @@ fun SetupScreen(
     onInstallModel: () -> Unit,
     onEnableKeyboard: () -> Unit,
     onSelectKeyboard: () -> Unit,
+    onShowNotices: () -> Unit,
     onDismissError: () -> Unit,
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Ink) {
@@ -169,6 +170,7 @@ fun SetupScreen(
                 color = Muted,
                 fontSize = 12.sp,
             )
+            TextButton(onClick = onShowNotices) { Text("Third-party notices") }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.pulsetalq.android.model
 
+import android.annotation.SuppressLint
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -62,6 +63,7 @@ class ModelRepository(
     private val rootDirectory: File,
     private val assets: List<ModelAsset> = ParakeetModelManifest.assets,
     private val downloader: ModelDownloader = HttpModelDownloader(),
+    @param:SuppressLint("UsableSpace")
     private val availableBytes: () -> Long = { rootDirectory.usableSpace },
     private val safetyMarginBytes: Long = 64L * 1024 * 1024,
 ) {

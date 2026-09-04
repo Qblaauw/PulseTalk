@@ -63,6 +63,7 @@ class PulseKeyboardView(context: Context) : View(context) {
         if (event.action != MotionEvent.ACTION_UP) return true
         val key = renderedKeys.firstOrNull { (_, bounds) -> bounds.contains(event.x, event.y) }?.first
             ?: return true
+        performClick()
         performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
         when (key.action) {
             KeyAction.Text, KeyAction.Space -> listener?.onText(key.output)
@@ -84,6 +85,11 @@ class PulseKeyboardView(context: Context) : View(context) {
                 invalidate()
             }
         }
+        return true
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
         return true
     }
 

@@ -1,6 +1,7 @@
 package com.pulsetalq.android.setup
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.pulsetalq.android.model.ModelRepository
+import com.pulsetalq.android.R
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -48,6 +50,7 @@ class MainActivity : ComponentActivity() {
                         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                             .showInputMethodPicker()
                     },
+                    onShowNotices = ::showThirdPartyNotices,
                     onDismissError = setupViewModel::dismissError,
                 )
             }
@@ -77,5 +80,16 @@ class MainActivity : ComponentActivity() {
             keyboardEnabled = enabled,
             keyboardSelected = selectedId.startsWith("$packageName/"),
         )
+    }
+
+    private fun showThirdPartyNotices() {
+        val notices = resources.openRawResource(R.raw.third_party_notices)
+            .bufferedReader()
+            .use { it.readText() }
+        AlertDialog.Builder(this)
+            .setTitle("Third-party notices")
+            .setMessage(notices)
+            .setPositiveButton("Close", null)
+            .show()
     }
 }
