@@ -4,9 +4,19 @@
     "The installer is built only in this task-owned worktree. Existing 2026-09-03 installer worktrees and artifacts are treated as read-only historical evidence.",
     "PT-2026-09-04-ui-redesign still says ready_for_review in its task record, but its commits are merged into main and this integration base. Version-only edits to Settings and Sidebar preserve the merged UI behavior."
   ],
+  "artifact": {
+    "created_at": "2026-09-04T17:20:56Z",
+    "installer_revision": 1,
+    "path": "F:/ptbuild/pulsetalq-20260904/release/bundle/nsis/PulseTalq_0.4.3_installer.1_x64-setup.exe",
+    "product_version": "0.4.3",
+    "sha256": "ffd9df3572523260d6b35c7b3463cd3bd1363f64f96e32e8ee4e19d57ff70ca2",
+    "signature_status": "NotSigned",
+    "size_bytes": 42704653,
+    "target": "x86_64-pc-windows-msvc NSIS CPU profile"
+  },
   "superseded_artifact": {
     "created_at": "2026-09-04T15:28:30.1243140Z",
-    "path": "F:/ptbuild/pulsetalq-20260904/release/bundle/nsis/PulseTalq_0.4.0_x64-setup.exe",
+    "path": "F:/ptbuild/pulsetalq-20260904/superseded/PulseTalq_0.4.0_x64-setup.SUPERSEDED.exe",
     "product_version": "0.4.0",
     "sha256": "ad1f46056222468b3cb1a494a2baa839a2c6845f4d1f7d760a64d406f02131d8",
     "signature_status": "NotSigned",
@@ -16,7 +26,9 @@
   },
   "commits": [
     "9a9190af967bc2d60f6a654c12e74785adba69da",
-    "146f0dd409c783f753587be81cddcb9df50c5842"
+    "146f0dd409c783f753587be81cddcb9df50c5842",
+    "907638095a37bba4a3fc0551ee2c8e6c537e3f1c",
+    "c61a1f625d00154a5ba4076038f6c3428eeb0732"
   ],
   "created_at": "2026-09-04T15:14:18Z",
   "exclusive_resources": [
@@ -63,10 +75,10 @@
   "roadmap_items": [],
   "schema": "product-ops.task/v1",
   "secret_overrides": [],
-  "status": "in_progress",
+  "status": "ready_for_review",
   "subject": "Build and verify a versioned Windows NSIS installer that upgrades the installed PulseTalq 0.4.2 app",
   "target_integration_branch": "integration/pulsetalq-next",
-  "updated_at": "2026-09-04T17:08:33Z",
+  "updated_at": "2026-09-04T17:21:50Z",
   "verification_contract": [
     "the task worktree is clean at a named commit whose app source matches integration commit 436adc672a04b2a57d51784913c5beebe5e7c2d8",
     "python scripts/verify-installer-assets.py passes before packaging",
@@ -125,6 +137,41 @@
     {
       "check": "build provenance and worktree state",
       "note": "At build commit 9a9190af967bc2d60f6a654c12e74785adba69da, the only difference from integration source 436adc672a04b2a57d51784913c5beebe5e7c2d8 was the task claim record. The build worktree was clean, git diff --check passed, and no task-owned build process remained after packaging.",
+      "result": "pass"
+    },
+    {
+      "check": "installed version diagnosis",
+      "note": "The existing HKCU PulseTalq uninstall entry and C:/Users/qblaa/AppData/Local/PulseTalq/pulse-talq.exe both report 0.4.2. The first 0.4.0 artifact was older and could not replace that installed app, so it was moved out of the normal bundle folder and marked superseded.",
+      "result": "pass"
+    },
+    {
+      "check": "application and installer version contract",
+      "note": "Cargo.lock, frontend/package.json, frontend/src-tauri/Cargo.toml, frontend/src-tauri/tauri.conf.json, Settings, Sidebar, and analytics fields now report 0.4.3. The stale manifest test failed before the controlled bump, then node scripts/installer-version.mjs verify passed with 0.4.3_installer.1 before and after packaging.",
+      "result": "pass"
+    },
+    {
+      "check": "pnpm run lint at c61a1f625d00154a5ba4076038f6c3428eeb0732",
+      "note": "Passed with the existing React hook warnings and no errors.",
+      "result": "pass"
+    },
+    {
+      "check": "node --test frontend/scripts/prepare-sidecars.test.js",
+      "note": "All 6 tests passed.",
+      "result": "pass"
+    },
+    {
+      "check": "corrected pnpm run tauri:build:windows-local at c61a1f625d00154a5ba4076038f6c3428eeb0732",
+      "note": "Passed. The pre-build version gate reported 0.4.3_installer.1, Tauri built pulse-talq 0.4.3 from the redesigned source, and the post-build gate stamped PulseTalq_0.4.3_installer.1_x64-setup.exe.",
+      "result": "pass"
+    },
+    {
+      "check": "corrected artifact branding, version, hash, and Authenticode inspection",
+      "note": "The 42,704,653-byte installer has SHA-256 ffd9df3572523260d6b35c7b3463cd3bd1363f64f96e32e8ee4e19d57ff70ca2. Installer and packaged app resources both report PulseTalq 0.4.3. Branding passed 3 checks with 0 failures and 0 warnings. Authenticode status is NotSigned.",
+      "result": "pass"
+    },
+    {
+      "check": "corrected exported UI markers",
+      "note": "The built frontend contains Account and sync, Record meeting, Guide this summary, and v0.4.3. No visible 0.4.0, 0.4.1, or 0.4.2 marker remains in frontend/out.",
       "result": "pass"
     }
   ]
